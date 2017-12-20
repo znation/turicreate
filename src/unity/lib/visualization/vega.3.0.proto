@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+// Vega 3.0 schema in protobuf
+// ported from https://vega.github.io/schema/vega/v3.0.json
+
+message AutoSizeObject {
+  string type = 1;
+  bool resize = 2;
+  string contains = 3;
+}
+
+message AutoSize {
+  oneof autosize_oneof {
+    string autosize_str = 1; // { 'enum': ['pad', 'fit', 'none'] }
+    AutoSizeObject autosize_obj = 2;
+  }
+}
+
+message VegaSpec {
+  AutoSize autosize = 1;
+}
