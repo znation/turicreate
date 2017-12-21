@@ -786,6 +786,7 @@ include(MergeStaticLibraries)
 
 include_directories(SYSTEM src)
 include_directories(SYSTEM src/external)
+include_directories(SYSTEM src/external/google)
 include_directories(SYSTEM src/old)
 include_directories(SYSTEM src/platform)
 
