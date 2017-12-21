@@ -34,7 +34,3 @@ make_library(visualization
     protobuf
     EXTERNAL_VISIBILITY
 )
-
-add_dependencies(visualization
-  visualization_client
-)

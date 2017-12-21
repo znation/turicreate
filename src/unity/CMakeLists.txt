@@ -20,6 +20,10 @@ subdirs(extensions
           numerics
   ) 
 
+  add_dependencies(unity
+    visualization_client
+  )
+
   # Pull in all the libraries in the extensions directory.
   get_property(EXTENSIONS_LIST DIRECTORY "extensions" PROPERTY EXTENSIONS_LIST)
 
