@@ -1,11 +1,21 @@
-// Vega 3.0 schema in protobuf
-// ported from https://vega.github.io/schema/vega/v3.0.json
-//
-// NOTE: protobuf JSON serialization won't produce a Vega-compatible
-// message due to the differences in serialization and semantics between
-// protobuf and json-schema, so this is not a strict semantic port.
-// As a result, custom serialization logic may be needed for some or all
-// fields, to obtain compatibliity with real Vega.
+/* Copyright © 2017 Apple Inc. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-3-clause license that can
+ * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
+ */
+
+/*
+ * Vega 3.0 schema in protobuf
+ * ported from https://vega.github.io/schema/vega/v3.0.json
+ *
+ * NOTE: protobuf JSON serialization won't produce a Vega-compatible
+ * message due to the differences in serialization and semantics between
+ * protobuf and json-schema, so this is not a strict semantic port.
+ * This port does attempt to capture meaningful semantics from the Vega
+ * spec into the protobuf language, for ease of use.
+ * As a result, custom serialization logic may be needed for some or all
+ * fields to obtain compatibliity with real Vega.
+ */
 
 syntax = "proto3";
 
@@ -26,13 +36,179 @@ message BoundingBox {
   double bottom = 4;
 }
 
+message EventTypes {
+  repeated string eventTypes = 1;
+}
+
+message Default {
+  oneof default {
+    bool all = 1;
+    EventTypes specificEvents = 2;
+  }
+}
+
+message EventsConfig {
+  oneof defaults {
+    Default prevent = 1;
+    Default allow = 2;
+  }
+}
+
+message AxisConfig {
+  double bandPosition = 1;
+  bool domain = 2;
+  string domainColor = 3;
+  double domainWidth = 4;
+  bool grid = 5;
+  string gridColor = 6;
+  repeated double gridDash = 7;
+  double gridOpacity = 8;
+  double gridWidth = 9;
+  bool labels = 10;
+  double labelAngle = 11;
+  oneof labelBound {
+    bool labelBoundFlag = 12;
+    double labelBoundTolerance = 13;
+  }
+  string labelColor = 14;
+  oneof labelFlush {
+    bool labelFlushFlag = 15;
+    double labelFlushTolerance = 16;
+  }
+  double labelFlushOffset = 17;
+  string labelFont = 18;
+  double labelFontSize = 19;
+  double labelLimit = 20;
+  double labelPadding = 21;
+  double maxExtent = 22;
+  double minExtent = 23;
+  bool ticks = 24;
+  string tickColor = 25;
+  bool tickExtra = 26;
+  double tickOffset = 27;
+  bool tickRound = 28;
+  double tickSize = 29;
+  double tickWidth = 30;
+  string titleAlign = 31;
+  double titleAngle = 32;
+  string titleBaseline = 33;
+  string titleColor = 34;
+  string titleFont = 35;
+  double titleFontSize = 36;
+  double titleLimit = 37;
+  double titlePadding = 38;
+  double titleX = 39;
+  double titleY = 40;
+}
+
+message LegendConfig {
+  double cornerRadius = 1;
+  double entryPadding = 2;
+  string fillColor = 3;
+  double gradientWidth = 4;
+  double gradientHeight = 5;
+  string gradientStrokeColor = 6;
+  double gradientStrokeWidth = 7;
+  string gradientLabelBaseline = 8;
+  double gradientLabelLimit = 9;
+  double gradientLabelOffset = 10;
+  string labelAlign = 11;
+  string labelBaseline = 12;
+  string labelColor = 13;
+  string labelFont = 14;
+  double labelFontSize = 15;
+  double labelLimit = 16;
+  double labelOffset = 17;
+  double offset = 18;
+  string orient = 19;
+  double padding = 20;
+  string titleAlign = 21;
+  string titleBaseline = 22;
+  string titleColor = 23;
+  string titleFont = 24;
+  double titleFontSize = 25;
+  string titleFontWeight = 26;
+  double titleLimit = 27;
+  double titlePadding = 28;
+  string strokeColor = 29;
+  repeated double strokeDash = 30;
+  double strokeWidth = 31;
+  string symbolType = 32;
+  double symbolSize = 33;
+  string symbolFillColor = 34;
+  string symbolStrokeColor = 35;
+  double symbolStrokeWidth = 36;
+}
+
+message TitleConfig {
+  string anchor = 1;
+  double angle = 2;
+  string baseline = 3;
+  string color = 4;
+  string font = 5;
+  double fontSize = 6;
+  string fontWeight = 7;
+  double limit = 8;
+  double offset = 9;
+  string orient = 10; // one of: ['top', 'left', 'bottom', 'right']
+}
+
+message ColorValues {
+  repeated string values = 1;
+}
+
+message ColorScheme {
+  oneof scheme {
+    string name = 1;
+    ColorValues values = 2;
+  }
+}
+
+message RangeConfig {
+  ColorScheme category = 1;
+  ColorScheme diverging = 2;
+  ColorScheme heatmap = 3;
+  ColorScheme ordinal = 4;
+  ColorScheme ramp = 5;
+  repeated string symbol = 6;
+}
+
 message Config {
+
+  // View properties
   oneof autosize {
     string autosize_str = 1; // one of: ['pad', 'fit', 'none']
     Autosize autosize_obj = 2;
   }
   string background = 3; // must be valid CSS color string
-  google.protobuf.Struct group = 4; // mark properties such as "fill", "stroke" and "strokeWidth".
+
+  // valid properties are mark properties such as "fill", "stroke" and "strokeWidth".
+  google.protobuf.Struct group = 4;
+  EventsConfig events = 5;
+
+  // TODO - mark properties: https://vega.github.io/vega/docs/config/#mark
+
+  // Style definitions
+  google.protobuf.Struct style = 200;
+
+  // Axis properties
+  AxisConfig axis = 300;
+  AxisConfig axisX = 301;
+  AxisConfig axisY = 302;
+  AxisConfig axisLeft = 303;
+  AxisConfig axisTop = 304;
+  AxisConfig axisRight = 305;
+  AxisConfig axisBottom = 306;
+  AxisConfig axisBand = 307;
+
+  // Legend properties
+  LegendConfig legend = 400;
+
+  // Title properties
+  TitleConfig title = 500;
+
+  // Scale range properties
+  RangeConfig range = 600;
 }
 
 message Specification {
