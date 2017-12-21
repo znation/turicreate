@@ -1,21 +1,50 @@
-syntax = "proto3";
-
 // Vega 3.0 schema in protobuf
 // ported from https://vega.github.io/schema/vega/v3.0.json
+//
+// NOTE: protobuf JSON serialization won't produce a Vega-compatible
+// message due to the differences in serialization and semantics between
+// protobuf and json-schema, so this is not a strict semantic port.
+// As a result, custom serialization logic may be needed for some or all
+// fields, to obtain compatibliity with real Vega.
 
-message AutoSizeObject {
+syntax = "proto3";
+
+import "google/protobuf/struct.proto";
+
+package vega;
+
+message Autosize {
   string type = 1;
   bool resize = 2;
   string contains = 3;
 }
 
-message AutoSize {
-  oneof autosize_oneof {
-    string autosize_str = 1; // { 'enum': ['pad', 'fit', 'none'] }
-    AutoSizeObject autosize_obj = 2;
-  }
+message BoundingBox {
+  double left = 1;
+  double top = 2;
+  double right = 3;
+  double bottom = 4;
 }
 
-message VegaSpec {
-  AutoSize autosize = 1;
+message Config {
+  oneof autosize {
+    string autosize_str = 1; // one of: ['pad', 'fit', 'none']
+    Autosize autosize_obj = 2;
+  }
+  string background = 3; // must be valid CSS color string
+  google.protobuf.Struct group = 4; // mark properties such as "fill", "stroke" and "strokeWidth".
+}
+
+message Specification {
+  // ignore $schema
+  string description = 1;
+  string background = 2; // must be valid CSS color string
+  double width = 3;
+  double height = 4;
+  BoundingBox padding = 5;
+  oneof autosize {
+    string autosize_str = 6; // one of: ['pad', 'fit', 'none']
+    Autosize autosize_obj = 7;
+  }
+  Config config = 8;
 }
