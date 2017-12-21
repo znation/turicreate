@@ -23,6 +23,30 @@ import "google/protobuf/struct.proto";
 
 package vega;
 
+message Specification {
+  // ignore $schema
+  string description = 1;
+  string background = 2; // must be valid CSS color string
+  double width = 3;
+  double height = 4;
+  BoundingBox padding = 5;
+  oneof autosize {
+    string autosize_str = 6; // one of: ['pad', 'fit', 'none']
+    Autosize autosize_obj = 7;
+  }
+  Config config = 8;
+  repeated Signal signals = 9;
+  // TODO - Data could be a strongly-typed message type
+  repeated google.protobuf.Struct data = 10;
+  repeated Scale scales = 11;
+  repeated Projection projections = 12;
+  repeated Axis axes = 13;
+  repeated Legend legends = 14;
+  Title title = 15;
+  repeated Mark marks = 16;
+  google.protobuf.Struct encode = 17;
+}
+
 message Autosize {
   string type = 1;
   bool resize = 2;
@@ -211,16 +235,168 @@ message Config {
   RangeConfig range = 600;
 }
 
-message Specification {
-  // ignore $schema
-  string description = 1;
-  string background = 2; // must be valid CSS color string
-  double width = 3;
-  double height = 4;
-  BoundingBox padding = 5;
-  oneof autosize {
-    string autosize_str = 6; // one of: ['pad', 'fit', 'none']
-    Autosize autosize_obj = 7;
+message Bind {
+  string input = 1;
+  string element = 2;
+  double debounce = 3;
+}
+
+message Handler {
+  google.protobuf.Value events = 1;
+  string update = 2; // Vega expression
+  string encode = 3;
+  bool force = 4;
+}
+
+message Signal {
+  string name = 1;
+  Bind bind = 2;
+  string description = 3;
+  repeated Handler on = 4;
+  string update = 5;
+  bool react = 6;
+  google.protobuf.Value value = 7;
+}
+
+message Scale {
+  string name = 1;
+  string type = 2;
+  google.protobuf.Value domain = 3;
+  double domainMax = 4;
+  double domainMin = 5;
+  double domainMid = 6;
+  google.protobuf.ListValue domainRaw = 7;
+  google.protobuf.Value range = 8;
+  bool reverse = 9;
+  bool round = 10;
+}
+
+message Projection {
+  string name = 1;
+  string type = 2;
+  double clipAngle = 3;
+  google.protobuf.ListValue clipExtent = 4; // [[x0, y0], [x1, y1]]
+  double scale = 5;
+  repeated double translate = 6;
+  repeated double center = 7;
+  repeated double rotate = 8;
+  string precision = 9;
+  google.protobuf.Value fit = 10;
+  google.protobuf.ListValue extent = 11; // [[x0, y0], [x1, y1]]
+  repeated double size = 12; // [w, h]
+}
+
+message Axis {
+  string scale = 1;
+  string orient = 2;
+  bool domain = 3;
+  google.protobuf.Struct encode = 4;
+  string format = 5;
+  bool grid = 6;
+  string gridScale = 7;
+  bool labels = 8;
+  oneof labelBound {
+    bool labelBoundFlag = 9;
+    double labelBoundTolerance = 10;
   }
-  Config config = 8;
+  oneof labelFlush {
+    bool labelFlushFlag = 11;
+    double labelFlushTolerance = 12;
+  }
+  double labelFlushOffset = 13;
+  double labelPadding = 14;
+  oneof labelOverlap {
+    bool labelOverlapFlag = 15;
+    string labelOverlapStrategy = 16;
+  }
+  google.protobuf.Value minExtent = 17;
+  google.protobuf.Value maxExtent = 18;
+  google.protobuf.Value offset = 19;
+  google.protobuf.Value position = 20;
+  bool ticks = 21;
+  google.protobuf.Value tickCount = 22;
+  double tickSize = 23;
+  string title = 24;
+  google.protobuf.Value titlePadding = 25;
+  google.protobuf.ListValue values = 26;
+  double zindex = 27;
+}
+
+message Legend {
+  string type = 1;
+  string orient = 2;
+  string fill = 3;
+  string opacity = 4;
+  string shape = 5;
+  string size = 6;
+  string stroke = 7;
+  string strokeDash = 8;
+  google.protobuf.Struct encode = 9;
+  google.protobuf.Value entryPadding = 10;
+  string format = 11;
+  google.protobuf.Value offset = 12;
+  google.protobuf.Value padding = 13;
+  google.protobuf.Value tickCount = 14;
+  google.protobuf.Value titlePadding = 15;
+  string title = 16;
+  google.protobuf.ListValue values = 17;
+  double zindex = 18;
+}
+
+message Title {
+  string text = 1;
+  string orient = 2;
+  string anchor = 3;
+  google.protobuf.Struct encode = 4;
+  bool interactive = 5;
+  string name = 6;
+  google.protobuf.Value style = 7;
+  google.protobuf.Value offset = 8;
+  double zindex = 9;
+}
+
+message Facet {
+  string name = 1;
+  string data = 2;
+  string field = 3;
+  repeated string groupby = 4;
+  google.protobuf.Struct aggregate = 5;
+}
+
+message From {
+  string data = 1;
+  Facet facet = 2;
+}
+
+message Trigger {
+  string trigger = 1; // Vega expression
+  string insert = 2; // Vega expression
+  oneof remove {
+    string removeExpression = 3; // Vega expression
+    bool removeAll = 4; // Vega expression
+  }
+  string toggle = 5; // Vega expression
+  string modify = 6; // Vega expression
+  string values = 7; // Vega expression
+}
+
+message Compare {
+  google.protobuf.Value field = 1;
+  google.protobuf.Value comparator = 2;
+}
+
+message Mark {
+  string type = 1;
+  bool clip = 2;
+  string description = 3;
+  google.protobuf.Struct encode = 4;
+  From from = 5;
+  bool interactive = 6;
+  string key = 7;
+  string name = 8;
+  repeated Trigger on = 9;
+  Compare sort = 10;
+  repeated google.protobuf.Struct transform = 11;
+  string role = 12;
+  google.protobuf.Value style = 13;
 }
