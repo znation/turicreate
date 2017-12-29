@@ -3,6 +3,13 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include "histogram.hpp"
 #include "vega_spec.hpp"
 
@@ -279,7 +286,11 @@ void histogram::merge_results(std::vector<histogram_result>& thread_results) {
   }
 }
 
-std::string histogram_result::vega_column_data(bool) const {
+std::shared_ptr<Message> histogram_result::vega_column_data(double, bool) const {
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+  /*
   // TODO - "values" is repetitive - flatten structure
   // TODO - for now, assuming 20 bins
 
@@ -303,23 +314,16 @@ std::string histogram_result::vega_column_data(bool) const {
   }
 
   return ss.str();
+  */
 }
 
-static std::string escape_float(flex_float value) {
-  if (std::isnan(value)) {
-    return "\"nan\"";
-  }
-  if (std::isinf(value)) {
-    if (value > 0) {
-      return "\"inf\"";
-    } else {
-      return "\"-inf\"";
-    }
-  }
-  return std::to_string(value);
-}
+std::shared_ptr<Message> histogram_result::vega_summary_data(double) const {
 
-std::string histogram_result::vega_summary_data() const {
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+
+  /*
   std::stringstream ss;
 
   flex_vec median_vec = m_median.emit().get<flex_vec>();
@@ -340,6 +344,7 @@ std::string histogram_result::vega_summary_data() const {
   ss << "\"categorical\": []";
 
   return ss.str();
+  */
 
 }
 

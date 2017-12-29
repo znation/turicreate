@@ -10,19 +10,39 @@
 #include <string>
 #include <queue>
 
+namespace vega {
+  class Specification;
+}
+
 namespace turi {
   namespace visualization {
+
+    template<typename T>
     class io_buffer {
       private:
         std::mutex m_mutex;
-        std::queue<std::string> m_queue;
+        std::queue<T> m_queue;
 
       public:
-        std::string read();
-        void write(const std::string&);
-        size_t size() const;
-    };
+        T read() {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          if (m_queue.empty()) {
+            return T();
+          }
+          auto ret = m_queue.front();
+          m_queue.pop();
+          return ret;
+        }
 
+        void write(const T& t) {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          m_queue.push(t);
+        }
+
+        size_t size() const {
+          return m_queue.size();
+        }
+    };
   }
 }
 

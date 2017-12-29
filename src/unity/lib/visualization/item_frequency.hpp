@@ -19,8 +19,8 @@ class item_frequency_result: public sframe_transformation_output,
   public:
     virtual void add_element_simple(const flexible_type& flex) override;
     virtual void combine(const group_aggregate_value& other) override;
-    virtual std::string vega_column_data(bool sframe) const override;
-    virtual std::string vega_summary_data() const override;
+    virtual std::shared_ptr<Message> vega_column_data(double progress, bool sframe) const override;
+    virtual std::shared_ptr<Message> vega_summary_data(double progress) const override;
 
     // also store and compute basic summary stats
     groupby_operators::count m_count; // num rows

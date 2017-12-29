@@ -16,6 +16,10 @@ cmake_policy(SET CMP0046 OLD)
 cmake_policy(SET CMP0042 NEW)
 endif()
 
+# Generate a compilation database for use with automated tools like IDE/editor
+# plugins. See http://clang.llvm.org/docs/JSONCompilationDatabase.html
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
 # Determine where additional Turi specific cmake modules are
 # defined
 set(DEPS_CMAKE ${CMAKE_SOURCE_DIR}/deps/cmake)
@@ -789,7 +793,7 @@ include_directories(SYSTEM src/external)
 include_directories(SYSTEM src/external/google)
 include_directories(SYSTEM src/old)
 include_directories(SYSTEM src/platform)
-
+include_directories(SYSTEM ${CMAKE_BINARY_DIR}/src)
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/subtree)
   include_directories(SYSTEM subtree)

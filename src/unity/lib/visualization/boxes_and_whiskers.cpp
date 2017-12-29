@@ -3,11 +3,20 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
+#undef MIN
+#undef MAX
+
 #include "boxes_and_whiskers.hpp"
 
 #include "process_wrapper.hpp"
 #include "thread.hpp"
-#include "vega_data.hpp"
 #include "vega_spec.hpp"
 
 #include <parallel/lambda_omp.hpp>
@@ -20,7 +29,12 @@ using namespace turi::visualization;
 static const std::string x_name = "x";
 static const std::string y_name = "y";
 
-std::string boxes_and_whiskers_result::vega_column_data(bool sframe) const {
+std::shared_ptr<Message> boxes_and_whiskers_result::vega_column_data(double progress, bool) const {
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+
+  /*
   std::stringstream ss;
 
   std::unordered_map<flexible_type, flexible_type> grouped = get_grouped();
@@ -48,8 +62,9 @@ std::string boxes_and_whiskers_result::vega_column_data(bool sframe) const {
       continue;
     }
 
+    // TODO use protobuf for serialization
     ss << "{\"" << x_name << "\": ";
-    ss << escape_string(xValue);
+    ss << xValue;
 
     ss << ",\"min\": ";
     ss << yValues[0];
@@ -71,6 +86,7 @@ std::string boxes_and_whiskers_result::vega_column_data(bool sframe) const {
   }
 
   return ss.str();
+  */
 }
 
 void ::turi::visualization::show_boxes_and_whiskers(const std::string& path_to_client,
@@ -86,9 +102,7 @@ void ::turi::visualization::show_boxes_and_whiskers(const std::string& path_to_c
 
 
     process_wrapper ew(path_to_client);
-    vega_spec vs;
-    vs << boxes_and_whiskers_spec(xlabel, ylabel, title);
-    ew << vs.get_spec();
+    ew << boxes_and_whiskers_spec(xlabel, ylabel, title);
 
     boxes_and_whiskers bw;
 
@@ -97,14 +111,11 @@ void ::turi::visualization::show_boxes_and_whiskers(const std::string& path_to_c
     temp_sf[y_name] = y;
     bw.init(temp_sf);
     while (ew.good()) {
-      vega_data vd;
       auto result = bw.get();
-      vd << result->vega_column_data();
-
       double num_rows_processed =  static_cast<double>(bw.get_rows_processed());
       double size_array = static_cast<double>(x.size());
       double percent_complete = num_rows_processed/size_array;
-      ew << vd.get_data_spec(percent_complete);
+      ew << result->vega_column_data(percent_complete);
 
       if (bw.eof()) {
         break;

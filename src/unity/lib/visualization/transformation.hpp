@@ -12,14 +12,16 @@
 namespace turi {
 namespace visualization {
 
+class Message;
+
 class transformation_output {
   public:
-    virtual std::string vega_column_data(bool sframe = false) const = 0;
+    virtual std::shared_ptr<Message> vega_column_data(double progress, bool sframe = false) const = 0;
 };
 
 class sframe_transformation_output : public transformation_output {
   public:
-    virtual std::string vega_summary_data() const = 0;
+    virtual std::shared_ptr<Message> vega_summary_data(double progress) const = 0;
 };
 
 class fused_transformation_output : public transformation_output {
@@ -28,7 +30,7 @@ class fused_transformation_output : public transformation_output {
 
   public:
     fused_transformation_output(const std::vector<std::shared_ptr<transformation_output>> outputs);
-    virtual std::string vega_column_data(bool sframe = false) const override;
+    virtual std::shared_ptr<Message> vega_column_data(double progress, bool sframe = false) const override;
 };
 
 class transformation_base {

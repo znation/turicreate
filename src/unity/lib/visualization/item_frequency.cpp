@@ -3,8 +3,16 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
-#include "item_frequency.hpp"
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include "vega_spec.hpp"
+
+#include "item_frequency.hpp"
 
 using namespace turi::visualization;
 
@@ -40,7 +48,12 @@ void item_frequency_result::combine(const group_aggregate_value& other) {
   m_non_null_count.combine(item_frequency_other.m_non_null_count);
 }
 
-std::string item_frequency_result::vega_summary_data() const {
+std::shared_ptr<Message> item_frequency_result::vega_summary_data(double progress) const {
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+
+  /*
   std::stringstream ss;
 
   flex_int num_missing = m_count.emit() - m_non_null_count.emit();
@@ -53,10 +66,17 @@ std::string item_frequency_result::vega_summary_data() const {
   ss << "\"numeric\": []";
 
   return ss.str();
+  */
 
 }
 
-std::string item_frequency_result::vega_column_data(bool sframe) const {
+std::shared_ptr<Message> item_frequency_result::vega_column_data(double progress, bool sframe) const {
+
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+
+  /*
   std::stringstream ss;
   size_t x = 0;
 
@@ -92,8 +112,9 @@ std::string item_frequency_result::vega_column_data(bool sframe) const {
 
     size_t count = pair.second.get<flex_int>();
 
+    // TODO use protobuf for serialization
     ss << "{\"label\": ";
-    ss << escape_string(value);
+    ss << value;
     ss << ",\"label_idx\": ";
     ss << i;
     ss << ",\"count\": ";
@@ -108,4 +129,5 @@ std::string item_frequency_result::vega_column_data(bool sframe) const {
   }
 
   return ss.str();
+  */
 }

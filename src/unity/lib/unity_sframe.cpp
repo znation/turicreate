@@ -1642,11 +1642,9 @@ void unity_sframe::show(const std::string& path_to_client) {
 
   ::turi::visualization::run_thread([path_to_client, column_transformers, column_names, self]() {
 
-    vega_spec vs;
     visualization::process_wrapper ew(path_to_client);
 
-    vs << summary_view_spec(column_transformers.size());
-    ew << vs.get_spec();
+    ew << summary_view_spec(column_transformers.size());
 
     const static size_t expected_batch_size = 5000000;
     double num_rows_processed = 0;
@@ -1660,12 +1658,8 @@ void unity_sframe::show(const std::string& path_to_client) {
         const auto& transformation = column_transformers[i];
         const auto& name = column_names[i];
 
-        vega_data vd;
-
         std::shared_ptr<unity_sarray_base> sarr = self->select_column(name);
         auto result = transformation->get();
-
-        vd << vd.create_sframe_spec(i, self->size(), sarr->dtype(), name, result);
 
         double batch_size = static_cast<double>(transformation->get_batch_size());
         DASSERT_EQ(batch_size, expected_batch_size);
@@ -1675,7 +1669,8 @@ void unity_sframe::show(const std::string& path_to_client) {
         DASSERT_GE(percent_complete, 0.0);
         DASSERT_LE(percent_complete, 1.0);
 
-        ew << vd.get_data_spec(percent_complete);
+        auto message = vega_data::create_sframe_spec(i, self->size(), sarr->dtype(), name, result, percent_complete);
+        ew << message;
 
         if (!transformation->eof()) {
           remainingItems = true;
@@ -1705,11 +1700,10 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
     log_and_throw("Nothing to explore; SFrame is empty.");
   }
 
-  std::string titleString = turi::visualization::escape_string(title);
   // This materializes if not already
   auto underlying_sframe = get_underlying_sframe();
 
-  ::turi::visualization::run_thread([path_to_client, titleString, self, underlying_sframe]() {
+  ::turi::visualization::run_thread([path_to_client, title, self, underlying_sframe]() {
 
     // get a reader just once.
     auto reader = underlying_sframe->get_reader();
@@ -1749,7 +1743,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
       ss << "{\"table_spec\":{\"column_names\": [";
       for (size_t i=0; i<self->num_columns(); i++) {
         const auto& name = column_names[i];
-        ss << visualization::escape_string(name);
+        // TODO build JSON properly with protobuf encoding
+        ss << name;
         if (i != self->num_columns() - 1) {
           ss << ",";
         }
@@ -1757,7 +1752,7 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
       ss << "], \"size\": ";
       ss << self->size();
       ss << ", \"title\": ";
-      ss << titleString;
+      ss << title;
       ss << ", \"column_types\": [";
       for (size_t i=0; i<self->num_columns(); i++) {
         const auto& type = column_types[i];
@@ -1767,7 +1762,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
         }
       }
       ss << "]}}" << std::endl;
-      ew << ss.str();
+      DASSERT_TRUE(false);
+      //ew << ss.str();
     }
 
     auto getRows = [self, &reader, &ew, &column_names, &empty_tz, &image_queue](size_t start, size_t end) {
@@ -1798,7 +1794,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
           for (size_t j=0; j<row.size(); j++) {
             const auto& columnName = column_names[j];
             const auto& value = row[j];
-            ss << visualization::escape_string(columnName) << ": ";
+            // TODO build JSON properly with protobuf encoding
+            ss << columnName << ": ";
 
             std::string default_string;
 
@@ -1843,7 +1840,7 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
                   visualization::vega_data::Image image_temp;
 
                   image_temp.idx = count;
-                  image_temp.column = visualization::escape_string(columnName);
+                  image_temp.column = columnName;
                   image_temp.img = img_temporary;
 
                   image_queue.push(image_temp);
@@ -1852,7 +1849,7 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
                   ss << "{\"width\": " << img.m_width << ", ";
                   ss << "\"height\": " << img.m_height << ", ";
                   ss << "\"idx\": " << count << ", ";
-                  ss << "\"column\": " << visualization::escape_string(columnName) << ", ";
+                  ss << "\"column\": " << columnName << ", ";
                   ss << "\"data\": \"";
 
                   std::copy(
@@ -1933,7 +1930,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
                   if(default_string.length() > resize_table_view){
                     default_string.resize(resize_table_view);
                   }
-                  ss << turi::visualization::escape_string(default_string);
+                  // TODO escape JSON properly with protobuf encoding
+                  ss << default_string;
                 }
                 break;
               case flex_type_enum::LIST:
@@ -1944,7 +1942,7 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
                 if(default_string.length() > resize_table_view){
                   default_string.resize(resize_table_view);
                 }
-                ss << turi::visualization::escape_string(default_string);
+                ss << default_string;
                 break;
             }
             if (j != row.size() - 1) {
@@ -1958,7 +1956,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
           ++i;
         }
         ss << "]}}" << std::endl;
-        ew << ss.str();
+        DASSERT_TRUE(false);
+        //ew << ss.str();
       }
     };
 
@@ -1970,7 +1969,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
     while (ew.good()) {
       // get input, send responses
       std::string input;
-      ew >> input;
+      DASSERT_TRUE(false);
+      //ew >> input;
       if (input.empty()) {
         if (image_queue.size() == 0) {
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -2020,7 +2020,8 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
 
           ss << "\"}]}}" << std::endl;
 
-          ew << ss.str();
+          DASSERT_TRUE(false);
+          //ew << ss.str();
           image_queue.pop();
         }
 
