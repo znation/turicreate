@@ -3,10 +3,6 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
-#include "process_wrapper.hpp"
-
-#include <logger/assertions.hpp>
-#include <logger/logger.hpp>
 
 #include <cassert>
 #include <chrono>
@@ -15,6 +11,14 @@
 #include <string>
 
 #include <errno.h>
+
+#include "process_wrapper.hpp"
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
 
 using namespace turi::visualization;
 
@@ -28,51 +32,53 @@ process_wrapper::process_wrapper(const std::string& path_to_client) : m_alive(tr
   if (!m_client_process.exists()) {
     throw std::runtime_error("Turi Create visualization process was unable to launch.");
   }
-  m_client_process.set_nonblocking(true);
   m_client_process.autoreap();
 
   // start the background threads to pull and push data over the pipe
   m_inputThread = std::thread([this]() {
-    std::string previousInputRemaining;
     while (good()) {
-      std::string input = previousInputRemaining + m_client_process.read_from_child();
-      if (input.empty()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        continue;
+      // read number of bytes from first 4 bytes (32 bits of message size)
+      uint32_t message_size;
+      ssize_t bytes_read = m_client_process.read_from_child(&message_size, 4);
+      DASSERT_EQ(bytes_read, 4);
+
+      // read message_size bytes
+      std::string input;
+      input.resize(message_size);
+
+      // const cast on std::string data() should be safe now
+      // see https://stackoverflow.com/questions/7518732/why-are-stdvectordata-and-stdstringdata-different#7519345
+      bytes_read = m_client_process.read_from_child(const_cast<void *>(static_cast<const void *>(input.data())), message_size);
+      DASSERT_EQ(bytes_read, message_size);
+
+      // decode a Message and write it to input buffer
+      std::shared_ptr<Message> spec = std::make_shared<Message>();
+      if (!spec->ParseFromString(input)) {
+        throw std::runtime_error("Could not decode a valid visualization message from input.");
       }
 
-      // split on newline - each message is newline separated
-      std::stringstream ss;
-      for (char c : input) {
-        if (c == '\n') {
-          std::string msg = ss.str();
-          if (!msg.empty()) {
-            m_inputBuffer.write(msg);
-          }
-          ss = std::stringstream(); // clear the stream
-        } else {
-          ss << c;
-        }
-      }
-
-      // whatever is left over in the stream, store in previousInputRemaining
-      previousInputRemaining = ss.str();
+      m_inputBuffer.write(spec);
     }
   });
   m_outputThread = std::thread([this]() {
     std::unique_lock<mutex> guard(m_mutex);
     while (true) {
+
       while (m_client_process.exists() && m_outputBuffer.size() > 0) {
-        std::string output = m_outputBuffer.read();
-        DASSERT_FALSE(output.empty());
-        //fprintf(stderr, "TC sending data: %s\n", output.c_str());
-        DASSERT_TRUE(strlen(output.c_str()) == output.size());
-        m_client_process.write_to_child(output.c_str(), output.size());
+        std::shared_ptr<Message> output = m_outputBuffer.read();
+        std::string output_str;
+        if (!output->SerializeToString(&output_str)) {
+          throw std::runtime_error("Could not encode visualization spec to string.");
+        }
+        
+        ssize_t bytes_written = m_client_process.write_to_child(output_str.c_str(), output_str.size());
+        DASSERT_EQ(bytes_written, output_str.size());
       }
       if (!good()) {
         break;
       }
       m_cond.wait(guard);
+
     }
   });
 
@@ -100,7 +106,7 @@ process_wrapper::~process_wrapper() {
   m_outputThread.join();
 }
 
-process_wrapper& process_wrapper::operator<<(const std::string& to_client) {
+process_wrapper& process_wrapper::operator<<(std::shared_ptr<Message> to_client) {
   // TODO - error handling?
   if (good()) {
     std::lock_guard<mutex> guard(m_mutex);
@@ -110,7 +116,7 @@ process_wrapper& process_wrapper::operator<<(const std::string& to_client) {
   return *this;
 }
 
-process_wrapper& process_wrapper::operator>>(std::string& from_client) {
+process_wrapper& process_wrapper::operator>>(std::shared_ptr<Message>& from_client) {
   // TODO - error handling?
   if (good()) {
     from_client = m_inputBuffer.read();

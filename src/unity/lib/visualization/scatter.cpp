@@ -3,29 +3,24 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
-#include "scatter.hpp"
 
-#include "process_wrapper.hpp"
-#include "thread.hpp"
-#include "vega_data.hpp"
-#include "vega_spec.hpp"
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
 
 #include <cmath>
 #include <thread>
 
+#include "thread.hpp"
+#include "vega_spec.hpp"
+
+#include "process_wrapper.hpp"
+#include "scatter.hpp"
+
 using namespace turi;
 using namespace turi::visualization;
-
-static std::string to_string(const flexible_type& ft) {
-  switch (ft.get_type()) {
-    case flex_type_enum::INTEGER:
-      return std::to_string(ft.get<flex_int>());
-    case flex_type_enum::FLOAT:
-      return std::to_string(ft.get<flex_float>());
-    default:
-      throw std::runtime_error("Unexpected flexible_type type. Expected INTEGER or FLOAT.");
-  }
-}
 
 void turi::visualization::show_scatter(const std::string& path_to_client,
                                        const gl_sarray& x,
@@ -39,11 +34,11 @@ void turi::visualization::show_scatter(const std::string& path_to_client,
     DASSERT_EQ(x.size(), y.size());
 
     process_wrapper ew(path_to_client);
-    vega_spec vs;
-    vs << scatter_spec(xlabel, ylabel, title);
-    ew << vs.get_spec();
+    ew << scatter_spec(xlabel, ylabel, title);
 
-    vega_data vd;
+    std::shared_ptr<Message> message = std::make_shared<Message>();
+    message->mutable_data_message()->set_name("source_2");
+    message->mutable_data_message()->set_progress(1.0);
 
     for (size_t i=0; i<x.size(); i++) {
       if (x[i].get_type() == flex_type_enum::UNDEFINED ||
@@ -62,10 +57,13 @@ void turi::visualization::show_scatter(const std::string& path_to_client,
           !std::isfinite(y[i].get<flex_float>())) {
         continue;
       }
-      vd << "{\"x\": " + to_string(x[i]) + ", \"y\": " + to_string(y[i]) + "}";
+
+      auto* value = message->mutable_data_message()->mutable_scatter_values()->add_values();
+      value->set_x(x[i]);
+      value->set_y(y[i]);
     }
 
-    ew << vd.get_data_spec(1.0 /* progress */);
+    ew << message;
 
   });
 

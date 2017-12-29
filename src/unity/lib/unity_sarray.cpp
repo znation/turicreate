@@ -44,7 +44,6 @@
 #include <unity/lib/visualization/histogram.hpp>
 #include <unity/lib/visualization/item_frequency.hpp>
 #include <unity/lib/visualization/thread.hpp>
-#include <unity/lib/visualization/vega_data.hpp>
 #include <unity/lib/visualization/vega_spec.hpp>
 #include <unity/lib/unity_sketch.hpp>
 #include <algorithm>
@@ -2826,7 +2825,6 @@ void unity_sarray::show(const std::string& path_to_client,
     case flex_type_enum::FLOAT:
       ::turi::visualization::run_thread([path_to_client, _title, _xlabel, _ylabel, self]() {
         process_wrapper ew(path_to_client);
-        vega_spec vs;
 
         histogram hist;
         std::string title = _title;
@@ -2847,21 +2845,15 @@ void unity_sarray::show(const std::string& path_to_client,
           ylabel = "Count";
         }
 
-        vs << histogram_spec(title, xlabel, ylabel);
-        ew << vs.get_spec();
+        ew << histogram_spec(title, xlabel, ylabel);
 
         hist.init(self);
         while (ew.good()) {
-          vega_data vd;
           auto result = hist.get();
-          vd << result->vega_column_data();
-
           double num_rows_processed =  static_cast<double>(hist.get_rows_processed());
           double size_array = static_cast<double>(self->size());
           double percent_complete = num_rows_processed/size_array;
-
-
-          ew << vd.get_data_spec(percent_complete);
+          ew << result->vega_column_data(percent_complete);
 
           if (hist.eof()) {
             break;
@@ -2873,7 +2865,6 @@ void unity_sarray::show(const std::string& path_to_client,
     case flex_type_enum::STRING:
       ::turi::visualization::run_thread([path_to_client, _title, _xlabel, _ylabel, self]() {
         process_wrapper ew(path_to_client);
-        vega_spec vs;
 
         item_frequency item_freq;
         item_freq.init(self);
@@ -2898,18 +2889,14 @@ void unity_sarray::show(const std::string& path_to_client,
           ylabel = "Values";
         }
 
-        vs << categorical_spec(length_list, title, xlabel, ylabel);
-        ew << vs.get_spec();
+        ew << categorical_spec(length_list, title, xlabel, ylabel);
 
         while (ew.good()) {
-          vega_data vd;
-          vd << item_freq.get()->vega_column_data();
-
+          auto result = item_freq.get();
           double num_rows_processed =  static_cast<double>(item_freq.get_rows_processed());
           double size_array = static_cast<double>(self->size());
           double percent_complete = num_rows_processed/size_array;
-
-          ew << vd.get_data_spec(percent_complete);
+          ew << result->vega_column_data(percent_complete);
 
           if (item_freq.eof()) {
             break;

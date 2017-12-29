@@ -3,11 +3,20 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
+#undef MIN
+#undef MAX
+
 #include "heatmap.hpp"
 
 #include "process_wrapper.hpp"
 #include "thread.hpp"
-#include "vega_data.hpp"
 #include "vega_spec.hpp"
 
 #include <parallel/lambda_omp.hpp>
@@ -44,9 +53,7 @@ void turi::visualization::show_heatmap(const std::string& path_to_client,
   ::turi::visualization::run_thread([path_to_client, x, y, xlabel, ylabel, title]() {
 
     process_wrapper ew(path_to_client);
-    vega_spec vs;
-    vs << heatmap_spec(xlabel, ylabel, title);
-    ew << vs.get_spec();
+    ew << heatmap_spec(xlabel, ylabel, title);
 
     heatmap hm;
     gl_sframe temp_sf;
@@ -54,14 +61,11 @@ void turi::visualization::show_heatmap(const std::string& path_to_client,
     temp_sf[y_name] = y;
     hm.init(temp_sf);
     while (ew.good()) {
-      vega_data vd;
       auto result = hm.get();
-      vd << result->vega_column_data();
-
       double num_rows_processed =  static_cast<double>(hm.get_rows_processed());
       double size_array = static_cast<double>(x.size());
       double percent_complete = num_rows_processed/size_array;
-      ew << vd.get_data_spec(percent_complete);
+      ew << result->vega_column_data(percent_complete);
 
       if (hm.eof()) {
         break;
@@ -338,7 +342,12 @@ void heatmap_result::load(iarchive& iarc) {
   throw std::runtime_error("load not supported for heatmap result");
 }
 
-std::string heatmap_result::vega_column_data(bool) const {
+std::shared_ptr<Message> heatmap_result::vega_column_data(double progress, bool) const {
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+
+  /*
   std::stringstream ss;
   flexible_type flex_data = this->emit();
   flex_list data = flex_data.get<flex_list>();
@@ -349,4 +358,5 @@ std::string heatmap_result::vega_column_data(bool) const {
     }
   }
   return ss.str();
+  */
 }

@@ -3,6 +3,13 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include "transformation.hpp"
 
 using namespace turi;
@@ -12,7 +19,12 @@ fused_transformation_output::fused_transformation_output(const std::vector<std::
   : m_outputs(outputs) {
 }
 
-std::string fused_transformation_output::vega_column_data(bool sframe) const {
+std::shared_ptr<Message> fused_transformation_output::vega_column_data(double progress, bool sframe) const {
+  std::shared_ptr<Message> ret = std::make_shared<Message>();
+  DASSERT_TRUE(false);
+  return ret;
+
+  /*
   std::stringstream ret;
 
   for (const auto& output : m_outputs) {
@@ -20,6 +32,7 @@ std::string fused_transformation_output::vega_column_data(bool sframe) const {
   }
 
   return ret.str();
+  */
 }
 
 fused_transformation::fused_transformation(const std::vector<std::shared_ptr<transformation_base>> transformers)

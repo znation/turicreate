@@ -71,8 +71,8 @@ struct histogram_result : public sframe_transformation_output {
     flexible_type get_min_value() const;
     flexible_type get_max_value() const;
     void add_element_simple(const flexible_type& value); // updates the result w/ value
-    virtual std::string vega_column_data(bool) const override;
-    virtual std::string vega_summary_data() const override;
+    virtual std::shared_ptr<Message> vega_column_data(double progress, bool) const override;
+    virtual std::shared_ptr<Message> vega_summary_data(double progress) const override;
 
     // also store and compute basic summary stats
     groupby_operators::count m_count; // num rows

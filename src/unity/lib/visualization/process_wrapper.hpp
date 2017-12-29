@@ -12,28 +12,31 @@
 #include <string>
 #include <thread>
 #include <platform/parallel/pthread_tools.hpp>
-
 #include <process/process.hpp>
-
 
 namespace turi {
   namespace visualization {
+
+    class Message;
+
     class process_wrapper {
       private:
+        typedef io_buffer<std::shared_ptr<Message>> spec_buffer;
+
         volatile bool m_alive;
         turi::mutex m_mutex;
         turi::conditional m_cond;
         ::turi::process m_client_process;
-        io_buffer m_inputBuffer;
+        spec_buffer m_inputBuffer;
         std::thread m_inputThread;
-        io_buffer m_outputBuffer;
+        spec_buffer m_outputBuffer;
         std::thread m_outputThread;
 
       public:
         explicit process_wrapper(const std::string& path_to_client);
         ~process_wrapper();
-        process_wrapper& operator<<(const std::string& to_client);
-        process_wrapper& operator>>(std::string& from_client);
+        process_wrapper& operator<<(std::shared_ptr<Message> to_client);
+        process_wrapper& operator>>(std::shared_ptr<Message>& from_client);
         bool good();
     };
 
