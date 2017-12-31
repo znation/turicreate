@@ -9,6 +9,7 @@
 
 #include <string>
 #include <flexible_type/flexible_type.hpp>
+#include <unity/lib/visualization/transformation.hpp>
 
 namespace turi {
   namespace visualization {

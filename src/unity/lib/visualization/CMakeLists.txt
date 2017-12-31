@@ -21,7 +21,9 @@ set(VISUALIZATION_SOURCES
   show.cpp
   thread.cpp
   transformation.cpp
+  vega_data.cpp
   vega_spec.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/vega.3.0.pb.cc
   ${CMAKE_CURRENT_BINARY_DIR}/tcviz.pb.cc
 )
 
