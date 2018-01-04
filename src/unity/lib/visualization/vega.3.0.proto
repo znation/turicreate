@@ -334,7 +334,7 @@ message Legend {
   google.protobuf.Struct encode = 9;
   google.protobuf.Value entryPadding = 10;
   string format = 11;
-  google.protobuf.Value offset = 12;
+  double offset = 12;
   google.protobuf.Value padding = 13;
   google.protobuf.Value tickCount = 14;
   google.protobuf.Value titlePadding = 15;
@@ -351,7 +351,7 @@ message Title {
   bool interactive = 5;
   string name = 6;
   google.protobuf.Value style = 7;
-  google.protobuf.Value offset = 8;
+  double offset = 8;
   double zindex = 9;
 }
 

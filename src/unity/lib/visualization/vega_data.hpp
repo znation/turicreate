@@ -21,7 +21,7 @@ namespace turi {
         flex_image img;
       };
 
-      std::shared_ptr<Message> create_sframe_spec(
+      std::shared_ptr<Message> create_sframe_data(
         size_t i,
         size_t num_rows,
         flex_type_enum type,

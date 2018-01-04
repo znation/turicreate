@@ -15,7 +15,7 @@ namespace turi {
     std::shared_ptr<Message> histogram_spec(const std::string& title, const std::string& xlabel, const std::string& ylabel, double sizeMultiplier = 1.0);
     std::shared_ptr<Message> categorical_spec(size_t length_list, const std::string& title, const std::string& xlabel, const std::string& ylabel, double sizeMultiplier = 1.0);
     std::shared_ptr<Message> summary_view_spec(size_t length_elements, double sizeMultiplier = 1.0);
-    std::shared_ptr<Message> scatter_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
+    std::shared_ptr<Message> scatter_spec(std::string x_name = "", std::string y_name = "", std::string title_name = "");
     std::shared_ptr<Message> heatmap_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
     std::shared_ptr<Message> categorical_heatmap_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
     std::shared_ptr<Message> boxes_and_whiskers_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
