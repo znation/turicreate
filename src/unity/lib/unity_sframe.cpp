@@ -1669,7 +1669,7 @@ void unity_sframe::show(const std::string& path_to_client) {
         DASSERT_GE(percent_complete, 0.0);
         DASSERT_LE(percent_complete, 1.0);
 
-        auto message = vega_data::create_sframe_spec(i, self->size(), sarr->dtype(), name, result, percent_complete);
+        auto message = vega_data::create_sframe_data(i, self->size(), sarr->dtype(), name, result, percent_complete);
         ew << message;
 
         if (!transformation->eof()) {

@@ -37,8 +37,8 @@ void turi::visualization::show_scatter(const std::string& path_to_client,
     ew << scatter_spec(xlabel, ylabel, title);
 
     std::shared_ptr<Message> message = std::make_shared<Message>();
-    message->mutable_data_message()->set_name("source_2");
-    message->mutable_data_message()->set_progress(1.0);
+    message->mutable_data()->set_name("source_2");
+    message->mutable_data()->set_progress(1.0);
 
     for (size_t i=0; i<x.size(); i++) {
       if (x[i].get_type() == flex_type_enum::UNDEFINED ||
@@ -58,7 +58,7 @@ void turi::visualization::show_scatter(const std::string& path_to_client,
         continue;
       }
 
-      auto* value = message->mutable_data_message()->mutable_scatter_values()->add_values();
+      auto* value = message->mutable_data()->mutable_scatter_data()->add_values();
       value->set_x(x[i]);
       value->set_y(y[i]);
     }

@@ -27,7 +27,7 @@ std::string vega_data::get_data_spec(double progress) {
 }
 */
 
-std::shared_ptr<Message> create_sframe_spec(
+std::shared_ptr<Message> create_sframe_data(
     size_t i,
     size_t num_rows,
     flex_type_enum type,

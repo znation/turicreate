@@ -10,8 +10,7 @@
 
 syntax = "proto3";
 
-import "google/protobuf/struct.proto";
-import public "vega.3.0.proto";
+import "vega.3.0.proto";
 
 package turi.visualization;
 
@@ -27,7 +26,7 @@ message XYCoords {
   double y = 2;
 }
 
-message ScatterValues {
+message ScatterData {
   repeated XYCoords values = 1;
 }
 
@@ -36,13 +35,13 @@ message Data {
   string name = 1;
   double progress = 2; // on a scale of 0.0 to 1.0
   oneof values {
-     ScatterValues scatter_values = 3;
+     ScatterData scatter_data = 3;
   }
 }
 
 message Message {
   oneof msg {
-    Spec spec_message = 1;
-    Data data_message = 2;
+    Spec spec = 1;
+    Data data = 2;
   }
 }
