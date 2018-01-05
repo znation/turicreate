@@ -78,6 +78,28 @@ std::shared_ptr<Message> scatter_spec(std::string x_name, std::string y_name, st
   spec->set_height(400);
   spec->mutable_title()->set_text(title_name);
   spec->mutable_title()->set_offset(30);
+  spec->add_data()->set_name("source_2");
+  {
+    // marks
+    auto* mark = spec->add_marks();
+    mark->set_name("marks");
+    mark->set_type("symbol");
+    mark->add_style("circle");
+    mark->mutable_from()->set_data("source_2");
+    {
+      auto* encode = mark->mutable_encode();
+      auto* fillValue = (*encode)["hover"].mutable_fill()->mutable_valuereference();
+      fillValue->mutable_value()->set_string_value("#7EC2F3");
+      auto& update = (*encode)["update"];
+      update.mutable_x()->mutable_valuereference()->set_field("x");
+      update.mutable_x()->mutable_valuereference()->set_scale("x");
+      update.mutable_y()->mutable_valuereference()->set_field("y");
+      update.mutable_y()->mutable_valuereference()->set_scale("y");
+      update.mutable_fill()->mutable_valuereference()->mutable_value()->set_string_value("#108EE9");
+      update.mutable_shape()->mutable_valuereference()->mutable_value()->set_string_value("circle");
+      update.mutable_opacity()->mutable_valuereference()->mutable_value()->set_number_value(0.7);
+    }
+  }
   return ret;
 }
 

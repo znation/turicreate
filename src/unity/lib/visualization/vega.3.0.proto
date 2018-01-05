@@ -37,14 +37,14 @@ message Specification {
   Config config = 8;
   repeated Signal signals = 9;
   // TODO - Data could be a strongly-typed message type
-  repeated google.protobuf.Struct data = 10;
+  repeated Data data = 10;
   repeated Scale scales = 11;
   repeated Projection projections = 12;
   repeated Axis axes = 13;
   repeated Legend legends = 14;
   Title title = 15;
   repeated Mark marks = 16;
-  google.protobuf.Struct encode = 17;
+  map<string, EncodingSet> encode = 17;
 }
 
 message Autosize {
@@ -258,6 +258,25 @@ message Signal {
   google.protobuf.Value value = 7;
 }
 
+message Format {
+  string type = 1;
+  oneof parse {
+    string parseString = 2;
+    google.protobuf.Struct parseObject = 3;
+  }
+}
+
+message Data {
+  string name = 1;
+  Format format = 2;
+  repeated string source = 3;
+  string url = 4;
+  google.protobuf.Value values = 5;
+  repeated Trigger on = 6;
+  // TODO this should be a Transform message
+  repeated google.protobuf.Struct transform = 7;
+}
+
 message Scale {
   string name = 1;
   string type = 2;
@@ -385,18 +404,57 @@ message Compare {
   google.protobuf.Value comparator = 2;
 }
 
+message ValueReference {
+  oneof baseValue {
+    string signal = 1;
+    string color = 2;
+    string field = 3;
+    google.protobuf.Value value = 4;
+  }
+
+  // scale transforms
+  string scale = 100;
+  double band = 101;
+
+  // value modifiers
+  double exponent = 200;
+  double mult = 201;
+  double offset = 202;
+  bool round = 203;
+}
+
+message ProductionRule {
+  // TODO implement this
+}
+
+message EncodingValue {
+  oneof encodingValue {
+    ValueReference valueReference = 1;
+    ProductionRule productionRule = 2;
+  }
+}
+
+message EncodingSet {
+  EncodingValue fill = 1;
+  EncodingValue x = 2;
+  EncodingValue y = 3;
+  EncodingValue shape = 4;
+  EncodingValue opacity = 5;
+}
+
 message Mark {
   string type = 1;
   bool clip = 2;
   string description = 3;
-  google.protobuf.Struct encode = 4;
+  map<string, EncodingSet> encode = 4;
   From from = 5;
   bool interactive = 6;
   string key = 7;
   string name = 8;
   repeated Trigger on = 9;
   Compare sort = 10;
+  // TODO this should be a Transform message
   repeated google.protobuf.Struct transform = 11;
   string role = 12;
-  google.protobuf.Value style = 13;
+  repeated string style = 13;
 }
