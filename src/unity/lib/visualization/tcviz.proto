@@ -10,16 +10,7 @@
 
 syntax = "proto3";
 
-import "vega.3.0.proto";
-
 package turi.visualization;
-
-message Spec {
-  // A plot or interactive-UI high level specification.
-  oneof spec {
-    vega.Specification vega_spec = 1;
-  }
-}
 
 message XYCoords {
   double x = 1;
@@ -41,7 +32,7 @@ message Data {
 
 message Message {
   oneof msg {
-    Spec spec = 1;
+    string spec = 1; // JSON
     Data data = 2;
   }
 }

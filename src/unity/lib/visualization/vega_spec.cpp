@@ -10,7 +10,7 @@
 
 namespace turi {
 namespace visualization {
-std::string escape_string(const std::string& str) {
+std::shared_ptr<Message> escape_string(const std::string& str) {
   std::string ret;
   size_t ret_len;
   ::turi::escape_string(str, '\\', true /* use_escape_char */, '\"', true /* use_quote_char */, false /* double_quote */, ret, ret_len);
