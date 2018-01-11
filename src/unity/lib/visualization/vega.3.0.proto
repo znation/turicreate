@@ -277,17 +277,57 @@ message Data {
   repeated google.protobuf.Struct transform = 7;
 }
 
+message SignalReference {
+  // https://vega.github.io/vega/docs/types/#Signal
+  string signal = 1;
+}
+
+message DataReference {
+  string data = 1;
+  repeated string field = 2;
+  bool sort = 3;
+}
+
+message ColorSchemeReference {
+  string scheme = 1;
+}
+
 message Scale {
   string name = 1;
   string type = 2;
-  google.protobuf.Value domain = 3;
-  double domainMax = 4;
-  double domainMin = 5;
-  double domainMid = 6;
-  google.protobuf.ListValue domainRaw = 7;
-  google.protobuf.Value range = 8;
-  bool reverse = 9;
-  bool round = 10;
+
+  // Domain
+  oneof domain {
+    google.protobuf.ListValue domainLiteral = 100;
+    SignalReference domainSignalReference = 101;
+    DataReference domainDataReference = 102;
+  }
+  double domainMax = 120;
+  double domainMin = 121;
+  double domainMid = 122;
+  google.protobuf.ListValue domainRaw = 123;
+
+  // Range
+  oneof range {
+    google.protobuf.ListValue rangeLiteral = 200;
+    SignalReference rangeSignalReference = 201;
+    ColorSchemeReference rangeColorSchemeReference = 202;
+    DataReference rangeDataReference = 203; // ordinal scales only
+    double rangeStepSize = 204; // band and point scales only
+    string rangeDefault = 205; // pre defined default like "width", "symbol"
+  }
+  bool reverse = 220;
+  bool round = 221;
+
+  // Quantitative scales
+  bool clamp = 300;
+  string interpolate = 301;
+  double padding = 302;
+  oneof nice {
+    bool niceBool = 303;
+    double niceTickCount = 304;
+  }
+  bool zero = 305;
 }
 
 message Projection {
