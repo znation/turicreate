@@ -8,17 +8,32 @@
 
 #include <string>
 #include <sstream>
+#include <export.hpp>
 
 namespace turi {
   namespace visualization {
-    class Message;
-    std::shared_ptr<Message> histogram_spec(const std::string& title, const std::string& xlabel, const std::string& ylabel, double sizeMultiplier = 1.0);
-    std::shared_ptr<Message> categorical_spec(size_t length_list, const std::string& title, const std::string& xlabel, const std::string& ylabel, double sizeMultiplier = 1.0);
-    std::shared_ptr<Message> summary_view_spec(size_t length_elements, double sizeMultiplier = 1.0);
-    std::shared_ptr<Message> scatter_spec(std::string x_name = "", std::string y_name = "", std::string title_name = "");
-    std::shared_ptr<Message> heatmap_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
-    std::shared_ptr<Message> categorical_heatmap_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
-    std::shared_ptr<Message> boxes_and_whiskers_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
+
+    std::string histogram_spec(std::string title, std::string xlabel, std::string ylabel, double sizeMultiplier = 1.0);
+    std::string categorical_spec(size_t length_list, std::string title, std::string xlabel, std::string ylabel, double sizeMultiplier = 1.0);
+    std::string summary_view_spec(size_t length_elements, double sizeMultiplier = 1.0);
+    std::string scatter_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
+    std::string heatmap_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
+    std::string categorical_heatmap_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
+    std::string boxes_and_whiskers_spec(const std::string& x_name = "", const std::string& y_name = "", const std::string& title_name = "");
+
+    // Utility for escaping JSON string literals. Not concerned with Vega implications of the contents of those strings.
+    std::string escape_string(const std::string& str);
+
+    class EXPORT vega_spec {
+      protected:
+        std::stringstream m_spec;
+
+      public:
+        vega_spec();
+        virtual ~vega_spec();
+        virtual vega_spec& operator<<(const std::string&);
+        virtual std::string get_spec();
+    };
   }
 }
 
