@@ -100,6 +100,64 @@ std::shared_ptr<Message> scatter_spec(std::string x_name, std::string y_name, st
       update.mutable_opacity()->mutable_valuereference()->mutable_value()->set_number_value(0.7);
     }
   }
+  {
+    // scales
+    auto* scaleX = spec->add_scales();
+    scaleX->set_name("x");
+    scaleX->set_type("linear");
+    scaleX->mutable_domaindatareference()->set_data("source_2");
+    scaleX->mutable_domaindatareference()->add_field("x");
+    {
+      auto* begin = scaleX->mutable_rangeliteral()->add_values();
+      begin->set_number_value(0);
+      auto* end = scaleX->mutable_rangeliteral()->add_values();
+      auto* fields = end->mutable_struct_value()->mutable_fields();
+      (*fields)["signal"].set_string_value("width");
+    }
+    scaleX->set_nicebool(true);
+    scaleX->set_zero(true);
+
+    auto* scaleY = spec->add_scales();
+    scaleY->set_name("y");
+    scaleY->set_type("linear");
+    scaleY->mutable_domaindatareference()->set_data("source_2");
+    scaleY->mutable_domaindatareference()->add_field("y");
+    {
+      auto* begin = scaleY->mutable_rangeliteral()->add_values();
+      auto* fields = begin->mutable_struct_value()->mutable_fields();
+      (*fields)["signal"].set_string_value("width");
+      auto* end = scaleY->mutable_rangeliteral()->add_values();
+      end->set_number_value(0);
+    }
+    scaleY->set_nicebool(true);
+    scaleY->set_zero(true);
+  }
+  {
+    // axes
+    {
+      auto* axisX1 = spec->add_axes();
+      axisX1->set_scale("x");
+      axisX1->set_labeloverlapflag(true);
+      axisX1->set_orient("bottom");
+      auto* fields = axisX1->mutable_tickcount()->mutable_struct_value()->mutable_fields();
+      (*fields)["signal"].set_string_value("ceil(width/40)");
+      axisX1->set_title(title_name);
+      axisX1->set_zindex(1);
+    }
+    {
+      auto* axisX2 = spec->add_axes();
+      axisX2->set_domain(false);
+      axisX2->set_grid(true);
+      axisX2->set_labels(false);
+      axisX2->set_maxextent(0);
+      axisX2->set_minextent(0);
+      axisX2->set_orient("bottom");
+      auto* fields = axisX1->mutable_tickcount()->mutable_struct_value()->mutable_fields();
+      (*fields)["signal"].set_string_value("ceil(width/40)");
+      axisX2->set_ticks(false);
+      axisX2->set_zindex(0);
+    }
+  }
   return ret;
 }
 
