@@ -1,0 +1,5 @@
+project(TuriExternalDependencies)
+
+subdirs(
+  protobuf
+  )
