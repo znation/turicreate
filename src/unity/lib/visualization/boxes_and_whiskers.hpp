@@ -18,7 +18,7 @@ namespace visualization {
 class boxes_and_whiskers_result: public transformation_output,
                                  public groupby_quantile_result {
   public:
-    virtual std::string vega_column_data(bool sframe) const override;
+    virtual std::shared_ptr<Message> vega_column_data(double progress, bool sframe = false) const override;
 };
 
 // expects a gl_sframe of:

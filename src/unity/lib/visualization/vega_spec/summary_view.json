@@ -35,147 +35,147 @@
       "transform": [
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+66",
+          "expr": "toNumber(datum[\"column_idx\"])*300+66",
           "as": "c_main_background"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+43",
+          "expr": "toNumber(datum[\"column_idx\"])*300+43",
           "as": "c_top_bar"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+59",
+          "expr": "toNumber(datum[\"column_idx\"])*300+59",
           "as": "c_top_title"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+58",
+          "expr": "toNumber(datum[\"column_idx\"])*300+58",
           "as": "c_top_type"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+178",
+          "expr": "toNumber(datum[\"column_idx\"])*300+178",
           "as": "c_rule"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+106",
+          "expr": "toNumber(datum[\"column_idx\"])*300+106",
           "as": "c_num_rows"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+130",
+          "expr": "toNumber(datum[\"column_idx\"])*300+130",
           "as": "c_num_unique"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+154",
+          "expr": "toNumber(datum[\"column_idx\"])*300+154",
           "as": "c_missing"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+105",
+          "expr": "toNumber(datum[\"column_idx\"])*300+105",
           "as": "c_num_rows_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+130",
+          "expr": "toNumber(datum[\"column_idx\"])*300+130",
           "as": "c_num_unique_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+154",
+          "expr": "toNumber(datum[\"column_idx\"])*300+154",
           "as": "c_missing_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+195",
+          "expr": "toNumber(datum[\"column_idx\"])*300+195",
           "as": "c_frequent_items"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+218",
+          "expr": "toNumber(datum[\"column_idx\"])*300+218",
           "as": "c_first_item"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+235",
+          "expr": "toNumber(datum[\"column_idx\"])*300+235",
           "as": "c_second_item"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+252",
+          "expr": "toNumber(datum[\"column_idx\"])*300+252",
           "as": "c_third_item"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+269",
+          "expr": "toNumber(datum[\"column_idx\"])*300+269",
           "as": "c_fourth_item"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+286",
+          "expr": "toNumber(datum[\"column_idx\"])*300+286",
           "as": "c_fifth_item"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+200",
+          "expr": "toNumber(datum[\"column_idx\"])*300+200",
           "as": "c_mean"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+220",
+          "expr": "toNumber(datum[\"column_idx\"])*300+220",
           "as": "c_min"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+240",
+          "expr": "toNumber(datum[\"column_idx\"])*300+240",
           "as": "c_max"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+260",
+          "expr": "toNumber(datum[\"column_idx\"])*300+260",
           "as": "c_median"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+280",
+          "expr": "toNumber(datum[\"column_idx\"])*300+280",
           "as": "c_stdev"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+198",
+          "expr": "toNumber(datum[\"column_idx\"])*300+198",
           "as": "c_mean_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+218",
+          "expr": "toNumber(datum[\"column_idx\"])*300+218",
           "as": "c_min_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+238",
+          "expr": "toNumber(datum[\"column_idx\"])*300+238",
           "as": "c_max_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+258",
+          "expr": "toNumber(datum[\"column_idx\"])*300+258",
           "as": "c_median_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+278",
+          "expr": "toNumber(datum[\"column_idx\"])*300+278",
           "as": "c_stdev_val"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+106",
+          "expr": "toNumber(datum[\"column_idx\"])*300+106",
           "as": "graph_offset"
         },
         {
           "type": "formula",
-          "expr": "toNumber(datum[\"a\"])*300+132",
+          "expr": "toNumber(datum[\"column_idx\"])*300+132",
           "as": "graph_offset_categorical"
         },
         {
@@ -686,7 +686,7 @@
                     "value": 105
                   },
                   "text": {
-                    "signal": "toString(format(datum[\"num_row\"], \",\"))"
+                    "signal": "toString(format(datum[\"num_rows\"], \",\"))"
                   },
                   "align": {
                     "value": "right"

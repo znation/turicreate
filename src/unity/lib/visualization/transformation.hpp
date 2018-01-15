@@ -12,23 +12,16 @@
 namespace turi {
 namespace visualization {
 
+class Message;
+
 class transformation_output {
   public:
-    virtual std::string vega_column_data(bool sframe = false) const = 0;
+    virtual std::shared_ptr<Message> vega_column_data(double progress, bool sframe = false) const = 0;
 };
 
 class sframe_transformation_output : public transformation_output {
   public:
-    virtual std::string vega_summary_data() const = 0;
-};
-
-class fused_transformation_output : public transformation_output {
-  private:
-    std::vector<std::shared_ptr<transformation_output>> m_outputs;
-
-  public:
-    fused_transformation_output(const std::vector<std::shared_ptr<transformation_output>> outputs);
-    virtual std::string vega_column_data(bool sframe = false) const override;
+    virtual std::shared_ptr<Message> vega_summary_data(double progress, size_t column_idx, const std::string& column_title, size_t num_rows) const = 0;
 };
 
 class transformation_base {
@@ -39,24 +32,7 @@ class transformation_base {
     virtual size_t get_batch_size() const = 0;
 };
 
-class fused_transformation : public transformation_base {
-  private:
-    std::vector<std::shared_ptr<transformation_base>> m_transformers;
-
-  public:
-    fused_transformation(const std::vector<std::shared_ptr<transformation_base>> transformers);
-    virtual std::shared_ptr<transformation_output> get() override;
-    virtual bool eof() const override;
-    virtual flex_int get_rows_processed() const override;
-    virtual size_t get_batch_size() const override;
-};
-
-class transformation_collection : public std::vector<std::shared_ptr<transformation_base>> {
-  public:
-    // combines all of the transformations in the collection
-    // into a single transformer interface to simplify consumption
-    std::shared_ptr<fused_transformation> fuse();
-};
+typedef std::vector<std::shared_ptr<transformation_base>> transformation_collection;
 
 template<typename InputIterable,
          typename Output,

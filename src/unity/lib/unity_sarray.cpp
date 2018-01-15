@@ -2825,7 +2825,7 @@ void unity_sarray::show(const std::string& path_to_client,
     case flex_type_enum::INTEGER:
     case flex_type_enum::FLOAT:
       ::turi::visualization::run_thread([path_to_client, _title, _xlabel, _ylabel, self]() {
-        process_wrapper ew(path_to_client);
+        process_wrapper pw(path_to_client);
 
         histogram hist;
         std::string title = _title;
@@ -2846,20 +2846,15 @@ void unity_sarray::show(const std::string& path_to_client,
           ylabel = "Count";
         }
 
-        ew << histogram_spec(title, xlabel, ylabel);
+        pw << histogram_spec(title, xlabel, ylabel);
 
         hist.init(self);
-        while (ew.good()) {
-          vega_data vd;
+        while (pw.good()) {
           auto result = hist.get();
-          vd << result->vega_column_data();
-
           double num_rows_processed =  static_cast<double>(hist.get_rows_processed());
           double size_array = static_cast<double>(self->size());
           double percent_complete = num_rows_processed/size_array;
-
-
-          ew << vd.get_data_spec(percent_complete);
+          pw << result->vega_column_data(percent_complete);
 
           if (hist.eof()) {
             break;
@@ -2870,7 +2865,7 @@ void unity_sarray::show(const std::string& path_to_client,
       break;
     case flex_type_enum::STRING:
       ::turi::visualization::run_thread([path_to_client, _title, _xlabel, _ylabel, self]() {
-        process_wrapper ew(path_to_client);
+        process_wrapper pw(path_to_client);
 
         item_frequency item_freq;
         item_freq.init(self);
@@ -2895,17 +2890,14 @@ void unity_sarray::show(const std::string& path_to_client,
           ylabel = "Values";
         }
 
-        ew << categorical_spec(length_list, title, xlabel, ylabel);
+        pw << categorical_spec(length_list, title, xlabel, ylabel);
 
-        while (ew.good()) {
-          vega_data vd;
-          vd << item_freq.get()->vega_column_data();
-
+        while (pw.good()) {
           double num_rows_processed =  static_cast<double>(item_freq.get_rows_processed());
           double size_array = static_cast<double>(self->size());
           double percent_complete = num_rows_processed/size_array;
 
-          ew << vd.get_data_spec(percent_complete);
+          pw << item_freq.get()->vega_column_data(percent_complete);
 
           if (item_freq.eof()) {
             break;

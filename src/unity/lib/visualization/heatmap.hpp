@@ -37,7 +37,7 @@ namespace visualization {
       virtual void load(iarchive& iarc) override;
 
       // transformation_output methods
-      virtual std::string vega_column_data(bool) const override;
+      virtual std::shared_ptr<Message> vega_column_data(double progress, bool sframe = false) const override;
   };
 
   /*

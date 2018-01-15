@@ -18,6 +18,8 @@
 
 namespace turi {
   namespace visualization {
+    class Message;
+
     class process_wrapper {
       private:
         volatile bool m_alive;
@@ -32,8 +34,8 @@ namespace turi {
       public:
         explicit process_wrapper(const std::string& path_to_client);
         ~process_wrapper();
-        process_wrapper& operator<<(const std::string& to_client);
-        process_wrapper& operator>>(std::string& from_client);
+        process_wrapper& operator<<(const std::shared_ptr<Message>& to_client);
+        process_wrapper& operator>>(std::shared_ptr<Message>& from_client);
         bool good();
     };
 

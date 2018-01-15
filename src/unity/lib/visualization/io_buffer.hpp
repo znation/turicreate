@@ -12,14 +12,16 @@
 
 namespace turi {
   namespace visualization {
+    class Message;
+
     class io_buffer {
       private:
         std::mutex m_mutex;
-        std::queue<std::string> m_queue;
+        std::queue<std::shared_ptr<Message>> m_queue;
 
       public:
-        std::string read();
-        void write(const std::string&);
+        std::shared_ptr<Message> read();
+        void write(const std::shared_ptr<Message>&);
         size_t size() const;
     };
 

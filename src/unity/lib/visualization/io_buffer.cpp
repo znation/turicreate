@@ -7,17 +7,17 @@
 
 using namespace turi::visualization;
 
-std::string io_buffer::read() {
+std::shared_ptr<Message> io_buffer::read() {
   std::lock_guard<std::mutex> lock(m_mutex);
   if (m_queue.empty()) {
-    return "";
+    return nullptr;
   }
   auto ret = m_queue.front();
   m_queue.pop();
   return ret;
 }
 
-void io_buffer::write(const std::string& str) {
+void io_buffer::write(const std::shared_ptr<Message>& str) {
   std::lock_guard<std::mutex> lock(m_mutex);
   m_queue.push(str);
 }

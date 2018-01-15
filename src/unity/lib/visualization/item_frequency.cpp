@@ -3,6 +3,12 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include "item_frequency.hpp"
 #include "vega_spec.hpp"
 
@@ -40,25 +46,23 @@ void item_frequency_result::combine(const group_aggregate_value& other) {
   m_non_null_count.combine(item_frequency_other.m_non_null_count);
 }
 
-std::string item_frequency_result::vega_summary_data() const {
-  std::stringstream ss;
-
+std::shared_ptr<Message> item_frequency_result::vega_summary_data(double progress, size_t column_idx, const std::string& column_title, size_t num_rows) const {
+  std::shared_ptr<Message> ret = vega_column_data(progress, true /*sframe*/);
   flex_int num_missing = m_count.emit() - m_non_null_count.emit();
-  std::string data = vega_column_data(true);
-
-  ss << "\"type\": \"str\",";
-  ss << "\"num_unique\": " << m_count_distinct.emit() << ",";
-  ss << "\"num_missing\": " << num_missing << ",";
-  ss << "\"categorical\": [" << data << "],";
-  ss << "\"numeric\": []";
-
-  return ss.str();
-
+  auto *data = ret->mutable_data()->mutable_item_frequency();
+  data->set_type("str");
+  data->set_num_unique(m_count_distinct.emit());
+  data->set_num_missing(num_missing);
+  data->set_column_idx(column_idx);
+  data->set_column_title(column_title);
+  data->set_num_rows(num_rows);
+  return ret;
 }
 
-std::string item_frequency_result::vega_column_data(bool sframe) const {
-  std::stringstream ss;
-  size_t x = 0;
+std::shared_ptr<Message> item_frequency_result::vega_column_data(double progress, bool sframe) const {
+  auto ret = std::make_shared<Message>();
+  ret->mutable_data()->set_name("source_2");
+  ret->mutable_data()->set_progress(progress);
 
   auto items_list = emit().get<flex_dict>();
   size_t size_list;
@@ -103,21 +107,11 @@ std::string item_frequency_result::vega_column_data(bool sframe) const {
     const auto& value = flex_value.get<flex_string>();
 
     size_t count = pair.second.get<flex_int>();
-
-    ss << "{\"label\": ";
-    ss << escape_string(value);
-    ss << ",\"label_idx\": ";
-    ss << i;
-    ss << ",\"count\": ";
-    ss << count;
-    ss << "}";
-
-    if(x != (size_list - 1)){
-      ss << ",";
-    }
-
-    x++;
+    auto* data = ret->mutable_data()->mutable_item_frequency()->add_values();
+    data->set_label(value);
+    data->set_label_idx(i);
+    data->set_count(count);
   }
 
-  return ss.str();
+  return ret;
 }

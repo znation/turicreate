@@ -3,11 +3,16 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include "scatter.hpp"
 
 #include "process_wrapper.hpp"
 #include "thread.hpp"
-#include "vega_data.hpp"
 #include "vega_spec.hpp"
 
 #include <cmath>
@@ -15,17 +20,6 @@
 
 using namespace turi;
 using namespace turi::visualization;
-
-static std::string to_string(const flexible_type& ft) {
-  switch (ft.get_type()) {
-    case flex_type_enum::INTEGER:
-      return std::to_string(ft.get<flex_int>());
-    case flex_type_enum::FLOAT:
-      return std::to_string(ft.get<flex_float>());
-    default:
-      throw std::runtime_error("Unexpected flexible_type type. Expected INTEGER or FLOAT.");
-  }
-}
 
 void turi::visualization::show_scatter(const std::string& path_to_client,
                                        const gl_sarray& x,
@@ -38,10 +32,12 @@ void turi::visualization::show_scatter(const std::string& path_to_client,
 
     DASSERT_EQ(x.size(), y.size());
 
-    process_wrapper ew(path_to_client);
-    ew << scatter_spec(xlabel, ylabel, title);
+    process_wrapper pw(path_to_client);
+    pw << scatter_spec(xlabel, ylabel, title);
 
-    vega_data vd;
+    auto data_message = std::make_shared<Message>();
+    data_message->mutable_data()->set_name("source_2");
+    data_message->mutable_data()->set_progress(1.0);
 
     for (size_t i=0; i<x.size(); i++) {
       if (x[i].get_type() == flex_type_enum::UNDEFINED ||
@@ -60,10 +56,13 @@ void turi::visualization::show_scatter(const std::string& path_to_client,
           !std::isfinite(y[i].get<flex_float>())) {
         continue;
       }
-      vd << "{\"x\": " + to_string(x[i]) + ", \"y\": " + to_string(y[i]) + "}";
+
+      auto *data = data_message->mutable_data()->mutable_scatter()->add_values();
+      data->set_x(x[i]);
+      data->set_y(y[i]);
     }
 
-    ew << vd.get_data_spec(1.0 /* progress */);
+    pw << data_message;
 
   });
 

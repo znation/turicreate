@@ -14,6 +14,11 @@
 
 #include <thread>
 
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 using namespace turi::visualization;
 
 std::vector<categorical_heatmap_result> categorical_heatmap::split_input(size_t num_threads) {
@@ -27,14 +32,14 @@ void categorical_heatmap::merge_results(std::vector<categorical_heatmap_result>&
   }
 }
 
-std::string categorical_heatmap_result::vega_column_data(bool sframe) const {
-  std::stringstream ss;
-
+std::shared_ptr<Message> categorical_heatmap_result::vega_column_data(double progress, bool) const {
+  auto ret = std::make_shared<Message>();
+  ret->mutable_data()->set_name("source_2");
+  ret->mutable_data()->set_progress(progress);
   auto items_list = emit().get<flex_dict>();
-  size_t size_list = items_list.size();
-  for (size_t i=0; i<size_list; i++) {
 
-    const std::pair<flexible_type, flexible_type>& pair = items_list[i];
+  for (auto pair : items_list) {
+
     const flex_list& values = pair.first.get<flex_list>();
 
     // for now, skip undefined
@@ -47,20 +52,13 @@ std::string categorical_heatmap_result::vega_column_data(bool sframe) const {
     const flex_string& yValue = values[1].get<flex_string>();
     flex_int count = pair.second.get<flex_int>();
 
-    ss << "{\"x\": ";
-    ss << escape_string(xValue);
-    ss << ", \"y\": ";
-    ss << escape_string(yValue);
-    ss << ", \"count\": ";
-    ss << count;
-    ss << "}";
-
-    if(i != (size_list - 1)){
-      ss << ",";
-    }
+    auto* data = ret->mutable_data()->mutable_categorical_heatmap()->add_values();
+    data->set_x(xValue);
+    data->set_y(yValue);
+    data->set_count(count);
   }
 
-  return ss.str();
+  return ret;
 }
 
 
@@ -85,14 +83,11 @@ void ::turi::visualization::show_categorical_heatmap(const std::string& path_to_
     temp_sf["y"] = y;
     hm.init(temp_sf);
     while (ew.good()) {
-      vega_data vd;
       auto result = hm.get();
-      vd << result->vega_column_data();
-
       double num_rows_processed =  static_cast<double>(hm.get_rows_processed());
       double size_array = static_cast<double>(x.size());
       double percent_complete = num_rows_processed/size_array;
-      ew << vd.get_data_spec(percent_complete);
+      ew << result->vega_column_data(percent_complete);
 
       if (hm.eof()) {
         break;

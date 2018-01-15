@@ -15,6 +15,11 @@
 #include <cmath>
 #include <thread>
 
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 using namespace turi;
 using namespace turi::visualization;
 
@@ -52,14 +57,11 @@ void turi::visualization::show_heatmap(const std::string& path_to_client,
     temp_sf[y_name] = y;
     hm.init(temp_sf);
     while (ew.good()) {
-      vega_data vd;
       auto result = hm.get();
-      vd << result->vega_column_data();
-
       double num_rows_processed =  static_cast<double>(hm.get_rows_processed());
       double size_array = static_cast<double>(x.size());
       double percent_complete = num_rows_processed/size_array;
-      ew << vd.get_data_spec(percent_complete);
+      ew << result->vega_column_data(percent_complete);
 
       if (hm.eof()) {
         break;
@@ -336,15 +338,41 @@ void heatmap_result::load(iarchive& iarc) {
   throw std::runtime_error("load not supported for heatmap result");
 }
 
-std::string heatmap_result::vega_column_data(bool) const {
-  std::stringstream ss;
-  flexible_type flex_data = this->emit();
-  flex_list data = flex_data.get<flex_list>();
-  for (size_t i=0; i<data.size(); i++) {
-    ss << data[i];
-    if (i != data.size() - 1) {
-      ss << ",";
+std::shared_ptr<Message> heatmap_result::vega_column_data(double progress, bool) const {
+  auto ret = std::make_shared<Message>();
+  ret->mutable_data()->set_name("source_2");
+  ret->mutable_data()->set_progress(progress);
+
+  size_t bins_size = bins.size();
+
+  for (size_t i=0; i<bins_size; i++) {
+    // row
+
+    const auto& row = bins[i];
+    size_t row_size = row.size();
+    double xScale = static_cast<double>(i) / static_cast<double>(bins_size);
+    double xWidth = extrema.x.get_max() - extrema.x.get_min();
+    double xBinWidth = xWidth / static_cast<double>(NUM_BINS);
+    double yWidth = extrema.y.get_max() - extrema.y.get_min();
+    double yBinWidth = yWidth / static_cast<double>(NUM_BINS);
+    double x1 = static_cast<double>(extrema.x.get_min()) + (xScale * xWidth);
+    double x2 = x1 + xBinWidth;
+
+    for (size_t j=0; j<row_size; j++) {
+      // col
+
+      auto* data = ret->mutable_data()->mutable_heatmap()->add_values();
+      size_t count = row[j];
+      double yScale = static_cast<double>(j) / static_cast<double>(row_size);
+      double y1 = yScale * yWidth;
+      double y2 = y1 + yBinWidth;
+      data->set_x1(x1);
+      data->set_x2(x2);
+      data->set_y1(y1);
+      data->set_y2(y2);
+      data->set_count(count);
     }
   }
-  return ss.str();
+
+  return ret;
 }

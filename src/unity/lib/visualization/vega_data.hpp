@@ -11,25 +11,17 @@
 
 namespace turi {
   namespace visualization {
-    class EXPORT vega_data {
-      private:
-        bool m_has_spec = false;
-      protected:
-        std::stringstream m_spec;
+    class FlexibleType;
+    class FlexImage;
 
-      public:
-        vega_data();
-
-        struct Image {
-          size_t idx;
-          std::string column;
-          flex_image img;
-        };
-
-        virtual std::string create_sframe_spec(size_t i, size_t num_rows,flex_type_enum type, std::string element_title, const std::shared_ptr<transformation_output>& result);
-        virtual vega_data& operator<<(const std::string&);
-        virtual std::string get_data_spec(double progress);
+    struct QueuedImage {
+      size_t idx;
+      std::string column;
+      flex_image img;
     };
+
+    void serialize_flex_type(const flexible_type& from, visualization::FlexibleType* to);
+    void serialize_flex_type(const flex_image& from, visualization::FlexImage* to);
   }
 }
 

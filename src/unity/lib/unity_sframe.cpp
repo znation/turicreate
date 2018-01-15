@@ -3,6 +3,14 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+// Include tcviz.pb.h, then immediately assertions/logger, to make sure CHECK
+// gets redefined properly within the rest of this file.
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include <set>
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
@@ -1642,37 +1650,32 @@ void unity_sframe::show(const std::string& path_to_client) {
 
   ::turi::visualization::run_thread([path_to_client, column_transformers, column_names, self]() {
 
-    visualization::process_wrapper ew(path_to_client);
-    ew << summary_view_spec(column_transformers.size());
+    visualization::process_wrapper pw(path_to_client);
+    pw << summary_view_spec(column_transformers.size());
 
     const static size_t expected_batch_size = 5000000;
     double num_rows_processed = 0;
     double num_rows_total = self->size() * column_transformers.size();
     double percent_complete = 0.0;
 
-    while (ew.good()) {
+    while (pw.good()) {
       bool remainingItems = false;
 
-      for (size_t i=0; i<column_transformers.size() && ew.good(); i++) {
+      for (size_t i=0; i<column_transformers.size() && pw.good(); i++) {
         const auto& transformation = column_transformers[i];
         const auto& name = column_names[i];
 
-        vega_data vd;
-
         std::shared_ptr<unity_sarray_base> sarr = self->select_column(name);
-        auto result = transformation->get();
-
-        vd << vd.create_sframe_spec(i, self->size(), sarr->dtype(), name, result);
+        std::shared_ptr<sframe_transformation_output> result = std::dynamic_pointer_cast<sframe_transformation_output>(transformation->get());
 
         double batch_size = static_cast<double>(transformation->get_batch_size());
         DASSERT_EQ(batch_size, expected_batch_size);
         num_rows_processed += static_cast<double>(transformation->get_rows_processed());
         percent_complete = num_rows_processed / num_rows_total;
-
         DASSERT_GE(percent_complete, 0.0);
         DASSERT_LE(percent_complete, 1.0);
 
-        ew << vd.get_data_spec(percent_complete);
+        pw << result->vega_summary_data(percent_complete, i, name, self->size());
 
         if (!transformation->eof()) {
           remainingItems = true;
@@ -1711,10 +1714,10 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
     // get a reader just once.
     auto reader = underlying_sframe->get_reader();
 
-    visualization::process_wrapper ew(path_to_client);
+    visualization::process_wrapper pw(path_to_client);
     const auto& column_types = self->dtype();
     const auto& column_names = self->column_names();
-    std::queue<visualization::vega_data::Image> image_queue;
+    std::queue<visualization::QueuedImage> image_queue;
 
     using namespace boost;
     using namespace local_time;
@@ -1764,199 +1767,52 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
         }
       }
       ss << "]}}" << std::endl;
-      ew << ss.str();
+      auto message = std::make_shared<Message>();
+      message->set_spec(ss.str());
+      pw << message;
     }
 
-    auto getRows = [self, &reader, &ew, &column_names, &empty_tz, &image_queue](size_t start, size_t end) {
+    auto getRows = [self, &reader, &pw, &column_names, &empty_tz, &image_queue](size_t start, size_t end) {
+      std::queue<visualization::QueuedImage> empty;
+      std::swap( image_queue, empty );
 
-      // send table data
-      {
-        std::queue<visualization::vega_data::Image> empty;
-        std::swap( image_queue, empty );
+      sframe_rows rows;
+      reader->read_rows(start, end, rows);
 
-        sframe_rows rows;
-        reader->read_rows(start, end, rows);
-        std::stringstream ss;
-
-        // resize string for table view
-        size_t resize_table_view = 200;
-
-        // for DateTime string formatting
-        ss.exceptions(std::ios_base::failbit);
-        ss.imbue(std::locale(ss.getloc(),
-                              new boost::local_time::local_time_facet("%Y-%m-%d %H:%M:%S%ZP")));
-        // {"data_spec": {"values": [{"a": "A","b": 28}, {"a": "B","b": 55}, {"a": "C","b": 43},{"a": "D","b": 91}, {"a": "E","b": 81}, {"a": "F","b": 53},{"a": "G","b": 19}, {"a": "H","b": 87}, {"a": "I","b": 52}]}}
-        ss << "{\"data_spec\": {\"values\": [";
-        size_t i = 0;
-        for (const auto& row: rows) {
-          ss << "{";
-          size_t count = start + i;
-          ss << "\"__idx\": \"" << count << "\",";
-          for (size_t j=0; j<row.size(); j++) {
-            const auto& columnName = column_names[j];
-            const auto& value = row[j];
-            ss << visualization::escape_string(columnName) << ": ";
-
-            std::string default_string;
-
-            switch (value.get_type()) {
-              case flex_type_enum::UNDEFINED:
-                ss << "null";
-                break;
-              case flex_type_enum::FLOAT:
-                {
-                  // deal with inf/nan cases
-                  flex_float f = value.get<flex_float>();
-                  if (std::isnan(f)) {
-                    ss << "\"nan\"";
-                    break;
-                  }
-                  if (std::isinf(f)) {
-                    if (f > 0) {
-                      ss << "\"inf\"";
-                    } else {
-                      ss << "\"-inf\"";
-                    }
-                    break;
-                  }
-                } // fall through to int, if we didn't hit a break above
-              case flex_type_enum::INTEGER:
-                ss << value;
-                break;
-              case flex_type_enum::IMAGE:
-                {
-                  const size_t resized_height = 40;
-
-                  flex_image img_temporary = value.get<flex_image>();
-                  double image_ratio = ((img_temporary.m_width*1.0)/(img_temporary.m_height*1.0));
-                  double calculated_width = (image_ratio * resized_height);
-                  size_t resized_width = static_cast<int>(calculated_width);
-                  flex_image img = turi::image_util::resize_image(img_temporary,
-                          resized_width, resized_height, img_temporary.m_channels, img_temporary.is_decoded());
-                  img = turi::image_util::encode_image(img);
-
-                  const unsigned char * image_data = img.get_image_data();
-
-                  visualization::vega_data::Image image_temp;
-
-                  image_temp.idx = count;
-                  image_temp.column = visualization::escape_string(columnName);
-                  image_temp.img = img_temporary;
-
-                  image_queue.push(image_temp);
-
-                  size_t image_data_size = img.m_image_data_size;
-                  ss << "{\"width\": " << img.m_width << ", ";
-                  ss << "\"height\": " << img.m_height << ", ";
-                  ss << "\"idx\": " << count << ", ";
-                  ss << "\"column\": " << visualization::escape_string(columnName) << ", ";
-                  ss << "\"data\": \"";
-
-                  std::copy(
-                    to_base64(image_data),
-                    to_base64(image_data + image_data_size),
-                    std::ostream_iterator<char>(ss)
-                  );
-
-                  ss << "\", \"format\": \"";
-                  switch (img.m_format) {
-                    case Format::JPG:
-                      ss << "jpeg";
-                      break;
-                    case Format::PNG:
-                      ss << "png";
-                      break;
-                    case Format::RAW_ARRAY:
-                      ss << "raw";
-                      break;
-                    case Format::UNDEFINED:
-                      // TODO - not sure what to do here.
-                      // For now, treat it as raw, but this will probably
-                      // display garbage for the user.
-                      ss << "raw";
-                      break;
-                  }
-                  ss << "\"}";
-                }
-                break;
-              case flex_type_enum::DATETIME:
-                {
-
-                  ss << "\"";
-                  const auto& dt = value.get<flex_date_time>();
-
-                  if (dt.time_zone_offset() != flex_date_time::EMPTY_TIMEZONE) {
-                    std::string prefix = "0.";
-                    int sign_adjuster = 1;
-                    if(dt.time_zone_offset() < 0) {
-                      sign_adjuster = -1;
-                      prefix = "-0.";
-                    }
-                    // prepend a GMT0. or GMT-0. to the string for the timezone information
-                    // TODO: This can be optimized by precomputing this for all zones outsize
-                    // of the function.
-                    boost::local_time::time_zone_ptr zone(
-                        new boost::local_time::posix_time_zone(
-                            "GMT" + prefix +
-                            std::to_string(sign_adjuster *
-                                           dt.time_zone_offset() *
-                                           flex_date_time::TIMEZONE_RESOLUTION_IN_MINUTES)));
-                    boost::local_time::local_date_time az(
-                        flexible_type_impl::ptime_from_time_t(dt.posix_timestamp(),
-                                                              dt.microsecond()), zone);
-                    ss << az;
-                  } else {
-                    boost::local_time::local_date_time az(
-                        flexible_type_impl::ptime_from_time_t(dt.posix_timestamp(),
-                                                              dt.microsecond()),
-                        empty_tz);
-                    ss << az;
-                  }
-                  ss << "\"";
-                }
-                break;
-              case flex_type_enum::VECTOR:
-                {
-                  std::stringstream strm;
-                  const flex_vec& vec = value.get<flex_vec>();
-
-                  strm << "[";
-                  for (size_t i = 0; i < vec.size(); ++i) {
-                    strm << vec[i];
-                    if (i + 1 < vec.size()) strm << ", ";
-                  }
-                  strm << "]";
-                  default_string = strm.str();
-                  if(default_string.length() > resize_table_view){
-                    default_string.resize(resize_table_view);
-                  }
-                  ss << turi::visualization::escape_string(default_string);
-                }
-                break;
-              case flex_type_enum::LIST:
-                ss << value.to<std::string>();
-                break;
-              default:
-                default_string = value.to<std::string>();
-                if(default_string.length() > resize_table_view){
-                  default_string.resize(resize_table_view);
-                }
-                ss << turi::visualization::escape_string(default_string);
-                break;
-            }
-            if (j != row.size() - 1) {
-              ss << ",";
-            }
-          }
-          ss << "}";
-          if (i != rows.num_rows() - 1) {
-            ss << ",";
-          }
-          ++i;
-        }
-        ss << "]}}" << std::endl;
-        ew << ss.str();
+      auto message = std::make_shared<Message>();
+      visualization::SFrameData* data = message->mutable_data()->mutable_rows();
+      // populate column names
+      for (const auto& column: column_names) {
+        data->add_column_titles(column);
       }
+
+      size_t i = 0;
+      for (const auto& row: rows) {
+        size_t row_idx = start + i;
+
+        visualization::RowData* row_data = data->add_row_values();
+        row_data->set_row_idx(row_idx);
+
+        for (size_t j=0; j<row.size(); j++) {
+          const auto& columnName = column_names[j];
+          const auto& value = row[j];
+          visualization::FlexibleType* value_data = row_data->add_values();
+          visualization::serialize_flex_type(value, value_data);
+
+          if (value.get_type() == flex_type_enum::IMAGE) {
+            // put the full size image in the queue for eventual send
+            // the user will see this on hover
+            flex_image img_temporary = value.get<flex_image>();
+            visualization::QueuedImage image_temp;
+            image_temp.idx = row_idx;
+            image_temp.column = columnName;
+            image_temp.img = img_temporary;
+            image_queue.push(image_temp);
+          }
+        }
+        ++i;
+      }
+      pw << message;
     };
 
     // pass the first 1k rows
@@ -1964,18 +1820,18 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
 
     const size_t resized_height = 200;
 
-    while (ew.good()) {
+    while (pw.good()) {
       // get input, send responses
-      std::string input;
-      ew >> input;
-      if (input.empty()) {
+      std::shared_ptr<Message> input;
+      pw >> input;
+      if (input == nullptr) {
         if (image_queue.size() == 0) {
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
         } else {
           // send one image from the queue while we're not doing anything else
           std::stringstream ss;
 
-          visualization::vega_data::Image image_processing = image_queue.front();
+          visualization::QueuedImage image_processing = image_queue.front();
 
           flex_image img_temporary = image_processing.img;
           double image_ratio = ((img_temporary.m_width*1.0)/(img_temporary.m_height*1.0));
@@ -1985,67 +1841,30 @@ void unity_sframe::explore(const std::string& path_to_client, const std::string&
                   resized_width, resized_height, img_temporary.m_channels, img_temporary.is_decoded());
           img = turi::image_util::encode_image(img);
 
-          const unsigned char * image_data = img.get_image_data();
+          auto message = std::make_shared<Message>();
+          auto* img_message = message->mutable_data()->mutable_hover_image();
+          img_message->set_row_idx(image_processing.idx);
+          img_message->set_column(image_processing.column);
+          serialize_flex_type(img, img_message->mutable_img());
 
-          size_t image_data_size = img.m_image_data_size;
-
-          ss << "{\"image_spec\":{\"data\": [{\"idx\": " << image_processing.idx << ", ";
-          ss << "\"column\": " << image_processing.column << ", ";
-          ss << "\"image\": \"";
-
-          std::copy(
-            to_base64(image_data),
-            to_base64(image_data + image_data_size),
-            std::ostream_iterator<char>(ss)
-          );
-
-          ss << "\", \"format\": \"";
-          switch (img.m_format) {
-            case Format::JPG:
-              ss << "jpeg";
-              break;
-            case Format::PNG:
-              ss << "png";
-              break;
-            case Format::RAW_ARRAY:
-              ss << "raw";
-              break;
-            case Format::UNDEFINED:
-              ss << "raw";
-              break;
-          }
-
-          ss << "\"}]}}" << std::endl;
-
-          ew << ss.str();
+          pw << message;
           image_queue.pop();
         }
 
         continue;
       }
 
-      // parse the message as json
-      flex_int start = -1,
-               end = -1;
-      auto sa = gl_sarray(std::vector<flexible_type>(1, input)).astype(flex_type_enum::DICT);
-      flex_dict dict = sa[0].get<flex_dict>();
-      for (const auto& pair : dict) {
-        const auto& key = pair.first.get<flex_string>();
-        const auto& value = pair.second;
-        if (key == "method") {
-          DASSERT_EQ(value.get<flex_string>(), "get_rows");
-        } else if (key == "start") {
-          start = value.get<flex_int>();
-        } else if (key == "end") {
-          end = value.get<flex_int>();
-        }
+      // here, we can assume the input is non-null
+      switch (input->msg_case()) {
+        case Message::MsgCase::kGetRows:
+          {
+            const auto& get_rows_message = input->get_rows();
+            getRows(get_rows_message.start(), get_rows_message.end());
+          }
+          break;
+        default:
+          throw std::runtime_error("Unexpected message type from visualization client.");
       }
-
-      DASSERT_GT(start, -1);
-      DASSERT_GT(end, -1);
-
-      getRows(start, end);
-
     }
   });
 

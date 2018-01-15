@@ -3,6 +3,12 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
+
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 #include "vega_spec.hpp"
 
 #include <logger/assertions.hpp>
@@ -38,7 +44,7 @@ std::string escape_string(const std::string& str) {
 }
 
 /*
- * Prepares a raw JSON format string (from one of the vega_spec/*.json files)
+ * Prepares a raw JSON format string (from one of the vega_spec/.json files)
  * by doing the following:
  * 1. Strips all newlines.
  * 2. Wraps format string inside {"vega_spec": ...}.
@@ -58,10 +64,10 @@ static std::string make_format_string(unsigned char *raw_format_str_ptr,
 }
                                       
 
-EXPORT std::string histogram_spec(std::string title,
-                                  std::string xlabel,
-                                  std::string ylabel,
-                                  double sizeMultiplier) {
+EXPORT std::shared_ptr<Message> histogram_spec(std::string title,
+                                               std::string xlabel,
+                                               std::string ylabel,
+                                               double sizeMultiplier) {
   title = escape_string(title);
   xlabel = escape_string(xlabel);
   ylabel = escape_string(ylabel);
@@ -76,14 +82,17 @@ EXPORT std::string histogram_spec(std::string title,
     title %
     xlabel %
     ylabel;
-  return formatted.str();
+
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
-EXPORT std::string categorical_spec(size_t length_list,
-                                    std::string title,
-                                    std::string xlabel,
-                                    std::string ylabel,
-                                    double sizeMultiplier) {
+EXPORT std::shared_ptr<Message> categorical_spec(size_t length_list,
+                                                 std::string title,
+                                                 std::string xlabel,
+                                                 std::string ylabel,
+                                                 double sizeMultiplier) {
 
   title = escape_string(title);
   xlabel = escape_string(xlabel);
@@ -99,20 +108,24 @@ EXPORT std::string categorical_spec(size_t length_list,
     title %
     xlabel %
     ylabel;
-  return formatted.str();
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
 
-EXPORT std::string summary_view_spec(size_t length_elements, double sizeMultiplier){
+EXPORT std::shared_ptr<Message> summary_view_spec(size_t length_elements, double sizeMultiplier){
   size_t height = static_cast<size_t>((300.0 * sizeMultiplier * length_elements) + 80.0);
 
   auto format_string = make_format_string(vega_spec_summary_view_json, vega_spec_summary_view_json_len);
   auto formatted = boost::format(format_string) %
     height;
-  return formatted.str();
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
-std::string scatter_spec(std::string xlabel, std::string ylabel, std::string title) {
+std::shared_ptr<Message> scatter_spec(std::string xlabel, std::string ylabel, std::string title) {
   if (xlabel.empty()) {
     xlabel = "X";
   }
@@ -132,10 +145,12 @@ std::string scatter_spec(std::string xlabel, std::string ylabel, std::string tit
     title %
     xlabel %
     ylabel;
-  return formatted.str();
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
-std::string heatmap_spec(std::string xlabel, std::string ylabel, std::string title) {
+std::shared_ptr<Message> heatmap_spec(std::string xlabel, std::string ylabel, std::string title) {
   if (xlabel.empty()) {
     xlabel = "X";
   }
@@ -154,10 +169,12 @@ std::string heatmap_spec(std::string xlabel, std::string ylabel, std::string tit
     title %
     xlabel %
     ylabel;
-  return formatted.str();
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
-std::string categorical_heatmap_spec(std::string xlabel, std::string ylabel, std::string title) {
+std::shared_ptr<Message> categorical_heatmap_spec(std::string xlabel, std::string ylabel, std::string title) {
   if (xlabel.empty()) {
     xlabel = "X";
   }
@@ -176,10 +193,12 @@ std::string categorical_heatmap_spec(std::string xlabel, std::string ylabel, std
     title %
     xlabel %
     ylabel;
-  return formatted.str();
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
-std::string boxes_and_whiskers_spec(std::string xlabel, std::string ylabel, std::string title) {
+std::shared_ptr<Message> boxes_and_whiskers_spec(std::string xlabel, std::string ylabel, std::string title) {
   if (xlabel.empty()) {
     xlabel = "X";
   }
@@ -198,7 +217,9 @@ std::string boxes_and_whiskers_spec(std::string xlabel, std::string ylabel, std:
     title %
     xlabel %
     ylabel;
-  return formatted.str();
+  auto ret = std::make_shared<Message>();
+  ret->set_spec(formatted.str());
+  return ret;
 }
 
 } // visualization

@@ -9,6 +9,11 @@
 
 #include <cmath>
 
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 namespace turi {
 namespace visualization {
 
@@ -278,68 +283,48 @@ void histogram::merge_results(std::vector<histogram_result>& thread_results) {
   }
 }
 
-std::string histogram_result::vega_column_data(bool) const {
-  // TODO - "values" is repetitive - flatten structure
+std::shared_ptr<Message> histogram_result::vega_column_data(double progress, bool) const {
   // TODO - for now, assuming 20 bins
+
+  auto ret = std::make_shared<Message>();
+  ret->mutable_data()->set_name("source_2");
+  ret->mutable_data()->set_progress(progress);
 
   auto bins = get_bins(20);
   auto binWidth = (bins.max - bins.min)/20;
 
-  std::stringstream ss;
-
   for (size_t i=0; i<bins.bins.size(); i++) {
-    const auto& value = bins.bins[i];
-    ss << "{\"left\": ";
-    ss << (bins.min + (i * binWidth));
-    ss << ",\"right\": ";
-    ss << (bins.min + ((i+1) * binWidth));
-    ss << ", \"count\": ";
-    ss << value;
-    ss << "}";
-    if (i != bins.bins.size() - 1) {
-      ss << ",";
-    }
+    const auto& count = bins.bins[i];
+    auto* data = ret->mutable_data()->mutable_histogram()->add_values();
+    data->set_x1(bins.min + (i * binWidth));
+    data->set_x2(bins.min + ((i+1) * binWidth));
+    data->set_count(count);
   }
 
-  return ss.str();
+  return ret;
 }
 
-static std::string escape_float(flex_float value) {
-  if (std::isnan(value)) {
-    return "\"nan\"";
-  }
-  if (std::isinf(value)) {
-    if (value > 0) {
-      return "\"inf\"";
-    } else {
-      return "\"-inf\"";
-    }
-  }
-  return std::to_string(value);
-}
-
-std::string histogram_result::vega_summary_data() const {
-  std::stringstream ss;
-
+std::shared_ptr<Message> histogram_result::vega_summary_data(double progress, size_t column_idx, const std::string& column_title, size_t num_rows) const {
+  std::shared_ptr<Message> ret = vega_column_data(progress, true /*sframe*/);
   flex_vec median_vec = m_median.emit().get<flex_vec>();
   flex_float median = median_vec[0];
   flex_int num_missing = m_count.emit() - m_non_null_count.emit();
-  std::string data = vega_column_data(true);
   std::string typeName = flex_type_enum_to_name(m_type);
 
-  ss << "\"type\": \"" << typeName << "\",";
-  ss << "\"num_unique\": " << m_count_distinct.emit() << ",";
-  ss << "\"num_missing\": " << num_missing << ",";
-  ss << "\"mean\": " << escape_float(m_average.emit()) << ",";
-  ss << "\"min\": " << escape_float(m_min.emit()) << ",";
-  ss << "\"max\": " << escape_float(m_max.emit()) << ",";
-  ss << "\"median\": " << escape_float(median) << ",";
-  ss << "\"stdev\": " << escape_float(m_stdv.emit()) << ",";
-  ss << "\"numeric\": [" << data << "],";
-  ss << "\"categorical\": []";
+  auto* data = ret->mutable_data()->mutable_histogram();
+  data->set_type(typeName);
+  data->set_num_unique(m_count_distinct.emit());
+  data->set_num_missing(num_missing);
+  data->set_mean(m_average.emit());
+  data->set_min(m_min.emit());
+  data->set_max(m_max.emit());
+  data->set_median(median);
+  data->set_stdev(m_stdv.emit());
+  data->set_column_idx(column_idx);
+  data->set_column_title(column_title);
+  data->set_num_rows(num_rows);
 
-  return ss.str();
-
+  return ret;
 }
 
 }}

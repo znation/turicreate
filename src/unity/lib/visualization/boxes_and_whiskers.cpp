@@ -15,18 +15,22 @@
 #include <cmath>
 #include <thread>
 
+#undef CHECK
+#include <unity/lib/visualization/tcviz.pb.h>
+#include <logger/assertions.hpp>
+#include <logger/logger.hpp>
+
 using namespace turi::visualization;
 
 static const std::string x_name = "x";
 static const std::string y_name = "y";
 
-std::string boxes_and_whiskers_result::vega_column_data(bool sframe) const {
-  std::stringstream ss;
-
+std::shared_ptr<Message> boxes_and_whiskers_result::vega_column_data(double progress, bool) const {
+  auto ret = std::make_shared<Message>();
+  ret->mutable_data()->set_name("source_2");
+  ret->mutable_data()->set_progress(progress);
   std::unordered_map<flexible_type, flexible_type> grouped = get_grouped();
 
-  size_t i = 0;
-  size_t size_list = grouped.size();
   for (const auto& pair : grouped) {
     // if x is missing, nothing to plot -- skip for now
     // TODO: eventually we should probably have an "undefined" bin
@@ -48,29 +52,16 @@ std::string boxes_and_whiskers_result::vega_column_data(bool sframe) const {
       continue;
     }
 
-    ss << "{\"" << x_name << "\": ";
-    ss << escape_string(xValue);
-
-    ss << ",\"min\": ";
-    ss << yValues[0];
-    ss << ",\"lower quartile\": ";
-    ss << yValues[1];
-    ss << ",\"median\": ";
-    ss << yValues[2];
-    ss << ",\"upper quartile\": ";
-    ss << yValues[3];
-    ss << ",\"max\": ";
-    ss << yValues[4];
-
-    ss << "}";
-
-    if (i != (size_list - 1)) {
-      ss << ",";
-    }
-    i++;
+    auto* data = ret->mutable_data()->mutable_boxes_and_whiskers()->add_values();
+    data->set_name(xValue);
+    data->set_min(yValues[0]);
+    data->set_lower_quartile(yValues[1]);
+    data->set_median(yValues[2]);
+    data->set_upper_quartile(yValues[3]);
+    data->set_max(yValues[4]);
   }
 
-  return ss.str();
+  return ret;
 }
 
 void ::turi::visualization::show_boxes_and_whiskers(const std::string& path_to_client,
@@ -85,8 +76,8 @@ void ::turi::visualization::show_boxes_and_whiskers(const std::string& path_to_c
     DASSERT_EQ(x.size(), y.size());
 
 
-    process_wrapper ew(path_to_client);
-    ew << boxes_and_whiskers_spec(xlabel, ylabel, title);
+    process_wrapper pw(path_to_client);
+    pw << boxes_and_whiskers_spec(xlabel, ylabel, title);
 
     boxes_and_whiskers bw;
 
@@ -94,15 +85,12 @@ void ::turi::visualization::show_boxes_and_whiskers(const std::string& path_to_c
     temp_sf[x_name] = x;
     temp_sf[y_name] = y;
     bw.init(temp_sf);
-    while (ew.good()) {
-      vega_data vd;
+    while (pw.good()) {
       auto result = bw.get();
-      vd << result->vega_column_data();
-
       double num_rows_processed =  static_cast<double>(bw.get_rows_processed());
       double size_array = static_cast<double>(x.size());
       double percent_complete = num_rows_processed/size_array;
-      ew << vd.get_data_spec(percent_complete);
+      pw << result->vega_column_data(percent_complete);
 
       if (bw.eof()) {
         break;

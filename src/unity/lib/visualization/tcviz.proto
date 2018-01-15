@@ -1,0 +1,209 @@
+/* Copyright © 2017 Apple Inc. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-3-clause license that can
+ * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
+ */
+
+/*
+ * Turi Create visualization protocol
+ */
+
+syntax = "proto3";
+
+package turi.visualization;
+
+message XYCoords {
+  double x = 1;
+  double y = 2;
+}
+
+message Quantiles {
+  string name = 1;
+  double min = 2;
+  double lower_quartile = 3;
+  double median = 4;
+  double upper_quartile = 5;
+  double max = 6;
+}
+
+message CategoricalPairCount {
+  string x = 1;
+  string y = 2;
+  int64 count = 3;
+}
+
+message HeatmapBin {
+  double x1 = 1;
+  double x2 = 2;
+  double y1 = 3;
+  double y2 = 4;
+  int64 count = 5;
+}
+
+message HistogramBin {
+  double x1 = 1;
+  double x2 = 2;
+  int64 count = 3;
+}
+
+message CategoricalHistogramBin {
+  string label = 1;
+  uint32 label_idx = 2;
+  int64 count = 3;
+}
+
+message ScatterData {
+  repeated XYCoords values = 1;
+}
+
+message BoxesAndWhiskersData {
+  repeated Quantiles values = 1;
+}
+
+message CategoricalHeatmapData {
+  repeated CategoricalPairCount values = 1;
+}
+
+message HeatmapData {
+  repeated HeatmapBin values = 1;
+}
+
+message HistogramData {
+  repeated HistogramBin values = 1;
+
+  // only used in SFrame.show summary view (omitted in SArray.show)
+  string type = 2;
+  int64 num_unique = 3;
+  int64 num_missing = 4;
+  double mean = 5;
+  double min = 6;
+  double max = 7;
+  double median = 8;
+  double stdev = 9;
+
+  // used specifically for SFrame summary view (omitted in SArray.show)
+  int64 column_idx = 100;
+  string column_title = 101;
+  int64 num_rows = 102;
+}
+
+message ItemFrequencyData {
+  repeated CategoricalHistogramBin values = 1;
+
+  // only used in SFrame.show summary view (omitted in SArray.show)
+  string type = 2;
+  int64 num_unique = 3;
+  int64 num_missing = 4;
+
+  // used specifically for SFrame summary view (omitted in SArray.show)
+  int64 column_idx = 100;
+  string column_title = 101;
+  int64 num_rows = 102;
+}
+
+message FlexVec {
+  repeated double values = 1;
+}
+
+message FlexList {
+  repeated FlexibleType values = 1;
+}
+
+message FlexDict {
+  map<string, FlexibleType> values = 1;
+}
+
+message FlexDateTime {
+  int64 posix_timestamp = 1;
+  int32 tz_15min_offset = 2;
+  int32 microsecond = 3;
+}
+
+message FlexUndefined {
+}
+
+
+message FlexImage {
+  enum Format { 
+    JPG = 0;  ///< JPEG Compressed
+    PNG = 1;  ///< PNG Compressed
+    RAW_ARRAY = 2;  ///< Not Compressed
+    UNDEFINED = 3;  ///< Unknown
+  };
+
+  bytes data = 1;
+  uint64 height = 2;
+  uint64 width = 3; 
+  uint64 channels = 4;
+  Format format = 5;
+}
+
+message FlexibleType {
+  oneof value {
+    int64 int_value = 1;
+    double float_value = 2;
+    string str_value = 3;
+    FlexVec array_value = 4;
+    FlexList list_value = 5;
+    FlexDict dict_value = 6;
+    FlexDateTime datetime_value = 7;
+    FlexUndefined undefined_value = 8;
+    FlexImage image_value = 9;
+  }
+}
+
+message RowData {
+  uint64 row_idx = 1;
+  repeated FlexibleType values = 2;
+}
+
+message SFrameData {
+  repeated string column_titles = 1;
+  repeated RowData row_values = 2;
+}
+
+message Image {
+  uint64 row_idx = 1;
+  string column = 2;
+  FlexImage img = 3;
+}
+
+message Data {
+  // Data, in plot-specific or UI-specific format.
+
+  // name and progress are only used in Vega plot data
+  string name = 1;
+  double progress = 2; // on a scale of 0.0 to 1.0
+
+  oneof values {
+    // Vega plot data
+    ScatterData scatter = 100;
+    BoxesAndWhiskersData boxes_and_whiskers = 101;
+    CategoricalHeatmapData categorical_heatmap = 102;
+    HeatmapData heatmap = 103;
+    HistogramData histogram = 104;
+    ItemFrequencyData item_frequency = 105;
+
+    // Explore data
+    SFrameData rows = 106;
+    Image hover_image = 107;
+  }
+}
+
+message GetRows {
+  // causes server to send a message of type Data->SFrameData
+  // of length (end - start)
+  uint64 start = 1;
+  uint64 end = 2;
+}
+
+message Message {
+  oneof msg {
+    // server -> client
+    string spec = 1;
+    Data data = 2;
+
+    // client -> server
+    GetRows get_rows = 1000;
+  }
+}
