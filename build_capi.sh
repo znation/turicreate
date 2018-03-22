@@ -18,8 +18,9 @@ function print_help {
   echo
   echo "  --skip-configure,-s              Skip running ./configure."
   echo
-  echo "  -f,--framework                   Build the C-API as an OSX framework."
+  echo "  -f,--framework                   Build the C-API as an macOS/iOS framework."
   echo "  --framework-path                 The location coded into the capi framework (default @rpath)."
+  echo "  --iOS,-i                         Build for iOS (default macOS)."
   echo
   echo "  All additional options passed through to ./configure."
   exit 1
@@ -46,6 +47,7 @@ fi
 
 # command flag options
 target="capi"
+cross_compile="none" # Defaults to the OS running the build
 cleanup=0
 skip_configure=0
 jobs=4
@@ -62,6 +64,7 @@ framework_path='@rpath'
 while [ $# -gt 0 ]
   do case $1 in
     --framework|-f)         target="capi-framework";;
+    --iOS|-i)               cross_compile="iOS";;
 
     --cleanup|-c)           cleanup=1;;
 
@@ -92,11 +95,11 @@ src_dir=`pwd`
 
 
 echo "Setting up build:"
-echo "build_mode = ${build_mode}"
-echo "target_dir = ${target_dir}"
-echo "target     = ${target}"
-echo "build_dir  = ${build_dir}"
-
+echo "build_mode     = ${build_mode}"
+echo "target_dir     = ${target_dir}"
+echo "target         = ${target}"
+echo "cross_compile  = ${cross_compile}"
+echo "build_dir      = ${build_dir}"
 
 function run_cleanup {
   ./configure --cleanup --yes || exit 1
@@ -132,10 +135,14 @@ function build_capi {
 
 function build_capi_framework {
   echo
-  echo "Building C-API as OSX Framework"
+  echo "Building C-API as macOS Framework"
   echo
 
-  run_configure --with-capi-framework --no-python --no-visualization -D TC_CAPI_FRAMEWORK_PATH=\"${framework_path}\" || exit 1
+  framework_flag=--with-capi-framework
+  if [ "$cross_compile"=="iOS" ]; then
+    framework_flag=--with-capi-framework-ios
+  fi
+  run_configure ${framework_flag} --no-python --no-visualization -D TC_CAPI_FRAMEWORK_PATH=\"${framework_path}\" || exit 1
   mkdir -p ${target_dir}
   cd ${build_dir}/src/capi || exit 1
   make -j ${jobs} || exit 1
