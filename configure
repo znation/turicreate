@@ -25,7 +25,8 @@ function print_help {
   echo "  --no-ccache "
   echo  
   echo "  --with-capi                       Build C API."
-  echo "  --with-capi-framework             Build C API as OSX framework (OSX only)"
+  echo "  --with-capi-framework             Build C API as macOS framework (macOS only)"
+  echo "  --with-capi-framework-ios         Build C API as iOS framework (macOS only)"
   echo "  --no-capi (default)               " 
 
   echo "  --with-python (default)           Build python components."
@@ -103,6 +104,7 @@ with_ccache=1
 
 with_capi=0
 with_capi_framework=0
+with_capi_framework_ios=0
 with_ccache=1
 with_visualization=1
 
@@ -128,6 +130,7 @@ while [ $# -gt 0 ]
     
     --with-capi)            with_capi=1;;
     --with-capi-framework)  with_capi=1; with_capi_framework=1;;
+    --with-capi-framework-ios)  with_capi=1; with_capi_framework=1; with_capi_framework_ios=1;; 
     --no-capi)              with_capi=0;; 
 
     --with-python)          with_python=1;;
@@ -196,6 +199,8 @@ if [[ $with_capi == 1 ]]; then
   CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI=1"
   if [[ $with_capi_framework == 1 ]]; then
     CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI_FRAMEWORK=1"
+  elif [[ $with_capi_framework_ios == 1 ]]; then
+    CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI_FRAMEWORK=1 -DARCH=armv7"
   fi
 else
   CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI=0"
