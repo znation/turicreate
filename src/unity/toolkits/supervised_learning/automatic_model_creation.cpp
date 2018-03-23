@@ -77,7 +77,7 @@ std::shared_ptr<supervised_learning_model_base> create_automatic_classifier_mode
     cur_model->api_train(data, target, validation_data, options);
 
     accuracies[i] = get_classifier_accuracy(cur_model);
-    models[i] = cur_model;
+    models.push_back(cur_model);
   }
 
   int best_model = 0;

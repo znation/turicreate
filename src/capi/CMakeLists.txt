@@ -98,6 +98,7 @@ macro(make_capi_library NAME)
       --src-headers "${__CAPI_SOURCE_DIR}"
       --framework "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.framework"
       --install-location "@rpath"
+      ${_ios_option}
       --create-tbd-file
     BYPRODUCTS
       "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.framework/Versions/Current/Header/TuriCreate.h"

@@ -199,8 +199,9 @@ if [[ $with_capi == 1 ]]; then
   CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI=1"
   if [[ $with_capi_framework == 1 ]]; then
     CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI_FRAMEWORK=1"
-  elif [[ $with_capi_framework_ios == 1 ]]; then
-    CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DTC_BUILD_CAPI_FRAMEWORK=1 -DARCH=armv7"
+  fi
+  if [[ $with_capi_framework_ios == 1 ]]; then
+    CMAKE_CONFIG_FLAGS="$CMAKE_CONFIG_FLAGS -DARCH=armv7 -DTC_BUILD_CAPI_FRAMEWORK_IOS=1"
     PATH=`xcrun --sdk iphoneos --show-sdk-platform-path`/Developer/usr/bin:`xcode-select -p`:/usr/bin:$PATH
   fi
 else
