@@ -116,6 +116,12 @@ make_library(TuriCore
     set(_tbd_options "--create-tbd-file")
   endif()
 
+  if(TC_BUILD_CAPI_FRAMEWORK_IOS)
+    set(_ios_option "--iOS")
+  else()
+    set(_ios_option "")
+  endif()
+
   add_custom_command(TARGET TuriCore
     POST_BUILD
     COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/framework/process_framework.sh"
@@ -123,6 +129,7 @@ make_library(TuriCore
     --src-headers "${CMAKE_CURRENT_SOURCE_DIR}"
     --framework "${CMAKE_CURRENT_BINARY_DIR}/TuriCore.framework"
     --install-location "${_install_location}"
+    ${_ios_option}
     ${_tbd_options}
     BYPRODUCTS
     "${CMAKE_CURRENT_BINARY_DIR}/TuriCore.framework/Versions/Current/Header/TuriCore.h"

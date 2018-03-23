@@ -71,13 +71,13 @@ std::shared_ptr<supervised_learning_model_base> create_automatic_classifier_mode
 
   // Train each model. Save the model and its accuracy.
   double accuracies[possible_models.size()];
-  std::shared_ptr<supervised_learning_model_base> models[possible_models.size()];
+  std::vector<std::shared_ptr<supervised_learning_model_base>> models;
   for(size_t i = 0; i < possible_models.size(); i++) {
     std::shared_ptr<supervised_learning_model_base> cur_model = create_classifier(possible_models[i]);
     cur_model->api_train(data, target, validation_data, options);
 
     accuracies[i] = get_classifier_accuracy(cur_model);
-    models[i] = cur_model;
+    models.push_back(cur_model);
   }
 
   int best_model = 0;
