@@ -1,3 +1,7 @@
+if(TC_NO_CURL)
+  return()
+endif()
+
 if(APPLE)
   # SSL seems to link fine even when compiled using the default compiler
   # The alternative to get openssl to use gcc on mac requires a patch to

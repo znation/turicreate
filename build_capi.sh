@@ -118,7 +118,7 @@ function build_capi {
   echo
   echo "Building C-API"
   echo
-  run_configure --with-capi --no-python --no-visualization || exit 1
+  run_configure --with-capi --no-python --no-visualization --no-remotefs --release-opt-for-size -D TC_MINIMAL_TOOLKITS=1 || exit 1
   install_dir=${target_dir}/capi
   rm -rf ${target_dir}/capi
   mkdir -p ${target_dir}/capi
@@ -143,6 +143,11 @@ function build_capi_framework {
   echo "Installing C API Framework to ${target_dir}."
 
   rsync -a --delete ${build_dir}/src/capi/TuriCore.framework/ ${target_dir}/TuriCore.framework/ || exit 1
+
+  if [[ $build_mode == release ]] ; then
+    echo "Stripping local and debug symbols."
+    strip -S -x ${target_dir}/TuriCore.framework/Versions/Current/TuriCore || exit 1
+  fi
 }
 
 

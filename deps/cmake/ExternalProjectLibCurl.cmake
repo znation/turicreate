@@ -1,3 +1,7 @@
+if(TC_NO_CURL)
+  return()
+endif()
+
 if(APPLE)
   SET(EXTRA_CONFIGURE_FLAGS --with-darwinssl --without-ssl)
 elseif(WIN32)

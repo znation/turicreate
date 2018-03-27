@@ -42,7 +42,7 @@ if(${TC_BUILD_PYTHON})
   endif()
 
   include(UseCython)
-
+  add_definitions(-DTC_HAS_PYTHON)
 else()
   message("Skipping python libraries.")
 endif()
@@ -131,17 +131,16 @@ if(WIN32)
   add_definitions(-DWINVER=0x0600)
   add_definitions(-D_WIN32_WINNT=0x0600)
 endif()
-add_definitions(-DCURL_STATICLIB)
+
+if(${TC_REMOTEFS})
+  add_definitions(-DTC_HAS_REMOTEFS)
+  add_definitions(-DCURL_STATICLIB)
+else()
+  set(TC_NO_CURL TRUE)
+endif()
 add_definitions(-DIN_TURI_SOURCE_TREE)
 add_definitions(-DFUSION_MAX_VECTOR_SIZE=20)
 add_definitions(-DBOOST_SPIRIT_THREAD_SAFE)
-
-#**************************************************************************/
-#*                                                                        */
-#*                          Apple Legal Defines                           */
-#*                                                                        */
-#**************************************************************************/
-add_definitions(-DEIGEN_MPL2_ONLY)
 
 #**************************************************************************/
 #*                                                                        */
@@ -268,7 +267,12 @@ if(HAS_FTRACER)
 endif()
 
 set(DEBUG_OPTIMIZATION_LEVEL -O0)
-set(RELEASE_OPTIMIZATION_LEVEL -O3)
+
+if(${RELEASE_OPT_FOR_SIZE})
+  set(RELEASE_OPTIMIZATION_LEVEL -Os)
+else()
+  set(RELEASE_OPTIMIZATION_LEVEL -O3)
+endif()
 
 if(WIN32)
         # on windows due to some string table limitations + template
