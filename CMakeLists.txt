@@ -665,14 +665,6 @@ function (make_executable NAME)
           message(STATUS "make_executable ${NAME} ===> ${make_library_OUTPUT_NAME}")
           set_target_properties(${NAME} PROPERTIES OUTPUT_NAME ${make_library_OUTPUT_NAME})
   endif()
-  # this is really annoying
-  # There really isn't a clean way to this, but on Mac Anaconda's libpython2.7.dylib
-  # has it's install name set to just libpython2.7.dylib and not @rapth/libpython2.7.dylib
-  # We need to patch this.
-  if (APPLE)
-          add_custom_command(TARGET ${NAME} POST_BUILD
-                  COMMAND install_name_tool $<TARGET_FILE:${NAME}> -change libpython2.7.dylib @rpath/libpython2.7.dylib)
-  endif()
 
   if(NOT CLANG)
     if (NOT WIN32)
