@@ -135,7 +135,7 @@ function build_capi {
 
 function build_capi_framework {
   echo
-  echo "Building C-API as macOS Framework"
+  echo "Building C-API as macOS/iOS Framework"
   echo
 
   framework_flag=--with-capi-framework
