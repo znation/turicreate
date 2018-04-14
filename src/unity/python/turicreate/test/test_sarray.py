@@ -9,10 +9,10 @@ from __future__ import print_function as _
 from __future__ import division as _
 from __future__ import absolute_import as _
 from ..data_structures.sarray import SArray
+from ..data_structures.sarray import load_sarray
 from ..util.timezone import GMT
 from . import util
 
-import binascii
 import pandas as pd
 import numpy as np
 import unittest
@@ -24,7 +24,6 @@ import math
 import shutil
 import array
 import time
-import itertools
 import warnings
 import functools
 import tempfile
@@ -178,6 +177,14 @@ class SArrayTest(unittest.TestCase):
         self.__test_equal(SArray([1,2,None]).is_in([1]), [1,0,0], int)
 
     def test_save_load(self):
+
+        # Check top level load function
+        with util.TempDirectory() as f:
+            sa = SArray(self.float_data)
+            sa.save(f)
+            sa2 = load_sarray(f)
+            self.__test_equal(sa2, self.float_data)
+
         # Make sure these files don't exist before testing
         self._remove_sarray_files("intarr")
         self._remove_sarray_files("fltarr")
@@ -1111,6 +1118,9 @@ class SArrayTest(unittest.TestCase):
 
         sa_sample = SArray().sample(.5, 9)
         self.assertEqual(len(sa_sample), 0)
+        self.assertEqual(len(SArray.from_sequence(100).sample(0.5, 1, exact=True)), 50)
+        self.assertEqual(len(SArray.from_sequence(100).sample(0.5, 2, exact=True)), 50)
+
 
     def test_hash(self):
         a = SArray([0,1,0,1,0,1,0,1], int)
@@ -2866,7 +2876,7 @@ class SArrayTest(unittest.TestCase):
         sa = SArray(iso_str_list)
         self.__test_equal(sa,self.datetime_data,dt.datetime)
 
-        iso_str_list[2] = pd.tslib.NaT
+        iso_str_list[2] = pd.NaT
         sa = SArray(iso_str_list)
         self.__test_equal(sa,self.datetime_data,dt.datetime)
 

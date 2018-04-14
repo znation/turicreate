@@ -48,11 +48,6 @@
 #include <unity/toolkits/evaluation/metrics.hpp>
 #include <serialization/serialization_includes.hpp>
 
-#ifdef HAS_DISTRIBUTED
-#include <rpc/dc.hpp>
-#endif
-// xgboost
-
 namespace turi {
 namespace supervised {
 namespace xgboost {
@@ -318,11 +313,7 @@ void xgboost_model::_restore_from_checkpoint(const std::string& path) {
 std::vector<float> fast_evaluate(const std::vector<float>& preds,
                                  const learner::MetaInfo& info,
                                  std::vector<xgboost_evalptr>& evaluators) {
-#ifdef HAS_DISTRIBUTED
-  bool distributed = true;
-#else
   bool distributed = false;
-#endif
   std::vector<float> ret;
   for (auto& e : evaluators) {
     float v = e->Eval(preds, info, distributed);
@@ -753,9 +744,6 @@ void xgboost_model::init_options(const std::map<std::string,flexible_type>& _opt
     auto parsed_metrics = parse_tracking_metric(_opts.at("metric"), this->tracking_metrics, this->is_classifier());
     this->set_tracking_metric(parsed_metrics);
   }
-#ifdef HAS_DISTRIBUTED
-  booster_->SetParam("dsplit", "row");
-#endif
 }
 
 size_t xgboost_model::num_classes() {
@@ -1009,7 +997,6 @@ void xgboost_model::train(void) {
     std::vector<float> metrics = fast_evaluate(preds, ptrain->info, tracker.get_evaluators());
     tracker.track_training(iter, metrics);
     if (has_validation_data) {
-      auto& validation_labels = pvalid->info.labels;
       std::vector<float> valid_preds;
       this->xgboost_predict(*pvalid, output_margin, valid_preds, rf_running_rescale_constant);
       metrics = fast_evaluate(valid_preds, pvalid->info, tracker.get_evaluators());
@@ -1027,36 +1014,30 @@ void xgboost_model::train(void) {
       }
     }
 
-#ifdef HAS_DISTRIBUTED
-    // In distributed setting, only the worker 0 does checkpoint
-    auto dc = distributed_control_global::get_instance();
-    if (dc == nullptr || dc->procid() == 0) {
-#endif
-      // Checkpoint model
-      if (!(model_checkpoint_path.empty()) &&
-          (int)options.value("model_checkpoint_interval") != 0 &&
-          (iter + 1) % (int)options.value("model_checkpoint_interval") == 0) {
-        namespace fs = boost::filesystem;
-        fs::path checkpoint_path(model_checkpoint_path);
-        checkpoint_path /= "model_checkpoint_" + std::to_string(iter+1);
-        // Append progress tables
-        if (progress_table->size() == 0) {
-          progress_table->construct_from_sframe(printer.get_tracked_table());
-        } else {
-          auto new_progress_table = std::make_shared<unity_sframe>();
-          new_progress_table->construct_from_sframe(printer.get_tracked_table());
-          progress_table = std::dynamic_pointer_cast<unity_sframe>(progress_table->append(new_progress_table));
-        }
-        _save_training_state(iter,
-                             tracker.get_training_metrics(iter),
-                             tracker.get_validation_metrics(iter),
-                             progress_table,
-                             timer.current_time());
-        _checkpoint(checkpoint_path.string());
+    // Checkpoint model
+    if (!(model_checkpoint_path.empty()) &&
+        (int)options.value("model_checkpoint_interval") != 0 &&
+        (iter + 1) % (int)options.value("model_checkpoint_interval") == 0) {
+
+      namespace fs = boost::filesystem;
+      fs::path checkpoint_path(model_checkpoint_path);
+      checkpoint_path /= "model_checkpoint_" + std::to_string(iter+1);
+      // Append progress tables
+      if (progress_table->size() == 0) {
+        progress_table->construct_from_sframe(printer.get_tracked_table());
+      } else {
+        auto new_progress_table = std::make_shared<unity_sframe>();
+        new_progress_table->construct_from_sframe(printer.get_tracked_table());
+        progress_table = std::dynamic_pointer_cast<unity_sframe>(progress_table->append(new_progress_table));
       }
-#ifdef HAS_DISTRIBUTED
+      _save_training_state(iter,
+                           tracker.get_training_metrics(iter),
+                           tracker.get_validation_metrics(iter),
+                           progress_table,
+                           timer.current_time());
+      _checkpoint(checkpoint_path.string());
     }
-#endif
+
     ++iter;
   }
   printer.print_footer();

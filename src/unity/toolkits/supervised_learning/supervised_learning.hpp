@@ -291,11 +291,11 @@ class EXPORT supervised_learning_model_base : public ml_model_base {
   /**
    * Evaluate the model.
    *
-   * \param[in] test_X          Test data.
+   * \param[in] test_data          Test data.
    * \param[in] evaluation_type Evalution type.
    *
    * \note Already assumes that data is of the right shape. Test data
-   * must contain target column also. 
+   * must contain target column also.
    *
    */
   virtual std::map<std::string, variant_type> evaluate(const ml_data&
@@ -456,14 +456,14 @@ class EXPORT supervised_learning_model_base : public ml_model_base {
       ml_missing_value_action mva = ml_missing_value_action::ERROR);
   
   /**
-   * A setter for models that use Eigen for model coefficients.
+   * A setter for models that use Armadillo for model coefficients.
    */
   virtual void set_coefs(const DenseVector& coefs) {
     DASSERT_TRUE(false);
   }
 
   /**
-   * Set the evaluation metric. Set to rmse by defaule.
+   * Set the evaluation metric. Set to RMSE by default.
    */
   void set_evaluation_metric(std::vector<std::string> _metrics){
     metrics = _metrics;
@@ -471,7 +471,7 @@ class EXPORT supervised_learning_model_base : public ml_model_base {
 
 
   /**
-   * Set the evaluation metric. Set to rmse by default.
+   * Set the evaluation metric. Set to RMSE by default.
    */
   void set_tracking_metric(std::vector<std::string> _metrics){
     tracking_metrics = _metrics;
@@ -486,7 +486,7 @@ class EXPORT supervised_learning_model_base : public ml_model_base {
   }
 
   /**
-   * Set the default evaluation metric during model evaluation..
+   * Set the default evaluation metric during model evaluation.
    */
   virtual void set_default_evaluation_metric(){
     set_evaluation_metric({"max_error", "rmse"});
