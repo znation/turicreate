@@ -129,7 +129,7 @@ function build_capi {
   cd ${build_dir}/src/capi && make -j ${jobs} || exit 1
   echo "Installing C API header and shared library to ${install_dir}."
   cp libturi.* ${install_dir} || exit 1
-  cp ${src_dir}/src/capi/TuriCore.h ${install_dir}/TuriCore.h || exit 1
+  cp ${src_dir}/src/capi/TuriCreate.h ${install_dir}/TuriCreate.h || exit 1
 
 }
 
@@ -149,7 +149,7 @@ function build_capi_framework {
 
   echo "Installing C API Framework to ${target_dir}."
 
-  rsync -a --delete ${build_dir}/src/capi/TuriCore.framework/ ${target_dir}/TuriCore.framework/ || exit 1
+  rsync -a --delete ${build_dir}/src/capi/TuriCreate.framework/ ${target_dir}/TuriCreate.framework/ || exit 1
 }
 
 
