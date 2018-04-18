@@ -102,6 +102,14 @@ if(WIN32 AND MINGW)
   SET(COMPILER_FLAGS "${COMPILER_FLAGS} -Wa,-mbig-obj")
 endif()
 
+if(TC_BUILD_CAPI_FRAMEWORK_IOS)
+  EXECUTE_PROCESS(
+    COMMAND xcrun --sdk iphoneos --show-sdk-path
+    OUTPUT_VARIABLE IOS_ISYSROOT
+  )
+  SET(COMPILER_FLAGS "${COMPILER_FLAGS} -isysroot ${IOS_ISYSROOT}")
+endif()
+
 set(MINGW_ROOT "/mingw64/bin")
 # Separate variable so that cython's CMakeLists.txt can use it too
 if (WIN32)
@@ -221,7 +229,7 @@ include(CheckCXXCompilerFlag)
 if (MARCH)
   set(ARCH_FLAG "-march=${MARCH}")
 elseif (ARCH)
-  set(ARCH_FLAG "-arch=${ARCH}")
+  set(ARCH_FLAG "-arch ${ARCH}")
 else()
   set(MARCH "x86-64")
   set(ARCH_FLAG "-march=${MARCH}")
