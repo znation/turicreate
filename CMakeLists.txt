@@ -107,7 +107,7 @@ if(TC_BUILD_CAPI_FRAMEWORK_IOS)
     COMMAND xcrun --sdk iphoneos --show-sdk-path
     OUTPUT_VARIABLE IOS_ISYSROOT
   )
-  SET(COMPILER_FLAGS "${COMPILER_FLAGS} -isysroot ${IOS_ISYSROOT}")
+  SET(COMPILER_FLAGS "${COMPILER_FLAGS} -Wno-c++11-narrowing -isysroot ${IOS_ISYSROOT}")
 endif()
 
 set(MINGW_ROOT "/mingw64/bin")
