@@ -12,4 +12,8 @@ make_library(xgboost
   EXTERNAL_VISIBILITY
 )
 
+# TODO this doesn't seem to take effect at all
 set_property(TARGET xgboost APPEND_STRING PROPERTY COMPILE_FLAGS " -DXGBOOST_CUSTOMIZE_MSG_ -Wno-narrowing -msse2 -funroll-loops")
+
+# this does
+target_compile_options(xgboost PUBLIC "-Wno-c++11-narrowing")
