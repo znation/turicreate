@@ -1532,7 +1532,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_join_single_column) {
   tc_error *error = NULL;
 
   auto assert_join_results_equal = [](tc_sframe *actual, tc_sframe *expected) {
-    TS_ASSERT(check_equality_tc_sframe(actual, expected, false /* check_row_order */));
+    check_equality_tc_sframe(actual, expected, false /* check_row_order */);
   };
 
   tc_sframe *employees_sf = tc_sframe_create_empty(&error);
@@ -1687,7 +1687,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_manual_sframe) {
 
   turi::gl_sframe sampled_gl_sframe = sf_gl.groupby(group_keys, operators);
 
-  TS_ASSERT(check_equality_gl_sframe(sampled_frame->value, sampled_gl_sframe));
+  check_equality_gl_sframe(sampled_frame->value, sampled_gl_sframe);
 
   tc_release(gb_manual);
   tc_release(column_list);
@@ -1723,7 +1723,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_random_sframe_most_aggregates) {
   TS_ASSERT(sf1->value.num_columns() == sf_gl1.num_columns());
   TS_ASSERT(sf1->value.column_names() == sf_gl1.column_names());
   TS_ASSERT(sf1->value.column_types() == sf_gl1.column_types());
-  TS_ASSERT(check_equality_gl_sframe(sf1->value, sf_gl1));
+  check_equality_gl_sframe(sf1->value, sf_gl1);
 
   // C interface
   tc_groupby_aggregator_add_simple_aggregator(gb1, "sum", "a_sum", zeroth_column.c_str(), &error);
@@ -1796,7 +1796,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_random_sframe_most_aggregates) {
   turi::gl_sframe sampled_gl_sframe = sf_gl1.groupby(group_keys, operators);
 
   // Check for equality
-  TS_ASSERT(check_equality_gl_sframe(sampled_frame1->value, sampled_gl_sframe));
+  check_equality_gl_sframe(sampled_frame1->value, sampled_gl_sframe);
 
   tc_release(gb1);
   tc_release(column_list1);
@@ -1832,7 +1832,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_random_sframe_quantiles) {
   TS_ASSERT(sf1->value.num_columns() == sf_gl1.num_columns());
   TS_ASSERT(sf1->value.column_names() == sf_gl1.column_names());
   TS_ASSERT(sf1->value.column_types() == sf_gl1.column_types());
-  TS_ASSERT(check_equality_gl_sframe(sf1->value, sf_gl1));
+  check_equality_gl_sframe(sf1->value, sf_gl1);
 
   tc_flex_list *quantiles = new_tc_flex_list();
   tc_flexible_type *ft_25 = tc_ft_create_from_double(0.25, &error);
@@ -1879,7 +1879,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_random_sframe_quantiles) {
   TS_ASSERT(sampled_frame1->value.num_columns() == sampled_gl_sframe.num_columns());
   TS_ASSERT(sampled_frame1->value.column_names() == sampled_gl_sframe.column_names());
   TS_ASSERT(sampled_frame1->value.column_types() == sampled_gl_sframe.column_types());
-  TS_ASSERT(check_equality_gl_sframe(sampled_frame1->value, sampled_gl_sframe));
+  check_equality_gl_sframe(sampled_frame1->value, sampled_gl_sframe);
 
   tc_release(gb1);
   tc_release(column_list1);
@@ -1916,7 +1916,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_random_sframe_argminmax) {
   TS_ASSERT(sf1->value.num_columns() == sf_gl1.num_columns());
   TS_ASSERT(sf1->value.column_names() == sf_gl1.column_names());
   TS_ASSERT(sf1->value.column_types() == sf_gl1.column_types());
-  TS_ASSERT(check_equality_gl_sframe(sf1->value, sf_gl1));
+  check_equality_gl_sframe(sf1->value, sf_gl1);
 
   // C interface
   tc_groupby_aggregator_add_argmax(gb1, "a_argmax",
@@ -1950,7 +1950,7 @@ BOOST_AUTO_TEST_CASE(test_sframe_groupby_random_sframe_argminmax) {
   TS_ASSERT(sampled_frame1->value.num_columns() == sampled_gl_sframe.num_columns());
   TS_ASSERT(sampled_frame1->value.column_names() == sampled_gl_sframe.column_names());
   TS_ASSERT(sampled_frame1->value.column_types() == sampled_gl_sframe.column_types());
-  TS_ASSERT(check_equality_gl_sframe(sampled_frame1->value, sampled_gl_sframe));
+  check_equality_gl_sframe(sampled_frame1->value, sampled_gl_sframe);
 
   tc_release(gb1);
   tc_release(column_list1);

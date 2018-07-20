@@ -222,7 +222,79 @@ static tc_sframe* make_sframe_double(const std::vector<std::pair<std::string, st
   }
 
 __attribute__((__unused__))
-  static bool check_equality_gl_sframe(
+  static void check_equality_float(float actual, float expected) {
+  if (std::isnan(actual) && std::isnan(expected)) {
+    return;
+  }
+  if (std::isinf(actual) && std::isinf(expected)) {
+    TS_ASSERT_EQUALS(actual > 0, expected > 0);
+    return;
+  }
+  TS_ASSERT_EQUALS(actual, expected);
+}
+
+__attribute__((__unused__))
+  static void check_equality_flexible_type(
+  const turi::flexible_type& actual, const turi::flexible_type& expected) {
+    TS_ASSERT_EQUALS(actual.get_type(), expected.get_type());
+    switch (actual.get_type()) {
+
+      case turi::flex_type_enum::LIST:
+      {
+        turi::flex_list actual_list = actual;
+        turi::flex_list expected_list = expected;
+        TS_ASSERT_EQUALS(actual_list.size(), expected_list.size());
+        for (size_t i=0; i<actual_list.size(); i++) {
+          check_equality_flexible_type(actual_list[i], expected_list[i]);
+        }
+        break;
+      }
+
+      case turi::flex_type_enum::VECTOR:
+      {
+        turi::flex_vec actual_vec = actual;
+        turi::flex_vec expected_vec = expected;
+        TS_ASSERT_EQUALS(actual_vec.size(), expected_vec.size());
+        for (size_t i=0; i<actual_vec.size(); i++) {
+          check_equality_float(actual_vec[i], expected_vec[i]);
+        }
+        break;
+      }
+
+      case turi::flex_type_enum::DICT:
+      {
+        turi::flex_dict actual_dict = actual;
+        turi::flex_dict expected_dict = expected;
+        TS_ASSERT_EQUALS(actual_dict.size(), expected_dict.size());
+
+        // make a set of keys for easier comparison
+        std::unordered_set<turi::flexible_type> actual_keys;
+        std::unordered_set<turi::flexible_type> expected_keys;
+        for (const auto& kv : actual_dict) {
+          actual_keys.insert(kv.first);
+        }
+        for (const auto& kv : expected_dict) {
+          expected_keys.insert(kv.first);
+        }
+        TS_ASSERT_EQUALS(actual_keys, expected_keys);
+        for (const auto& key : actual_keys) {
+          check_equality_flexible_type(actual.dict_at(key), expected.dict_at(key));
+        }
+        break;
+      }
+
+      case turi::flex_type_enum::FLOAT:
+        check_equality_float(actual, expected);
+        break;
+
+      default:
+        TS_ASSERT_EQUALS(actual, expected);
+        break;
+    }
+}
+
+__attribute__((__unused__))
+  static void check_equality_gl_sframe(
   turi::gl_sframe sf_gl, turi::gl_sframe ref_gl, bool check_row_order=true) {
 
   size_t num_columns_sf = sf_gl.num_columns();
@@ -262,18 +334,16 @@ __attribute__((__unused__))
           TS_ASSERT_EQUALS(column_sf[i] < 0, column_ref[i] < 0);
         }
       }
-      TS_ASSERT_EQUALS(column_sf[i], column_ref[i]);
+      check_equality_flexible_type(column_sf[i], column_ref[i]);
     }
   }
-
-  return true;
 }
 
 __attribute__((__unused__))
-  static bool check_equality_tc_sframe(
+  static void check_equality_tc_sframe(
   tc_sframe *sf, tc_sframe *ref, bool check_row_order=true) {
 
-  return check_equality_gl_sframe(sf->value, ref->value, check_row_order);
+  check_equality_gl_sframe(sf->value, ref->value, check_row_order);
 }
 
 #ifdef __clang__
