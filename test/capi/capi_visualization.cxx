@@ -74,10 +74,10 @@ class capi_test_visualization {
             std::string actual_spec(actual_spec_data, actual_spec_length);
             TS_ASSERT_EQUALS(actual_spec, expected_spec);
             while (!expected_obj->finished_streaming()) {
-                TS_ASSERT_EQUALS(tc_plot_finished_streaming(actual_obj, &error), false);
+                TS_ASSERT_EQUALS(tc_plot_finished_streaming(actual_obj, nullptr, &error), false);
                 CAPI_CHECK_ERROR(error);
                 std::string expected_data = expected_obj->get_next_data();
-                tc_flexible_type *actual_data_ft = tc_plot_get_next_data(actual_obj, &error);
+                tc_flexible_type *actual_data_ft = tc_plot_get_next_data(actual_obj, nullptr, &error);
                 CAPI_CHECK_ERROR(error);
                 const char *actual_data_data = tc_ft_string_data(actual_data_ft, &error);
                 CAPI_CHECK_ERROR(error);
@@ -86,7 +86,7 @@ class capi_test_visualization {
                 std::string actual_data(actual_data_data, actual_data_length);
                 TS_ASSERT_EQUALS(actual_data, expected_data);
             }
-            TS_ASSERT_EQUALS(tc_plot_finished_streaming(actual_obj, &error), true);
+            TS_ASSERT_EQUALS(tc_plot_finished_streaming(actual_obj, nullptr, &error), true);
             CAPI_CHECK_ERROR(error);
 
             // numeric histogram (float)
@@ -94,9 +94,9 @@ class capi_test_visualization {
             expected_obj = std::dynamic_pointer_cast<Plot>(expected_obj_base);
             expected_spec = expected_obj->get_spec();
             error = nullptr;
-            actual_obj = tc_plot_create_1d(m_sa_float, "foo", "bar", "baz", &error);
+            actual_obj = tc_plot_create_1d(m_sa_float, "foo", "bar", "baz", nullptr, &error);
             CAPI_CHECK_ERROR(error);
-            actual_spec_ft = tc_plot_get_vega_spec(actual_obj, &error);
+            actual_spec_ft = tc_plot_get_vega_spec(actual_obj, nullptr, &error);
             CAPI_CHECK_ERROR(error);
             actual_spec_data = tc_ft_string_data(actual_spec_ft, &error);
             CAPI_CHECK_ERROR(error);
@@ -110,9 +110,9 @@ class capi_test_visualization {
             expected_obj = std::dynamic_pointer_cast<Plot>(expected_obj_base);
             expected_spec = expected_obj->get_spec();
             error = nullptr;
-            actual_obj = tc_plot_create_1d(m_sa_str, "foo", "bar", "baz", &error);
+            actual_obj = tc_plot_create_1d(m_sa_str, "foo", "bar", "baz", nullptr, &error);
             CAPI_CHECK_ERROR(error);
-            actual_spec_ft = tc_plot_get_vega_spec(actual_obj, &error);
+            actual_spec_ft = tc_plot_get_vega_spec(actual_obj, nullptr, &error);
             CAPI_CHECK_ERROR(error);
             actual_spec_data = tc_ft_string_data(actual_spec_ft, &error);
             CAPI_CHECK_ERROR(error);

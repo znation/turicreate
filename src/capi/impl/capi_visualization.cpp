@@ -53,4 +53,15 @@ extern "C" {
 
         ERROR_HANDLE_END(error, NULL);
     }
+
+    bool tc_plot_finished_streaming(const tc_plot* plot, const tc_parameters*, tc_error** error) {
+        ERROR_HANDLE_START();
+        turi::ensure_server_initialized();
+
+        CHECK_NOT_NULL(error, plot, "plot", NULL);
+        return plot->value->finished_streaming();
+
+        ERROR_HANDLE_END(error, NULL);
+    }
+
 }
