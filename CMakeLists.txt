@@ -966,6 +966,7 @@ endforeach()
 
 include_directories(src)
 include_directories(SYSTEM src/external)
+include_directories(SYSTEM src/external/cpp-netlib)
 include_directories(SYSTEM src/external/google)
 include_directories(src/platform)
 

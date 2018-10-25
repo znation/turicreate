@@ -20,6 +20,7 @@ namespace turi {
                                               m_transformer(transformer){}
         void show(const std::string& path_to_client);
         void materialize();
+        std::string get_url(); // browseable URL (hosted by web server internal to Turi Create)
 
         // vega specification
         std::string get_spec();
@@ -42,6 +43,7 @@ namespace turi {
         REGISTER_CLASS_MEMBER_FUNCTION(Plot::materialize)
         REGISTER_CLASS_MEMBER_FUNCTION(Plot::get_spec)
         REGISTER_CLASS_MEMBER_FUNCTION(Plot::get_data)
+        REGISTER_CLASS_MEMBER_FUNCTION(Plot::get_url)
         END_CLASS_MEMBER_REGISTRATION
     };
   }

@@ -22,6 +22,7 @@ make_library(
     process_wrapper.cpp
     registration.cpp
     scatter.cpp
+    server.cpp
     show.cpp
     summary_view.cpp
     thread.cpp

@@ -8,6 +8,7 @@
 #include <unity/lib/visualization/vega_data.hpp>
 #include <unity/lib/visualization/histogram.hpp>
 #include <unity/lib/visualization/item_frequency.hpp>
+#include <unity/lib/visualization/server.hpp>
 #include <unity/lib/visualization/summary_view.hpp>
 #include <sstream>
 
@@ -69,6 +70,10 @@ namespace turi{
 
     std::string Plot::get_spec() {
       return m_vega_spec;
+    }
+
+    std::string Plot::get_url() {
+      return WebServer::get_url_for_plot(*this);
     }
   }
 

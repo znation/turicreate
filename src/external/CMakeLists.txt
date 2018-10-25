@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS_DEBUG
 
 #3rd party source 
 
+add_subdirectory(cpp-netlib)
 add_subdirectory(libjson)
 add_subdirectory(armadillo)
 add_subdirectory(sparsehash)
