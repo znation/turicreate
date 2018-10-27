@@ -907,6 +907,10 @@ tc_flexible_type* tc_plot_get_vega_spec(const tc_plot* plot, const tc_parameters
 // computes the next batch of results, and returns a flex string of JSON data
 tc_flexible_type* tc_plot_get_next_data(const tc_plot* plot, const tc_parameters *params, tc_error** error); 
 
+// Returns a URL to a localhost web server for this plot
+// Note: on first call, spins up said web server!
+tc_flexible_type* tc_plot_get_url(const tc_plot* plot, const tc_parameters* params, tc_error** error);
+
 #ifdef __cplusplus
 }
 #endif

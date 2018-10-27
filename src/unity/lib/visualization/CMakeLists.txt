@@ -31,6 +31,8 @@ make_library(
     vega_spec.cpp
   REQUIRES
     process
+    cppnetlib-uri
+    cppnetlib-server-parsers
     EXTERNAL_VISIBILITY
 )
 

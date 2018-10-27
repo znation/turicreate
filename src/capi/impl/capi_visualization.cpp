@@ -110,4 +110,15 @@ extern "C" {
         ERROR_HANDLE_END(error, NULL);
     }
 
+    tc_flexible_type* tc_plot_get_url(const tc_plot* plot, const tc_parameters* params, tc_error** error) {
+        ERROR_HANDLE_START();
+        turi::ensure_server_initialized();
+
+        CHECK_NOT_NULL(error, plot, "plot", NULL);
+
+        std::string url = plot->value->get_url();
+        return tc_ft_create_from_string(url.data(), url.size(), error);
+
+        ERROR_HANDLE_END(error, NULL);
+    }
 }

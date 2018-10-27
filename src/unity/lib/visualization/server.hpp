@@ -13,12 +13,17 @@ namespace visualization {
 
     class WebServer {
     public:
+        class Impl;
         static std::string get_url_for_plot(const Plot& plot);
 
     private:
-        WebServer();
-        std::string add_plot(const Plot& plot);
+        std::unique_ptr<Impl> m_impl;
         std::unordered_map<std::string, Plot> m_plots;
+
+        WebServer();
+        ~WebServer();
+        std::string add_plot(const Plot& plot);
+
     };
 
 }}

@@ -249,6 +249,9 @@ class Plot(object):
         else:
             return _json.loads(self.__proxy__.call_function('get_spec'))
 
+    def _get_url(self):
+        return self.__proxy__.call_function('get_url')
+
     def _repr_javascript_(self):
         from IPython.core.display import display, HTML
 

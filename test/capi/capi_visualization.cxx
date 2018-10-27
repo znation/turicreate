@@ -334,6 +334,8 @@ class capi_test_visualization {
             TS_ASSERT_EQUALS(tc_plot_finished_streaming(actual_obj, nullptr, &error), true);
             CAPI_CHECK_ERROR(error);
         }
+
+        // TODO - test web server page load
 };
 
 BOOST_FIXTURE_TEST_SUITE(_capi_test_visualization, capi_test_visualization)

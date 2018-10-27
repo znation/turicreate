@@ -5,28 +5,76 @@
  */
 
 #include <unity/lib/visualization/server.hpp>
+#include <unity/lib/visualization/thread.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/network/protocol/http/server.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 namespace http = boost::network::http;
 using namespace turi::visualization;
 
+class handler_type;
+typedef http::server<handler_type> http_server;
+
+class handler_type {
+public:
+    void operator() (http_server::request const &request,
+                     http_server::connection_ptr const &connection) {
+        std::cerr << "DEBUG: handling connection\n";
+        connection->set_status(http_server::connection::status_t::ok);
+        connection->write("Hello, World!");
+    }
+
+    void log(http_server::string_type const &info) {
+        // TODO use turi logging
+        std::cerr << "ERROR: " << info << '\n';
+    }
+};
+
+class WebServer::Impl {
+public:
+    handler_type m_handler;
+    http_server::options m_options;
+    std::unique_ptr<http_server> m_server = nullptr;
+    Impl() : m_handler(), m_options(m_handler) {
+        std::cerr << "DEBUG: starting WebServer::Impl\n";
+        m_options.thread_pool(
+            std::make_shared<boost::network::utils::thread_pool>());
+        m_server.reset(new http_server(m_options.address("localhost").port("8000")));
+        run_thread([this]() {
+            m_server->run();
+        });
+        std::cerr << "DEBUG: finished starting WebServer::Impl\n";
+    }
+    ~Impl() {
+        std::cerr << "DEBUG: destroying WebServer::Impl\n";
+    }
+};
+
+WebServer::WebServer() : m_impl(new Impl()) {}
+WebServer::~WebServer() {
+    std::cerr << "DEBUG: destroying WebServer\n";
+}
+
 std::string WebServer::get_url_for_plot(const Plot& plot) {
+    std::cerr << "DEBUG: getting url for plot\n";
     static WebServer server;
+    std::cerr << "DEBUG: past WebServer constructor\n";
     return server.add_plot(plot);
 }
 
 std::string WebServer::add_plot(const Plot& plot) {
     // make UUID for plot
     static auto uuid_generator = boost::uuids::random_generator();
-    auto uuid = boost::lexical_cast<std::string>(uuid_generator());
+    auto uuid = uuid_generator();
+    auto uuid_str = boost::lexical_cast<std::string>(uuid);
 
     // add to dictionary with UUID
-    m_plots[uuid] = plot;
+    m_plots[uuid_str] = plot;
 
     // return formatted URL
-    return "http://localhost:8000/vega.html?plot=" + uuid;
+    return "http://localhost:8000/vega.html?plot=" + uuid_str;
 }
