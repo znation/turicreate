@@ -13,11 +13,41 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <sys/socket.h>
+
 namespace http = boost::network::http;
 using namespace turi::visualization;
 
 class handler_type;
 typedef http::server<handler_type> http_server;
+
+static int find_port() {
+    for (int port=8000; port<=9000; port++) {
+        std::cerr << "DEBUG: checking port " << port << std::endl;
+        int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (sock < 0) {
+            if (errno == EMFILE) {
+                log_and_throw("Unable to open a port between 8000 and 9000 (inclusive) to host Turi Create visualizations: too many open file handles.");
+            }
+            log_and_throw("Unable to open a port between 8000 and 9000 (inclusive) to host Turi Create visualizations: unknown error.");
+        }
+        int optval = 1;
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
+        struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = htonl(inet_addr("0.0.0.0"));
+        int error = bind(sock, (struct sockaddr*) &addr, sizeof(addr));
+        if (error == 0) {
+            return port;
+        } else {
+            std::cerr << "DEBUG: return was " << error << ", error was " << errno << " (" << std::strerror(errno) << ")" << std::endl;
+        }
+
+    }
+    log_and_throw("Unable to open a port between 8000 and 9000 (inclusive) to host Turi Create visualizations: all ports seem to be in use.");
+}
 
 class handler_type {
 public:
@@ -46,11 +76,14 @@ public:
     handler_type m_handler;
     http_server::options m_options;
     std::unique_ptr<http_server> m_server = nullptr;
+    std::string m_port;
+
     Impl() : m_handler(), m_options(m_handler) {
         std::cerr << "DEBUG: starting WebServer::Impl\n";
         m_options.thread_pool(
             std::make_shared<boost::network::utils::thread_pool>());
-        m_server.reset(new http_server(m_options.address("localhost").port("8000")));
+        m_port = std::to_string(find_port());
+        m_server.reset(new http_server(m_options.address("localhost").port(m_port)));
         run_thread([this]() {
             std::cerr << "DEBUG: server `run` starting\n";
             m_server->run();
@@ -85,5 +118,5 @@ std::string WebServer::add_plot(const Plot& plot) {
     m_plots[uuid_str] = plot;
 
     // return formatted URL
-    return "http://localhost:8000/vega.html?plot=" + uuid_str;
+    return "http://localhost:" + m_impl->m_port + "/vega.html?plot=" + uuid_str;
 }
