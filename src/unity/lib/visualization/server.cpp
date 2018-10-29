@@ -23,9 +23,16 @@ class handler_type {
 public:
     void operator() (http_server::request const &request,
                      http_server::connection_ptr const &connection) {
+        static http_server::response_header headers[] = {{"Connection", "close"},
+                                                    {"Content-Type", "text/plain"}};
         std::cerr << "DEBUG: handling connection\n";
         connection->set_status(http_server::connection::status_t::ok);
-        connection->write("Hello, World!");
+        connection->set_headers(boost::make_iterator_range(headers, headers + 2));
+        std::string msg = "Hello, World!";
+        connection->write(msg, [](std::error_code ec) {
+            std::cerr << "DEBUG: finished writing to connection object. Error code was " << ec << std::endl;
+        });
+        std::cerr << "DEBUG: returning from handling connection\n";
     }
 
     void log(http_server::string_type const &info) {
@@ -45,7 +52,9 @@ public:
             std::make_shared<boost::network::utils::thread_pool>());
         m_server.reset(new http_server(m_options.address("localhost").port("8000")));
         run_thread([this]() {
+            std::cerr << "DEBUG: server `run` starting\n";
             m_server->run();
+            std::cerr << "DEBUG: server `run` completed\n";
         });
         std::cerr << "DEBUG: finished starting WebServer::Impl\n";
     }
