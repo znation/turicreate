@@ -1,0 +1,30 @@
+<head>
+</head>
+<body>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/vega@4.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@2.6.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.18.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-tooltip@0.6.1"></script>
+  <div id="view"></div>
+  <script>
+    var vega_json = %1%;
+    var vega_data = %2%;
+    vega_json.autosize = {"type": "fit", "resize": true, "contains": "padding"};
+    for(var x = 0; x < vega_json.data.length; x++){
+      if(vega_json.data[x]["name"] === "source_2"){
+        vega_json.data[x] = vega_data;
+      }
+    }
+    vegaEmbed(
+      '#view',
+      vega_json,
+      {}
+    ).then(function(result) {
+        var bubbleOpts = {
+          showAllFields: true,
+        };
+        vegaTooltip.vega(result.view);
+    });
+  </script>
+</body>

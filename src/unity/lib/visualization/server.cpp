@@ -6,8 +6,14 @@
 
 #include <unity/lib/visualization/server.hpp>
 
+// generated include files for front-end artifacts
+#include <unity/lib/visualization/html/vega.h>
+#include <unity/lib/visualization/html/style.h>
+
+#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/network/protocol/http/server.hpp>
+#include <boost/network/uri.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -49,23 +55,81 @@ static int find_port() {
 }
 
 class handler_type {
+private:
+    WebServer::plot_map m_plots;
+    std::string vega_html = std::string(reinterpret_cast<char *>(html_vega_html), html_vega_html_len);
+    std::string style_css = std::string(reinterpret_cast<char *>(html_style_css), html_style_css_len);
+
+    static void handle_error(std::error_code ec) {
+        if (ec) {
+            logstream(LOG_ERROR) << "WebServer: failed writing to connection object. Error code was " << ec << std::endl;
+        }
+    }
+    void write(http_server::connection_ptr const& connection,
+               const std::string& msg,
+               const std::string& content_type) {
+        http_server::response_header headers[] = {{"Connection", "close"}, {"Content-Type", content_type}};
+        connection->set_status(http_server::connection::status_t::ok);
+        static_assert(sizeof(headers) / sizeof(headers[0]) == 2, "Assuming there are two headers");
+        connection->set_headers(boost::make_iterator_range(headers, headers + 2));
+        connection->write(msg, handle_error);
+    }
+    void write_error(http_server::connection_ptr const& connection,
+                     const std::string& msg) {
+        logstream(LOG_ERROR) << "WebServer: unexpected error: " << msg;
+        http_server::response_header headers[] = {{"Connection", "close"}, {"Content-Type", "text/plain"}};
+        connection->set_status(http_server::connection::status_t::internal_server_error);
+        static_assert(sizeof(headers) / sizeof(headers[0]) == 2, "Assuming there are two headers");
+        connection->set_headers(boost::make_iterator_range(headers, headers + 2));
+        connection->write(msg, handle_error);
+    }
+
+
 public:
+    handler_type(WebServer::plot_map plots) : m_plots(plots) {}
     void operator() (http_server::request const &request,
                      http_server::connection_ptr const &connection) {
-        static http_server::response_header headers[] = {{"Connection", "close"},
-                                                         {"Content-Type", "text/plain"}};
-        connection->set_status(http_server::connection::status_t::ok);
-        connection->set_headers(boost::make_iterator_range(headers, headers + 2));
-        std::string msg = "Hello, World!";
-        connection->write(msg, [](std::error_code ec) {
-            if (ec) {
-                logstream(LOG_ERROR) << "WebServer: failed writing to connection object. Error code was " << ec << std::endl;
+        try {
+            boost::network::uri::uri destination("http://localhost" + request.destination);
+            std::string path = destination.path();
+            if (path == "/vega.html") {
+                // parse the id out of the query string and use it to find the plot
+                std::map<std::string, std::string> queries;
+                boost::network::uri::query_map(destination, queries);
+                if (queries.find("plot") == queries.end()) {
+                    write_error(connection, "Expected ?plot= in query string; did not find it in URL " + request.destination);
+                }
+                std::string plot_id = queries.at("plot");
+                if (m_plots->find(plot_id) == m_plots->end()) {
+                    write_error(connection, "Expected plot " + plot_id + " was not found");
+                }
+                const Plot& plot = m_plots->at(plot_id);
+
+                // load the spec and data, and format them into the HTML page
+                std::string vega_spec = plot.get_spec();
+                std::string vega_data = plot.get_data();
+                std::string rendered_page = boost::str(boost::format(vega_html) % vega_spec % vega_data);
+                write(connection, rendered_page, "text/html");
+            } else if (path == "/style.css") {
+                write(connection, style_css, "text/css");
+            } else {
+                logstream(LOG_ERROR) << "WebServer: unrecognized destination requested in URL:  " << request.destination << std::endl;
+                http_server::response_header headers[] = {{"Connection", "close"}, {"Content-Type", "text/plain"}};
+                connection->set_status(http_server::connection::status_t::not_found);
+                static_assert(sizeof(headers) / sizeof(headers[0]) == 2, "Assuming there are two headers");
+                connection->set_headers(boost::make_iterator_range(headers, headers + 2));
+                std::string not_found("404 not found");
+                connection->write(not_found, handle_error);
             }
-        });
+        } catch (const std::exception& e) {
+            write_error(connection, e.what());
+        } catch (...) {
+            write_error(connection, "Unknown exception");
+        }
     }
 
     void log(http_server::string_type const &info) {
-        logstream(LOG_ERROR) << "WebServer: " << info << '\n';
+        logstream(LOG_INFO) << "WebServer: " << info << '\n';
     }
 };
 
@@ -79,7 +143,7 @@ public:
     // single background thread for server to run on and listen (it then hands off requests to a thread pool)
     std::thread m_thread;
 
-    Impl() : m_handler(), m_options(m_handler) {
+    Impl(plot_map plots) : m_handler(plots), m_options(m_handler) {
         logstream(LOG_DEBUG) << "WebServer: starting WebServer::Impl\n";
         m_options.thread_pool(
             std::make_shared<boost::network::utils::thread_pool>());
@@ -97,7 +161,7 @@ public:
     }
 };
 
-WebServer::WebServer() : m_impl(new Impl()) {
+WebServer::WebServer() : m_impl(new Impl(m_plots)) {
     logstream(LOG_DEBUG) << "WebServer: starting WebServer\n";
 }
 WebServer::~WebServer() {
@@ -116,7 +180,7 @@ std::string WebServer::add_plot(const Plot& plot) {
     auto uuid_str = boost::lexical_cast<std::string>(uuid);
 
     // add to dictionary with UUID
-    m_plots[uuid_str] = plot;
+    (*m_plots)[uuid_str] = plot;
 
     // return formatted URL
     return "http://localhost:" + m_impl->m_port + "/vega.html?plot=" + uuid_str;

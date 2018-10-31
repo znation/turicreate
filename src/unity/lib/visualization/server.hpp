@@ -13,12 +13,13 @@ namespace visualization {
 
     class WebServer {
     public:
+        typedef std::shared_ptr<std::unordered_map<std::string, Plot>> plot_map;
         class Impl;
         static std::string get_url_for_plot(const Plot& plot);
 
     private:
+        plot_map m_plots = std::make_shared<std::unordered_map<std::string, Plot>>();
         std::unique_ptr<Impl> m_impl;
-        std::unordered_map<std::string, Plot> m_plots;
 
         WebServer();
         ~WebServer();

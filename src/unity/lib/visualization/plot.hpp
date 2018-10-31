@@ -19,19 +19,19 @@ namespace turi {
                                               m_size_array(size_array),
                                               m_transformer(transformer){}
         void show(const std::string& path_to_client);
-        void materialize();
-        std::string get_url(); // browseable URL (hosted by web server internal to Turi Create)
+        void materialize() const;
+        std::string get_url() const; // browseable URL (hosted by web server internal to Turi Create)
 
         // vega specification
-        std::string get_spec();
+        std::string get_spec() const;
 
         // streaming data aggregation
         double get_percent_complete() const; // out of 1.0
         bool finished_streaming() const;
-        std::string get_next_data();
+        std::string get_next_data() const;
 
         // non-streaming data aggregation: causes full materialization
-        std::string get_data();
+        std::string get_data() const;
 
         // TODO - these hould be private
         std::string m_vega_spec;

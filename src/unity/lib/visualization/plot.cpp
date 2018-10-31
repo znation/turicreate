@@ -39,7 +39,7 @@ namespace turi{
       });
     }
 
-    void Plot::materialize() {
+    void Plot::materialize() const {
       do {
         m_transformer->get()->vega_column_data();
       } while(!m_transformer->eof());
@@ -54,13 +54,13 @@ namespace turi{
       return m_transformer->get_percent_complete();
     }
 
-    std::string Plot::get_next_data() {
+    std::string Plot::get_next_data() const {
       vega_data vd;
       vd << m_transformer->get()->vega_column_data();
       return vd.get_data_spec(get_percent_complete());
     }
 
-    std::string Plot::get_data() {
+    std::string Plot::get_data() const {
       this->materialize();
       DASSERT_TRUE(m_transformer->eof());
       vega_data vd;
@@ -68,11 +68,11 @@ namespace turi{
       return vd.get_data_spec(100 /* percent_complete */);
     }
 
-    std::string Plot::get_spec() {
+    std::string Plot::get_spec() const {
       return m_vega_spec;
     }
 
-    std::string Plot::get_url() {
+    std::string Plot::get_url() const {
       return WebServer::get_url_for_plot(*this);
     }
   }
