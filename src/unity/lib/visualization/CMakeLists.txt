@@ -22,7 +22,7 @@ make_library(
     process_wrapper.cpp
     registration.cpp
     scatter.cpp
-    server.cpp
+    #server.cpp
     show.cpp
     summary_view.cpp
     thread.cpp
@@ -31,8 +31,6 @@ make_library(
     vega_spec.cpp
   REQUIRES
     process
-    cppnetlib-uri
-    cppnetlib-server-parsers
     EXTERNAL_VISIBILITY
 )
 
