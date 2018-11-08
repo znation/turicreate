@@ -25,6 +25,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <memory>
+#include <thread>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -74,7 +75,6 @@ template<
     class Send>
 void
 handle_request(
-    boost::beast::string_view doc_root,
     http::request<Body, http::basic_fields<Allocator>>&& req,
     Send&& send,
     WebServer::plot_map& m_plots)
@@ -253,7 +253,6 @@ private:
     boost::asio::strand<
         boost::asio::io_context::executor_type> strand_;
     boost::beast::flat_buffer buffer_;
-    std::shared_ptr<std::string const> doc_root_;
     http::request<http::string_body> req_;
     std::shared_ptr<void> res_;
     send_lambda lambda_;
@@ -264,11 +263,9 @@ public:
     explicit
     session(
         tcp::socket socket,
-        std::shared_ptr<std::string const> const& doc_root,
         WebServer::plot_map& plots)
         : socket_(std::move(socket))
         , strand_(socket_.get_executor())
-        , doc_root_(doc_root)
         , lambda_(*this)
         , m_plots(plots)
     {
@@ -314,7 +311,7 @@ public:
             return fail(ec, "read");
 
         // Send the response
-        handle_request(*doc_root_, std::move(req_), lambda_, m_plots);
+        handle_request(std::move(req_), lambda_, m_plots);
     }
 
     void
@@ -361,18 +358,15 @@ class listener : public std::enable_shared_from_this<listener>
 private:
     tcp::acceptor acceptor_;
     tcp::socket socket_;
-    std::shared_ptr<std::string const> doc_root_;
     WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
 
 public:
     listener(
         boost::asio::io_context& ioc,
         tcp::endpoint endpoint,
-        std::shared_ptr<std::string const> const& doc_root,
         WebServer::plot_map& plots)
         : acceptor_(ioc)
         , socket_(ioc)
-        , doc_root_(doc_root)
         , m_plots(plots)
     {
         boost::system::error_code ec;
@@ -443,7 +437,6 @@ public:
             // Create the session and run it
             std::make_shared<session>(
                 std::move(socket_),
-                doc_root_,
                 m_plots)->run();
         }
 
@@ -452,8 +445,8 @@ public:
     }
 };
 
-static int find_port() {
-    for (int port=8000; port<=9000; port++) {
+static unsigned short find_port() {
+    for (unsigned short port=8000; port<=9000; port++) {
         logstream(LOG_DEBUG) << "WebServer: checking port " << port << std::endl;
         int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (sock < 0) {
@@ -482,15 +475,40 @@ static int find_port() {
 
 class WebServer::Impl {
 public:
-    std::string m_port;
+    unsigned short m_port;
+    const static size_t NUM_THREADS = 6; // handle requests on 6 threads - TODO optimize this number
+    boost::asio::io_context m_ioc{NUM_THREADS}; 
+    std::vector<std::thread> m_threads; // listener threads
+    std::shared_ptr<listener> m_listener = nullptr;
 
     Impl(plot_map plots) {
         logstream(LOG_DEBUG) << "WebServer: starting WebServer::Impl\n";
-        m_port = std::to_string(find_port());
+        m_port = find_port();
+        const auto address = boost::asio::ip::make_address("127.0.0.1");
+
+        // Create and launch a listening port
+        m_listener = std::make_shared<listener>(
+            m_ioc,
+            tcp::endpoint{address, m_port},
+            plots);
+        m_listener->run();
+
+        // Run the ioc on background threads
+        for (size_t i=0; i<NUM_THREADS; i++) {
+            m_threads.push_back(std::thread([&]() {
+                m_ioc.run();
+            }));
+        }
+
         logstream(LOG_DEBUG) << "WebServer: finished starting WebServer::Impl\n";
     }
     ~Impl() {
         logstream(LOG_DEBUG) << "WebServer: destroying WebServer::Impl\n";
+        m_ioc.stop();
+        for (auto& thread : m_threads) {
+            thread.join();
+        }
+        logstream(LOG_DEBUG) << "WebServer: finished destroying WebServer::Impl\n";
     }
 };
 
@@ -516,5 +534,6 @@ std::string WebServer::add_plot(const Plot& plot) {
     (*m_plots)[uuid_str] = plot;
 
     // return formatted URL
-    return "http://localhost:" + m_impl->m_port + "/vega.html?plot=" + uuid_str;
+    std::string port_str = std::to_string(m_impl->m_port);
+    return "http://localhost:" + port_str + "/vega.html?plot=" + uuid_str;
 }
