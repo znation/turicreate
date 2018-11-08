@@ -73,8 +73,7 @@ namespace turi{
     }
 
     std::string Plot::get_url() const {
-      return std::string();
-      //return WebServer::get_url_for_plot(*this);
+      return WebServer::get_url_for_plot(*this);
     }
   }
 
