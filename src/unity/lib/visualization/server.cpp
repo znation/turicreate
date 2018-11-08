@@ -481,7 +481,7 @@ public:
     std::vector<std::thread> m_threads; // listener threads
     std::shared_ptr<listener> m_listener = nullptr;
 
-    Impl(plot_map plots) {
+    Impl(plot_map& plots) {
         logstream(LOG_DEBUG) << "WebServer: starting WebServer::Impl\n";
         m_port = find_port();
         const auto address = boost::asio::ip::make_address("127.0.0.1");
