@@ -23,7 +23,6 @@ make_library(
     registration.cpp
     scatter.cpp
     server.cpp
-    server_impl.cpp
     show.cpp
     summary_view.cpp
     thread.cpp
