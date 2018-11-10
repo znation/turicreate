@@ -9,13 +9,31 @@
   <div id="view"></div>
   <script>
     var vega_json = %1%;
-    var vega_data = %2%;
-    vega_json.autosize = {"type": "fit", "resize": true, "contains": "padding"};
-    for(var x = 0; x < vega_json.data.length; x++){
-      if(vega_json.data[x]["name"] === "source_2"){
-        vega_json.data[x] = vega_data;
-      }
+    var plot_url = %2%;
+    function updateData(view) {
+      var req = new XMLHttpRequest();
+      req.addEventListener("load", function() {
+        var data = this.response;
+        console.log(data);
+        var newData = data.values.slice();
+        var changeSet = vega.changeset();
+        changeSet = changeSet.insert(newData);
+        view.change("source_2", changeSet).runAfter(function(viewInstance) {
+          if(data.progress != null){
+            var progress = parseFloat(data.progress);
+            console.log(progress);
+            if(progress < 1.0) {
+              // request another batch of data
+              setTimeout(function() {updateData(viewInstance);}, 1000);
+            }
+          }
+        });
+      });
+      req.responseType = "json";
+      req.open("GET", plot_url);
+      req.send()
     }
+    vega_json.autosize = {"type": "fit", "resize": true, "contains": "padding"};
     vegaEmbed(
       '#view',
       vega_json,
@@ -25,6 +43,9 @@
           showAllFields: true,
         };
         vegaTooltip.vega(result.view);
+
+        // start data fetching
+        updateData(result.view);
     });
   </script>
 </body>

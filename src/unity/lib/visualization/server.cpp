@@ -185,11 +185,20 @@ handle_request(
 
             // load the spec and data, and format them into the HTML page
             std::string vega_spec = plot.get_spec();
-            std::string vega_data = plot.get_data();
-            std::string rendered_page = boost::str(boost::format(vega_html) % vega_spec % vega_data);
+            std::string plot_url = "\"/data/" + plot_id + "\"";
+            std::string rendered_page = boost::str(boost::format(vega_html) % vega_spec % plot_url);
             return respond(rendered_page, "text/html");
         } else if (req_target == "/style.css" || req_target.find("/style.css?") == 0) {
             return respond(style_css, "text/css");
+        } else if (req_target.find("/data/") == 0) {
+            const size_t data_url_length = sizeof("/data/") - 1;
+            std::string plot_id = req_target.substr(data_url_length).to_string();
+            if (m_plots->find(plot_id) == m_plots->end()) {
+                return server_error("Expected plot " + plot_id + " was not found");
+            }
+            const Plot& plot = m_plots->at(plot_id);
+            std::string plot_data = plot.get_next_data();
+            return respond(plot_data, "application/json");
         }
 
         // did not match any expected URL
