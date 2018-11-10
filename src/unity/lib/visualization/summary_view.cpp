@@ -7,14 +7,13 @@
 using namespace turi;
 using namespace turi::visualization;
 
-summary_view_transformation_output::summary_view_transformation_output(const std::vector<std::shared_ptr<transformation_output>> outputs, std::vector<std::string> column_names, std::vector<flex_type_enum> column_types, size_t size)
+summary_view_transformation_output::summary_view_transformation_output(const std::vector<std::shared_ptr<transformation_output>>& outputs, std::vector<std::string> column_names, std::vector<flex_type_enum> column_types, size_t size)
   : m_outputs(outputs), m_column_names(column_names), m_column_types(column_types), m_size(size) {
 }
 
 std::string summary_view_transformation_output::vega_column_data(bool sframe) const {
   std::stringstream ss;
-
-  for (size_t i=0; i<m_column_names.size(); i++) {
+  for (size_t i=0; i<m_outputs.size(); i++) {
     ss << "{\"a\": " << std::to_string(i) << ",";
     std::string title = extra_label_escape(m_column_names[i]);
     ss << "\"title\": " << title << ",";
@@ -33,15 +32,15 @@ std::string summary_view_transformation_output::vega_column_data(bool sframe) co
       default:
         throw std::runtime_error("Unexpected dtype. SFrame plot expects int, float or str dtypes.");
     }
-    if (i < m_column_names.size() - 1) {
-      ss << ",";
+    if (i != m_outputs.size() - 1) {
+      ss << ", ";
     }
   }
 
   return ss.str();
 }
 
-summary_view_transformation::summary_view_transformation(const std::vector<std::shared_ptr<transformation_base>> transformers, std::vector<std::string> column_names, std::vector<flex_type_enum> column_types, size_t size)
+summary_view_transformation::summary_view_transformation(const std::vector<std::shared_ptr<transformation_base>>& transformers, std::vector<std::string> column_names, std::vector<flex_type_enum> column_types, size_t size)
   : m_transformers(transformers),  m_column_names(column_names), m_column_types(column_types), m_size(size) {
     // 0. Transformers, column_names, and column_types must all be the same length
     // (number of SArray columns to show)
@@ -61,14 +60,11 @@ summary_view_transformation::summary_view_transformation(const std::vector<std::
 }
 
 std::shared_ptr<transformation_output> summary_view_transformation::get() {
-  std::vector<std::shared_ptr<transformation_output>> ret;
-
+  std::vector<std::shared_ptr<transformation_output>> outputs;
   for (size_t i=0; i<m_transformers.size(); i++) {
-    std::shared_ptr<transformation_output> output =  m_transformers[i]->get();
-    ret.push_back(output);
+    outputs.push_back(m_transformers[i]->get());
   }
-
-  return std::make_shared<summary_view_transformation_output>(summary_view_transformation_output(ret, m_column_names, m_column_types, m_size));
+  return std::make_shared<summary_view_transformation_output>(summary_view_transformation_output(outputs, m_column_names, m_column_types, m_size));
 }
 
 bool summary_view_transformation::eof() const {
@@ -81,8 +77,6 @@ bool summary_view_transformation::eof() const {
 }
 
 flex_int summary_view_transformation::get_rows_processed() const {
-  // we also guaranteed in the constructor that there is at least 1 transformer.
-  // we need only ask the 1 we know of for rows_processed.
   size_t all_rows_processed = 0;
 
   for (const auto& transformer : m_transformers) {
