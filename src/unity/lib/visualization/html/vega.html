@@ -16,7 +16,11 @@
         var data = this.response;
         console.log(data);
         var newData = data.values.slice();
+        var prevData = view.data("source_2");
         var changeSet = vega.changeset();
+        if(prevData.length > 0){
+          changeSet = changeSet.remove(prevData);
+        }
         changeSet = changeSet.insert(newData);
         view.change("source_2", changeSet).runAfter(function(viewInstance) {
           if(data.progress != null){
