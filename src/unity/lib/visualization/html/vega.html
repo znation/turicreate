@@ -28,7 +28,7 @@
             console.log(progress);
             if(progress < 1.0) {
               // request another batch of data
-              setTimeout(function() {updateData(viewInstance);}, 1000);
+              setTimeout(function() {updateData(viewInstance);}, 0);
             }
           }
         });
@@ -41,11 +41,10 @@
     vegaEmbed(
       '#view',
       vega_json,
-      {}
+      {
+        "renderer": "svg"
+      }
     ).then(function(result) {
-        var bubbleOpts = {
-          showAllFields: true,
-        };
         vegaTooltip.vega(result.view);
 
         // start data fetching
