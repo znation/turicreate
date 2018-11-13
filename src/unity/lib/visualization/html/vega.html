@@ -27,7 +27,6 @@
             var progress = parseFloat(data.progress);
             console.log(progress);
             if(progress < 1.0) {
-              // request another batch of data
               setTimeout(function() {updateData(viewInstance);}, 0);
             }
           }
@@ -37,7 +36,19 @@
       req.open("GET", plot_url);
       req.send()
     }
+
     vega_json.autosize = {"type": "fit", "resize": true, "contains": "padding"};
+
+    // fixing vega tooltips
+    var bubbleOpts = {
+      showAllFields: true
+    };
+    if(vega_json["metadata"] != null){
+      if(vega_json["metadata"]["bubbleOpts"] != null){
+        bubbleOpts = vega_json["metadata"]["bubbleOpts"];
+      }
+    }
+
     vegaEmbed(
       '#view',
       vega_json,
@@ -45,7 +56,7 @@
         "renderer": "svg"
       }
     ).then(function(result) {
-        vegaTooltip.vega(result.view);
+        vegaTooltip.vega(result.view, bubbleOpts);
 
         // start data fetching
         updateData(result.view);
