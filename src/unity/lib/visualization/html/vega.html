@@ -40,7 +40,9 @@
     vega_json.autosize = {"type": "fit", "resize": true, "contains": "padding"};
 
     // fixing vega tooltips
-    var bubbleOpts;
+    var bubbleOpts = {
+      showAllFields: true
+    };
     if(vega_json["metadata"] != null){
       if(vega_json["metadata"]["bubbleOpts"] != null){
         bubbleOpts = vega_json["metadata"]["bubbleOpts"];
