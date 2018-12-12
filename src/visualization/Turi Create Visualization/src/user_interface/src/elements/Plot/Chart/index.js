@@ -40,8 +40,20 @@ class TcPlot extends Component {
             }
 
             var prevData = $this.vegaView.data("source_2");
-            if(prevData.length > 0){
-                changeSet = changeSet.remove(prevData);
+
+            for(var y = 0; y < newData.length; y++ ){
+                if(newData[y]["a"] != null){
+                    for(var x = 0; x < prevData.length; x++ ){
+                        if(prevData[x]["a"] === newData[y]["a"]){
+                            changeSet = changeSet.remove(prevData[x]);
+                        }
+                    }
+                }else{
+                    if(prevData.length > 0){
+                        changeSet = changeSet.remove(prevData);
+                        break;
+                    }
+                }
             }
 
             changeSet = changeSet.insert(newData);
