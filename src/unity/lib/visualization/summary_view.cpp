@@ -14,10 +14,7 @@ summary_view_transformation_output::summary_view_transformation_output(const std
 std::string summary_view_transformation_output::vega_column_data(bool sframe) const {
   std::stringstream ss;
 
-  std::cerr << "Getting column data. SFrame flag is " << sframe << std::endl;
-
   for (size_t i=0; i<m_column_names.size(); i++) {
-    std::cerr << "Getting column data for column " << m_column_names[i] << std::endl;
     ss << "{\"a\": " << std::to_string(i) << ",";
     std::string title = extra_label_escape(m_column_names[i]);
     ss << "\"title\": " << title << ",";
