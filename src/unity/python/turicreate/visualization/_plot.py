@@ -243,10 +243,7 @@ class Plot(object):
         if(include_data):
             spec = _json.loads(self.__proxy__.call_function('get_spec'))
             data = _json.loads(self.__proxy__.call_function('get_data'))
-            for x in range(len(spec["data"])):
-                if(spec["data"][x]["name"] == "source_2"):
-                    spec["data"][x] = data
-                    break
+            spec["data"] = data
             return spec
         else:
             return _json.loads(self.__proxy__.call_function('get_spec'))
