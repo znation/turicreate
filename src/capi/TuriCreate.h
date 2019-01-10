@@ -872,6 +872,11 @@ tc_variant* tc_function_call(
 /*                                                                            */
 /******************************************************************************/
 
+typedef enum tc_plot_size_variant {
+    tc_plot_size_default,
+    tc_plot_size_small,
+} tc_plot_size_variant;
+
 // Single SArray view (`.show` on an SArray)
 tc_plot* tc_plot_create_1d(const tc_sarray* sa,
                            const char* title,
@@ -894,15 +899,15 @@ tc_plot* tc_plot_create_2d(const tc_sarray* sa_x,
                            const tc_parameters* params,
                            tc_error** error);
 
-// SFrame summary view (`.show` on an SFrame)
-tc_plot* tc_plot_create_sframe_summary(const tc_sframe* sf, const tc_parameters* params, tc_error** error);
-
 // returns true if no further computation can be done on this stream
 // (should probably be used as a loop condition)
 bool tc_plot_finished_streaming(const tc_plot* plot, const tc_parameters *params, tc_error** error);
 
 // returns a flex string containing the Vega JSON spec for this plot
-tc_flexible_type* tc_plot_get_vega_spec(const tc_plot* plot, const tc_parameters *params, tc_error** error);
+tc_flexible_type* tc_plot_get_vega_spec(const tc_plot* plot,
+                                        tc_plot_size_variant size_variant,
+                                        const tc_parameters *params,
+                                        tc_error** error);
 
 // computes the next batch of results, and returns a flex string of JSON data
 tc_flexible_type* tc_plot_get_next_data(const tc_plot* plot, const tc_parameters *params, tc_error** error); 
