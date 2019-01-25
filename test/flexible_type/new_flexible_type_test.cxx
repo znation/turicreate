@@ -132,7 +132,14 @@ struct new_flexible_type_test  {
       }
 
       // test aliasing
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#endif
       f = f;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
       TS_ASSERT_DELTA(f[0], 1.1, 1E-6);
       TS_ASSERT_DELTA(f[1], 2.2, 1E-6);
       for (flexible_type i = 2;i < 12; ++i) {
