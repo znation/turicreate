@@ -19,6 +19,9 @@ endif()
 # plugins. See http://clang.llvm.org/docs/JSONCompilationDatabase.html
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
+# When generating Xcode build files, automatically generate schemes
+set( CMAKE_XCODE_GENERATE_SCHEME ON )
+
 # Determine where additional Turi specific cmake modules are
 # defined
 set(DEPS_CMAKE ${CMAKE_SOURCE_DIR}/deps/cmake)
