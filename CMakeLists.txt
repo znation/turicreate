@@ -511,13 +511,19 @@ endif()
 # TODO - does this work in anything other than clang?
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src/pch)
 add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch
-  COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -o ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch ${CMAKE_SOURCE_DIR}/src/pch/pch.in.hpp
+  OUTPUT ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.gch
+  COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -fvisibility=default -fvisibility-inlines-hidden -o ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.gch ${CMAKE_SOURCE_DIR}/src/pch/pch.in.hpp
+  COMMENT "Creating project-wide pre-compiled header."
+)
+add_custom_command(
+  OUTPUT ${CMAKE_BINARY_DIR}/src/pch/pch_visibility_hidden.hpp.gch
+  COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden -o ${CMAKE_BINARY_DIR}/src/pch/pch_visibility_hidden.hpp.gch ${CMAKE_SOURCE_DIR}/src/pch/pch.in.hpp
   COMMENT "Creating project-wide pre-compiled header."
 )
 add_custom_target(
   precompiled_header
-  DEPENDS ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch
+  DEPENDS ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.gch
+  DEPENDS ${CMAKE_BINARY_DIR}/src/pch/pch_visibility_hidden.hpp.gch
 )
 
 #**************************************************************************/
@@ -655,11 +661,6 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
     endif()
   endif()
 
-  # Use precompiled headers by default   
-  # TODO - does this need to be clang-only?
-  set_property(TARGET ${NAME} APPEND_STRING PROPERTY COMPILE_FLAGS " -include-pch ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch")
-  add_dependencies(${NAME} precompiled_header)
-
   if (${IS_LIBRARY})
     if(${SHARED})
             target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
@@ -766,14 +767,17 @@ macro(make_library NAME)
     endif()
   endif()
 
+  add_dependencies(${NAME} precompiled_header)
   if (${make_library_EXTERNAL_VISIBILITY})
     # do nothing
     message(STATUS "External Visibility: " ${NAME})
     target_compile_options(${NAME} PRIVATE "-fvisibility=default")
     target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
+    target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include-pch ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.gch>)
   else()
     target_compile_options(${NAME} PRIVATE "-fvisibility=hidden")
     target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
+    target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include-pch ${CMAKE_BINARY_DIR}/src/pch/pch_visibility_hidden.hpp.gch>)
   endif()
 
   if(NOT CLANG)
