@@ -6,12 +6,11 @@
 #ifndef TURI_UNITY_SARRAY_FILE_FORMAT_INTERFACE_HPP
 #define TURI_UNITY_SARRAY_FILE_FORMAT_INTERFACE_HPP
 
+// Project-wide precompiled header
+#include <pch/pch.hpp>
+
 #define BOOST_SPIRIT_THREADSAFE
 
-#include <cstdlib>
-#include <string>
-#include <sstream>
-#include <map>
 #include <fileio/general_fstream.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>

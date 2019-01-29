@@ -6,9 +6,9 @@
 #ifndef TURI_DENSE_BITSET_HPP
 #define TURI_DENSE_BITSET_HPP
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+// Project-wide precompiled header
+#include <pch/pch.hpp>
+
 #include <stdint.h>
 #include <logger/logger.hpp>
 #include <serialization/serialization_includes.hpp>

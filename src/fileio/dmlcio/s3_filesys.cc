@@ -1,10 +1,6 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <algorithm>
-#include <ctime>
-#include <sstream>
+// Project-wide precompiled header
+#include <pch/pch.hpp>
+
 #include <fileio/set_curl_options.hpp>
 #include <fileio/get_s3_endpoint.hpp>
 extern "C" {

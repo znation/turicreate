@@ -6,17 +6,14 @@
 #ifndef TURI_PTHREAD_TOOLS_HPP
 #define TURI_PTHREAD_TOOLS_HPP
 
+// Project-wide precompiled header
+#include <pch/pch.hpp>
 
-#include <cstdlib>
 #include <parallel/pthread_h.h>
 #include <semaphore.h>
 #include <sched.h>
 #include <signal.h>
 #include <sys/time.h>
-#include <vector>
-#include <list>
-#include <queue>
-#include <iostream>
 #include <boost/function.hpp>
 #include <logger/assertions.hpp>
 #include <parallel/atomic_ops.hpp>

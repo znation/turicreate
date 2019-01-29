@@ -5,7 +5,10 @@
  */
 #ifndef TURI_UNITY_FILE_LINE_COUNT_ESTIMATOR_HPP
 #define TURI_UNITY_FILE_LINE_COUNT_ESTIMATOR_HPP
-#include <cstdlib>
+
+// Project-wide precompiled header
+#include <pch/pch.hpp>
+
 namespace turi {
 
 /**

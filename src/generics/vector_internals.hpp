@@ -6,17 +6,11 @@
 #ifndef TURI_GL_VECTOR_INTERNALS_H_
 #define TURI_GL_VECTOR_INTERNALS_H_
 
-#include <cstdint>
-#include <cstdlib>
-#include <algorithm>
-#include <iterator>
-#include <memory>
-#include <exception>
-#include <type_traits>
-#include <initializer_list>
+// Project-wide precompiled header
+#include <pch/pch.hpp>
+
 #include <logger/assertions.hpp>
 #include <util/basic_types.hpp>
-#include <utility>
 
 #ifdef NDEBUG
 #define _VEC_NDEBUG_NOEXCEPT noexcept

@@ -6,9 +6,8 @@
 #ifndef TURI_BLOB_HPP
 #define TURI_BLOB_HPP
 
-#include <cstring>
-#include <cstdlib>
-#include <cassert>
+// Project-wide precompiled header
+#include <pch/pch.hpp>
 
 #include <serialization/iarchive.hpp>
 #include <serialization/oarchive.hpp>

@@ -6,13 +6,10 @@
 #ifndef TURI_RANDOM_HPP
 #define TURI_RANDOM_HPP
 
-#include <cstdlib>
+// Project-wide precompiled header
+#include <pch/pch.hpp>
+
 #include <stdint.h>
-
-
-#include <vector>
-#include <limits>
-#include <algorithm>
 
 #include <boost/random.hpp>
 #include <timer/timer.hpp>
