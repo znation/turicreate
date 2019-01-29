@@ -339,7 +339,8 @@ set(CPP_REAL_COMPILER_FLAGS "-Wall ${DEBUG_INFO_FLAGS} ${CPP11_FLAGS} ${COMPILER
 if (CLANG)
   # clang 9.0.0 and earlier will warn (error with -Werror) on unused -pthread during linking
   # so adding only to compile options is what we need.
-  add_compile_options(-pthread)
+  set(C_REAL_COMPILER_FLAGS "${C_REAL_COMPILER_FLAGS} -Xclang -pthread")
+  set(CPP_REAL_COMPILER_FLAGS "${CPP_REAL_COMPILER_FLAGS} -Xclang -pthread")
 else()
   set(C_REAL_COMPILER_FLAGS "${C_REAL_COMPILER_FLAGS} -pthread")
   set(CPP_REAL_COMPILER_FLAGS "${CPP_REAL_COMPILER_FLAGS} -pthread")
@@ -494,6 +495,30 @@ set(CMAKE_CXX_FLAGS_RELEASE
   "${RELEASE_OPTIMIZATION_FLAGS} ${EXTRA_OPTIMIZATION_FLAGS} ${DISABLE_WARNING_FLAGS} ${PROFILING_FLAGS} -Wno-attributes ${ARCH_FLAG} ${MTUNE} ${CPP_REAL_COMPILER_FLAGS} ${WERROR_FLAGS} ${INT128_FLAGS} ${ALTERNATE_LINKER} -DNDEBUG -DHAVE_PTHREAD=1 -DARMA_NO_DEBUG"
   CACHE STRING "compiler options" FORCE)
 
+if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_RELEASE})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
+else()
+  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_DEBUG})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
+endif()
+
+#**************************************************************************/
+#*                                                                        */
+#*       Enable pre-compiled headers to speed up the build                */
+#*                                                                        */
+#**************************************************************************/
+# TODO - does this work in anything other than clang?
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src/pch)
+add_custom_command(
+  OUTPUT ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch
+  COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -o ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch ${CMAKE_SOURCE_DIR}/src/pch/pch.in.hpp
+  COMMENT "Creating project-wide pre-compiled header."
+)
+add_custom_target(
+  precompiled_header
+  DEPENDS ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch
+)
 
 #**************************************************************************/
 #*                                                                        */
@@ -629,6 +654,11 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
       endif()
     endif()
   endif()
+
+  # Use precompiled headers by default   
+  # TODO - does this need to be clang-only?
+  set_property(TARGET ${NAME} APPEND_STRING PROPERTY COMPILE_FLAGS " -include-pch ${CMAKE_BINARY_DIR}/src/pch/pch.hpp.pch")
+  add_dependencies(${NAME} precompiled_header)
 
   if (${IS_LIBRARY})
     if(${SHARED})
