@@ -600,7 +600,7 @@ include(eval)
 #
 # Boost, pthread is always added as a default dependency. OpenMP is added
 # when possible.
-macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFINED)
+macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFINED STATIC)
   # create the target
   if (${IS_LIBRARY})
     message(STATUS "Adding Library: ${NAME}")
@@ -633,7 +633,7 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
   if (${IS_LIBRARY})
     if(${SHARED})
             target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
-    else()
+    elseif(${STATIC})
             target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
     endif()
   else()
@@ -685,7 +685,7 @@ endmacro()
 # Boost, pthread is always added as a default dependency. OpenMP is added
 # when possible.
 macro(make_library NAME)
-  set(options SHARED EXTERNAL_VISIBILITY SHARED_ALL_DEFINED DEAD_STRIP)
+  set(options SHARED EXTERNAL_VISIBILITY SHARED_ALL_DEFINED DEAD_STRIP STATIC)
   set(one_value_args COMPILE_FLAGS OUTPUT_NAME EXPORT_LINUX_MAP_FILE EXPORT_OSX_MAP_FILE)
   set(multi_value_args
     SOURCES REQUIRES MAC_REQUIRES LINUX_REQUIRES
@@ -708,12 +708,14 @@ macro(make_library NAME)
   if (${make_library_SHARED})
     message(STATUS "Shared Library: " ${NAME})
     add_library(${NAME} SHARED ${make_library_SOURCES})
-  else()
+  elseif(${make_library_STATIC})
     add_library(${NAME} STATIC ${make_library_SOURCES})
+  else()
+    add_library(${NAME} OBJECT ${make_library_SOURCES})
   endif()
 
   make_target_impl("${NAME}" "${make_library_COMPILE_FLAGS}"
-    "${make_library_REQUIRES}" TRUE "${make_library_SHARED}" "${make_library_SHARED_ALL_DEFINED}")
+    "${make_library_REQUIRES}" TRUE "${make_library_SHARED}" "${make_library_SHARED_ALL_DEFINED}" "${make_library_STATIC}")
 
   if (make_library_OUTPUT_NAME)
           message(STATUS "make_library ${NAME} ===> ${make_library_OUTPUT_NAME}")
@@ -819,7 +821,7 @@ macro(make_empty_library NAME)
   endif()
   add_library(${NAME} STATIC ${CMAKE_SOURCE_DIR}/dummy.cpp)
   make_target_impl("${NAME}" ""
-      "${make_library_REQUIRES}" TRUE FALSE FALSE)
+      "${make_library_REQUIRES}" TRUE FALSE FALSE TRUE)
 
     set_target_properties(${NAME} PROPERTIES EMPTY_LIBRARY TRUE)
 endmacro()
@@ -896,7 +898,7 @@ function (make_executable NAME)
   endif()
 
   make_target_impl("${NAME}" "${make_library_COMPILE_FLAGS}"
-    "${make_library_REQUIRES}" FALSE FALSE FALSE)
+    "${make_library_REQUIRES}" FALSE FALSE FALSE FALSE)
   if (make_library_OUTPUT_NAME)
           message(STATUS "make_executable ${NAME} ===> ${make_library_OUTPUT_NAME}")
           set_target_properties(${NAME} PROPERTIES OUTPUT_NAME ${make_library_OUTPUT_NAME})
@@ -1027,12 +1029,21 @@ macro (make_copy_target NAME)
                           list(APPEND all_target_locations ${location})
                   endforeach()
           else()
-                  add_custom_command(TARGET ${NAME} POST_BUILD
-                          COMMENT "copying target of ${target}"
-                          DEPENDS ${target}
-                          COMMAND ${CMAKE_COMMAND} -E
-                          copy_if_different $<TARGET_FILE:${target}> ${CMAKE_CURRENT_BINARY_DIR})
-                  list(APPEND all_target_locations $<TARGET_FILE:${target}>)
+                  if($<TARGET_OBJECTS:${target}>)
+                    add_custom_command(TARGET ${NAME} POST_BUILD
+                            COMMENT "copying target of ${target}"
+                            DEPENDS ${target}
+                            COMMAND ${CMAKE_COMMAND} -E
+                            copy_if_different $<TARGET_OBJECTS:${target}> ${CMAKE_CURRENT_BINARY_DIR})
+                    list(APPEND all_target_locations $<TARGET_OBJECTS:${target}>)
+                  else()
+                    add_custom_command(TARGET ${NAME} POST_BUILD
+                            COMMENT "copying target of ${target}"
+                            DEPENDS ${target}
+                            COMMAND ${CMAKE_COMMAND} -E
+                            copy_if_different $<TARGET_FILE:${target}> ${CMAKE_CURRENT_BINARY_DIR})
+                    list(APPEND all_target_locations $<TARGET_FILE:${target}>)
+                  endif()
           endif()
   endforeach()
   message(STATUS "Adding Copy Target ${NAME} is copying:  ${all_target_locations}")
