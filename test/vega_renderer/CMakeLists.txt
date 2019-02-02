@@ -19,9 +19,14 @@ if(APPLE)
             ${WEBKIT_LIBRARY}
             ${XCTEST_LIBRARY}
     )
+    target_compile_options(vega_renderer_test_utils PUBLIC "-fsanitize=leak")
+    target_compile_options(vega_renderer_test_utils PUBLIC "-g")
 
     make_boost_test(vega_example_tests.cxx REQUIRES vega_renderer_test_utils)
     make_boost_test(vega_lite_example_tests.cxx REQUIRES vega_renderer_test_utils)
     make_boost_test(turicreate_example_tests.cxx REQUIRES vega_renderer_test_utils)
+    target_compile_options(turicreate_example_tests.cxxtest PUBLIC "-fsanitize=leak")
+    target_compile_options(turicreate_example_tests.cxxtest PUBLIC "-g")
+    target_link_options(turicreate_example_tests.cxxtest PUBLIC "-fsanitize=leak")
 
 endif()

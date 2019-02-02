@@ -87,6 +87,9 @@ if(APPLE)
       ${CORETEXT_LIBRARY}
    )
 
+   target_compile_options(vega_renderer PUBLIC "-fsanitize=leak")
+   target_compile_options(vega_renderer PUBLIC "-g")
+
    target_compile_options(vega_renderer PUBLIC "-fobjc-arc")
 
 endif()
