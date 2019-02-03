@@ -51,4 +51,16 @@ BOOST_AUTO_TEST_CASE(testCategoricalHistogram) {
   this->run_test_case("mushroom_categorical_histogram.vg.json");
 }
 
+BOOST_AUTO_TEST_CASE(testForLeaks) {
+  for (size_t i=0; i<2; i++) {
+    this->run_test_case("mushroom_categorical_heatmap.vg.json");
+    this->run_test_case("mushroom_sframe_summary.vg.json");
+    this->run_test_case("clang_format_heatmap.vg.json");
+    this->run_test_case("clang_format_scatterplot.vg.json");
+    this->run_test_case("clang_format_boxes_and_whiskers.vg.json");
+    this->run_test_case("clang_format_boxes_and_whiskers.vg.json");
+    this->run_test_case("mushroom_categorical_histogram.vg.json");
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

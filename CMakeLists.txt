@@ -1063,6 +1063,9 @@ include_directories(SYSTEM src/external)
 include_directories(SYSTEM src/external/google)
 include_directories(src/platform)
 
+include_directories(SYSTEM /usr/local/opt/llvm/include)
+include_directories(SYSTEM /usr/local/opt/llvm/include/c++/v1)
+
 if(EXISTS ${CMAKE_SOURCE_DIR}/extensions)
   include_directories(SYSTEM extensions)
   add_subdirectory(extensions)
