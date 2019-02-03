@@ -1,61 +1,62 @@
 project(unity)
 
-# We depend on the open source src/unity/python/turicreate
-# to fill
-#  - INSTALLATION_BINARY_FILES
-#  - INSTALLATION_EXTENSIONS
-#  - INSTALLATION_BINARY_TARGETS
-#
-# These can be amended locally to set up alternative behavior
-
 if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
 
-set(INSTALLATION_BINARY_TARGETS
-  unity
-)
-set(INSTALLATION_BINARY_FILES)
-set(INSTALLATION_EXTENSIONS)
 # add the propretary extensions
 get_property(EXTENSIONS_LIST DIRECTORY "../../extensions" PROPERTY EXTENSIONS_LIST)
 foreach(loop_var ${EXTENSIONS_LIST})
-  message(STATUS "Copying Extension to turicreate python directory ${loop_var}")
-  list(APPEND INSTALLATION_EXTENSIONS ${loop_var})
+  message(STATUS "Building extension shared library in turicreate python directory: ${loop_var}")
+  make_shared_library_from_static(${loop_var}
+    REQUIRES ${loop_var}_static
+    OUTPUT_NAME ${loop_var}
+  )
+  if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_custom_command(TARGET ${loop_var}
+      POST_BUILD
+      COMMAND strip -Sx "$<TARGET_FILE:${loop_var}>"
+      COMMENT "Stripping ${loop_var} library"
+    )
+  endif()
 endforeach()
 
-make_copy_target(release_binaries
-        TARGETS
-        ${UNITY_ALL_LIBRARIES}
-        ${INSTALLATION_BINARY_TARGETS}
-        ${INSTALLATION_EXTENSIONS}
+if(APPLE AND HAS_MLCUSTOMMODEL)
+  set(EXTRA_REQUIRES objcapi)
+endif()
+
+make_shared_library_from_static(unity_shared
+      REQUIRES unity TuriCreate_static ${EXTRA_REQUIRES}
+      OUTPUT_NAME unity_shared
+      EXPORT_MAP ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_custom_command(TARGET unity_shared
+    POST_BUILD
+    COMMAND strip -Sx "$<TARGET_FILE:unity_shared>"
+    COMMENT "Stripping unity_shared library"
+  )
+endif()
+
+make_symlink_target(release_binaries
         FILES
-        ${INSTALLATION_BINARY_FILES}
-        ${INSTALLATION_SYSTEM_BINARY_FILES}
+          ${INSTALLATION_SYSTEM_BINARY_FILES}
         )
 
 ADD_CUSTOM_TARGET (clean_turicreate_binaries)
 ADD_CUSTOM_COMMAND(
   COMMENT "clean turicreate binaries"
-  COMMAND rm -f ${INSTALLATION_BINARY_TARGETS} ${UNITY_ALL_LIBRARIES} *.so *.dylib *.dll *.jar
+  COMMAND rm -f *.so *.so.* *.dylib *.dll *.jar
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   TARGET clean_turicreate_binaries
 )
 
 add_subdirectory(cython)
 
-set_property(DIRECTORY PROPERTY INSTALLATION_EXTENSIONS "${INSTALLATION_EXTENSIONS}")
-set_property(DIRECTORY PROPERTY INSTALLATION_BINARY_TARGETS "${INSTALLATION_BINARY_TARGETS}")
-set_property(DIRECTORY PROPERTY INSTALLATION_BINARY_FILES "${INSTALLATION_BINARY_FILES}")
-
 if (APPLE)
-  make_copy_target(
+  make_symlink_target(
     visualization_client_app
     FILES
-    ${CMAKE_SOURCE_DIR}/src/unity/python/turicreate/visualization/vega_3.2.1.js
-    ${CMAKE_SOURCE_DIR}/src/unity/python/turicreate/visualization/vg2png
-    ${CMAKE_SOURCE_DIR}/src/unity/python/turicreate/visualization/vg2svg
-    DIRECTORIES
     "${CMAKE_BINARY_DIR}/src/visualization/${CMAKE_BUILD_TYPE}/Turi Create Visualization.app"
   )
   add_dependencies(visualization_client_app visualization_client)
@@ -65,12 +66,5 @@ elseif(LINUX)
     DEPENDS visualization_client
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/Turi Create Visualization"
     COMMAND cp -a "${CMAKE_BINARY_DIR}/src/visualization/TcViz/*" "${CMAKE_CURRENT_BINARY_DIR}/Turi Create Visualization"
-  )
-  add_custom_target(
-    visualization_vega ALL
-    DEPENDS visualization_client
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/unity/python/turicreate/visualization/vega_3.2.1.js" "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/unity/python/turicreate/visualization/vg2png" "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/unity/python/turicreate/visualization/vg2svg" "${CMAKE_CURRENT_BINARY_DIR}"
   )
 endif()
