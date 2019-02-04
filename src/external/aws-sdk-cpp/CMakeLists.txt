@@ -258,6 +258,6 @@ make_library(aws-sdk-cpp
   )
 
 target_include_directories(aws-sdk-cpp SYSTEM
-  INTERFACE aws-cpp-sdk-core/include
-  INTERFACE aws-cpp-sdk-s3/include
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/aws-cpp-sdk-core/include
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/aws-cpp-sdk-s3/include
   )

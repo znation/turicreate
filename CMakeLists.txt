@@ -697,15 +697,11 @@ macro(make_library NAME)
   else()
     message(STATUS "Object Library: " ${NAME})
     add_library(${NAME}_objects OBJECT ${make_library_SOURCES})
-    list(LENGTH make_library_REQUIRES REQUIRES_LENGTH)
-    if(NOT ${REQUIRES_LENGTH} EQUAL 0)
-      add_dependencies(${NAME}_objects ${make_library_REQUIRES})
-    endif()
     set(REAL_COMPILE_TARGET ${NAME}_objects)
     add_library(${NAME} INTERFACE)
     add_dependencies(${NAME} ${NAME}_objects)
     target_sources(${NAME} INTERFACE $<TARGET_OBJECTS:${NAME}_objects>)
-    target_link_libraries(${NAME} INTERFACE ${make_library_REQUIRES})
+    target_link_libraries(${NAME} INTERFACE ${REQUIREMENTS})
   endif()
 
   make_target_impl("${REAL_COMPILE_TARGET}" "${make_library_COMPILE_FLAGS}"
@@ -1023,7 +1019,18 @@ endforeach()
 
 include_directories(src)
 include_directories(SYSTEM src/external)
+
+# TODO why doesn't this work in src/external/armadillo/CMakeLists.txt?
+include_directories(SYSTEM src/external/armadillo/include)
+
+# TODO why doesn't this work in src/external/aws-sdk-cpp/CMakeLists.txt?
+include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
+include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
+
+# TODO put this in src/external/google/CMakeLists.txt
 include_directories(SYSTEM src/external/google)
+
+# TODO don't special case platform - include as normal from src
 include_directories(src/platform)
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/extensions)

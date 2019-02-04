@@ -45,6 +45,7 @@ make_library(fileio
   ${FILEIO_REMOTE_FS_REQUIRES} libxml2 logger pthread z cancel_serverside_ops globals process util ${PLATFORM_DEPENDENCIES} network random 
   MAC_REQUIRES
     iconv
+  STATIC
   )
     
 

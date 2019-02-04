@@ -18,5 +18,6 @@ make_library(logger
     timer
     parallel
     stack_trace
-    EXTERNAL_VISIBILITY
+  EXTERNAL_VISIBILITY
+  STATIC
   )
