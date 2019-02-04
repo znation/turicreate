@@ -78,6 +78,7 @@ make_library(unity_coreml_model_export
     -Wno-unused-function          # TODO: resolve these issues at the source level
     -Wno-unused-local-typedef     # TODO: resolve these issues at the source level
     -Wno-unused-variable          # TODO: resolve these issues at the source level
+    -DCoreML=__tc_CoreML
   COMPILE_FLAGS_EXTRA_CLANG
     -Wno-format                   # TODO: resolve these issues at the source level
   COMPILE_FLAGS_EXTRA_GCC
@@ -87,4 +88,3 @@ make_library(unity_coreml_model_export
     -Wno-unknown-pragmas          # NOTE: used for auto-generated protobuf source files
     -Wno-unused-function          # NOTE: used for auto-generated protobuf source files
   )
-target_compile_definitions(protobuf PUBLIC CoreML=__tc_CoreML)

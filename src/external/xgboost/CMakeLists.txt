@@ -10,6 +10,11 @@ make_library(xgboost
   REQUIRES
     libjson
   EXTERNAL_VISIBILITY
+  COMPILE_FLAGS_EXTRA
+    -DXGBOOST_CUSTOMIZE_MSG_
+    -Wno-narrowing
+    -msse2
+    -funroll-loops
   COMPILE_FLAGS_EXTRA_GCC
     -Wno-comment
     -Wno-pointer-arith
@@ -20,6 +25,3 @@ make_library(xgboost
   COMPILE_FLAGS_EXTRA
     -Wno-unused-command-line-argument
 )
-
-# TODO this doesn't seem to take effect at all
-set_property(TARGET xgboost APPEND_STRING PROPERTY COMPILE_FLAGS " -DXGBOOST_CUSTOMIZE_MSG_ -Wno-narrowing -msse2 -funroll-loops")

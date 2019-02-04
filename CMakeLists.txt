@@ -2,7 +2,7 @@ project(Turi)
 
 # We require the most recent version of cmake and automatically
 # install the correct version when using the cmake lists
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 
 # Libraries linked via full path no longer produce linker search paths.
 cmake_policy(SET CMP0003 NEW)
@@ -13,6 +13,8 @@ if(${CMAKE_MAJOR_VERSION} GREATER 2)
 cmake_policy(SET CMP0045 OLD)
 cmake_policy(SET CMP0046 OLD)
 cmake_policy(SET CMP0042 NEW)
+cmake_policy(SET CMP0051 NEW)
+cmake_policy(SET CMP0063 NEW)
 endif()
 
 # Generate a compilation database for use with automated tools like IDE/editor
@@ -581,13 +583,12 @@ include(eval)
 
 # This is an internal function and should not be used
 # Usage:
-# make_target_impl(target compile_flags sources requirements is_library SHARED)
+# make_target_impl(target compile_flags requirements is_library shared shared_all_defined static)
 #
 # Example:
 # make_target_impl(fileio "-fPIC"
-#                   "asyncurl.cpp;sysutils.cpp"
 #                   "logger;dl;pthread;z"
-#                   TRUE FALSE)
+#                   TRUE FALSE FALSE TRUE)
 #
 # This generates a target library/binary with the given name. The optional
 # compile_flags are appended to the target compile flags. "-fPIC" is ALWAYS
@@ -595,21 +596,11 @@ include(eval)
 # source files.  "requirements" is a list listing all the libraries, and
 # builtins this target depends on. IS_LIBRARY must be "TRUE" or "FALSE"
 #
-# if DYNAMIC is true, a dynamic library is built.
+# if SHARED is true, a dynamic library is built.
 #
 # Boost, pthread is always added as a default dependency. OpenMP is added
 # when possible.
 macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFINED STATIC)
-  # create the target
-  if (${IS_LIBRARY})
-    message(STATUS "Adding Library: ${NAME}")
-  else()
-    message(STATUS "Adding Executable: ${NAME}")
-    # default dependencies
-    target_link_libraries(${NAME} boost pthread openmp)
-  endif()
-
-  set_property(TARGET ${NAME} PROPERTY IS_LIBRARY ${IS_LIBRARY})
 
   # add a custom property to the target listing its dependencies
   if(NOT ${FLAGS} STREQUAL "")
@@ -628,18 +619,6 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
       endif()
     endif()
   endif()
-
-  if (${IS_LIBRARY})
-    if(${SHARED})
-            target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
-    elseif(${STATIC})
-            target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
-    endif()
-  else()
-    target_link_libraries(${NAME} ${REQUIREMENTS})
-  endif()
-  # make sure boost is always built
-  add_dependencies(${NAME} boost)
 endmacro()
 
 
@@ -704,16 +683,32 @@ macro(make_library NAME)
     endif()
   endif()
 
+  set(REAL_COMPILE_TARGET ${NAME})
   if (${make_library_SHARED})
     message(STATUS "Shared Library: " ${NAME})
     add_library(${NAME} SHARED ${make_library_SOURCES})
+    set_property(TARGET ${NAME} PROPERTY IS_LIBRARY TRUE)
+    target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
   elseif(${make_library_STATIC})
+    message(STATUS "Static Library: " ${NAME})
     add_library(${NAME} STATIC ${make_library_SOURCES})
+    set_property(TARGET ${NAME} PROPERTY IS_LIBRARY TRUE)
+    target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
   else()
-    add_library(${NAME} OBJECT ${make_library_SOURCES})
+    message(STATUS "Object Library: " ${NAME})
+    add_library(${NAME}_objects OBJECT ${make_library_SOURCES})
+    list(LENGTH make_library_REQUIRES REQUIRES_LENGTH)
+    if(NOT ${REQUIRES_LENGTH} EQUAL 0)
+      add_dependencies(${NAME}_objects ${make_library_REQUIRES})
+    endif()
+    set(REAL_COMPILE_TARGET ${NAME}_objects)
+    add_library(${NAME} INTERFACE)
+    add_dependencies(${NAME} ${NAME}_objects)
+    target_sources(${NAME} INTERFACE $<TARGET_OBJECTS:${NAME}_objects>)
+    target_link_libraries(${NAME} INTERFACE ${make_library_REQUIRES})
   endif()
 
-  make_target_impl("${NAME}" "${make_library_COMPILE_FLAGS}"
+  make_target_impl("${REAL_COMPILE_TARGET}" "${make_library_COMPILE_FLAGS}"
     "${make_library_REQUIRES}" TRUE "${make_library_SHARED}" "${make_library_SHARED_ALL_DEFINED}" "${make_library_STATIC}")
 
   if (make_library_OUTPUT_NAME)
@@ -722,35 +717,29 @@ macro(make_library NAME)
   endif()
 
   if (make_library_COMPILE_FLAGS_EXTRA)
-    target_compile_options(${NAME} PRIVATE ${make_library_COMPILE_FLAGS_EXTRA})
+    target_compile_options(${REAL_COMPILE_TARGET} PRIVATE ${make_library_COMPILE_FLAGS_EXTRA})
   endif()
 
   if (CLANG)
     if (make_library_COMPILE_FLAGS_EXTRA_CLANG)
-      target_compile_options(${NAME} PRIVATE ${make_library_COMPILE_FLAGS_EXTRA_CLANG})
+      target_compile_options(${REAL_COMPILE_TARGET} PRIVATE ${make_library_COMPILE_FLAGS_EXTRA_CLANG})
     endif()
   endif()
 
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (make_library_COMPILE_FLAGS_EXTRA_GCC)
-      target_compile_options(${NAME} PRIVATE ${make_library_COMPILE_FLAGS_EXTRA_GCC})
+      target_compile_options(${REAL_COMPILE_TARGET} PRIVATE ${make_library_COMPILE_FLAGS_EXTRA_GCC})
     endif()
   endif()
 
   if (${make_library_EXTERNAL_VISIBILITY})
     # do nothing
     message(STATUS "External Visibility: " ${NAME})
-    target_compile_options(${NAME} PRIVATE "-fvisibility=default")
-    target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
+    target_compile_options(${REAL_COMPILE_TARGET} PRIVATE "-fvisibility=default")
+    target_compile_options(${REAL_COMPILE_TARGET} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
   else()
-    target_compile_options(${NAME} PRIVATE "-fvisibility=hidden")
-    target_compile_options(${NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
-  endif()
-
-  if(NOT CLANG)
-    if (NOT WIN32)
-      # set_property(TARGET ${NAME} APPEND_STRING PROPERTY LINK_FLAGS " -static-libstdc++ ")
-    endif()
+    target_compile_options(${REAL_COMPILE_TARGET} PRIVATE "-fvisibility=hidden")
+    target_compile_options(${REAL_COMPILE_TARGET} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>)
   endif()
 
   if(APPLE)
@@ -896,8 +885,16 @@ function (make_executable NAME)
     endif()
   endif()
 
+  message(STATUS "Adding Executable: ${NAME}")
+
   make_target_impl("${NAME}" "${make_library_COMPILE_FLAGS}"
     "${make_library_REQUIRES}" FALSE FALSE FALSE FALSE)
+
+  target_link_libraries(${NAME} ${make_library_REQUIRES})
+
+  # default dependencies for executables
+  target_link_libraries(${NAME} boost pthread openmp)
+
   if (make_library_OUTPUT_NAME)
           message(STATUS "make_executable ${NAME} ===> ${make_library_OUTPUT_NAME}")
           set_target_properties(${NAME} PROPERTIES OUTPUT_NAME ${make_library_OUTPUT_NAME})

@@ -20,6 +20,8 @@ if(APPLE AND HAS_MLCUSTOMMODEL)
     SHARED_ALL_DEFINED
     EXPORT_OSX_MAP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/symbol_exports.ver
     DEAD_STRIP
+    COMPILE_FLAGS_EXTRA
+      -fobjc-arc
   )
 
   make_library(objcapi
@@ -29,10 +31,9 @@ if(APPLE AND HAS_MLCUSTOMMODEL)
       TuriCreate_static
       ${FOUNDATION}
       ${CORE_ML}
+    COMPILE_FLAGS_EXTRA
+      -fobjc-arc
   )
-
-  target_compile_options(objcapi PUBLIC "-fobjc-arc")
-  target_compile_options(Recommender PUBLIC "-fobjc-arc")
 
   if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_custom_command(TARGET Recommender

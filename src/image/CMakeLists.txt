@@ -23,6 +23,13 @@ make_executable(io_example
     image_io
 )
 
+#set to native if supported
+check_cxx_compiler_flag(-Wno-c++11-narrowing HAS_NARROWING)
+
+if(HAS_NARROWING)
+  set(EXTRA_FLAGS "-Wno-c++11-narrowing")
+endif()
+
 make_library(image_io
         SOURCES
     io.cpp
@@ -33,10 +40,7 @@ make_library(image_io
       libjpeg
       logger
       fileio
-      EXTERNAL_VISIBILITY)
-#set to native if supported
-check_cxx_compiler_flag(-Wno-c++11-narrowing HAS_NARROWING)
-
-if(HAS_NARROWING)
-set_property(TARGET image_io APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-c++11-narrowing")
-endif()
+    EXTERNAL_VISIBILITY
+    COMPILE_FLAGS_EXTRA
+      ${EXTRA_FLAGS}
+  )

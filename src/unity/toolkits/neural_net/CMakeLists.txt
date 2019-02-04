@@ -23,7 +23,7 @@ if(APPLE AND HAS_MPS AND NOT TC_BUILD_IOS)
     message("MetalPerformanceShaders found at ${METAL_PERFORMANCE_SHADERS}.")
 
     make_library(tcmps
-        SOURCES
+      SOURCES
         TCMPSImageAugmenting.m
         mps_image_augmentation.mm
         mps_compute_context.mm
@@ -47,8 +47,11 @@ if(APPLE AND HAS_MPS AND NOT TC_BUILD_IOS)
         ${CORE_IMAGE}
         ${METAL}
         ${METAL_PERFORMANCE_SHADERS}
+      COMPILE_FLAGS_EXTRA
+        -fobjc-arc
+        -Wno-nullability-completeness
+        -Wno-shadow-ivar
     )
-    target_compile_options(tcmps PUBLIC "-fobjc-arc -Wno-nullability-completeness -Wno-shadow-ivar")
     set(additional_unity_neural_net_requirements tcmps)
 else()
     set(additional_unity_neural_net_requirements "")
