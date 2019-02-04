@@ -22,11 +22,20 @@ foreach(loop_var ${EXTENSIONS_LIST})
 endforeach()
 
 if(APPLE AND HAS_MLCUSTOMMODEL)
+  # TODO get rid of EXTRA_REQUIRES if nobody is using it anymore
   set(EXTRA_REQUIRES objcapi)
 endif()
 
+# TODO - when object deps and external dependencies / static libraries are the only deps,
+# we can actually use a regular make_library(unity_shared SHARED)
+make_library(unity_shared_object_deps
+  SOURCES
+  OBJECT_REQUIRES
+    objcapi
+)
+
 make_shared_library_from_static(unity_shared
-      REQUIRES unity TuriCreate_static ${EXTRA_REQUIRES}
+      REQUIRES unity TuriCreate_static unity_shared_object_deps
       OUTPUT_NAME unity_shared
       EXPORT_MAP ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver)
 

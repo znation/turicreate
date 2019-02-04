@@ -64,27 +64,17 @@ if(APPLE)
    ##
    ## VegaRenderer
    ##
-
-   add_library( vega_renderer OBJECT
-   ${VEGA_RENDERER_SOURCES}
-   ${VEGA_RENDERER_PUBLIC_HEADERS}
-   ${VEGA_RENDERER_PROJECT_HEADERS}
-   ${VEGA_RENDERER_PRIVATE_HEADERS}
-   ${VEGA_RENDERER_RESOURCES}
+   make_library(vega_renderer
+      SOURCES
+         ${VEGA_RENDERER_SOURCES}
+      REQUIRES
+         ${VEGA_RENDERER_DEPENDENCIES}
+      OBJECT
    )
 
    add_dependencies(
       vega_renderer
       preprocessed_javascript
-   )
-
-   target_link_libraries(
-      vega_renderer
-      ${FOUNDATION_LIBRARY}
-      ${APPKIT_LIBRARY}
-      ${COREGRAPHICS_LIBRARY}
-      ${JAVASCRIPTCORE_LIBRARY}
-      ${CORETEXT_LIBRARY}
    )
 
    target_compile_options(vega_renderer PUBLIC "-fobjc-arc")

@@ -26,9 +26,9 @@ if(APPLE AND HAS_MLCUSTOMMODEL)
     SOURCES
       TuriCreateObjC.m
     REQUIRES
-      TuriCreate_static
       ${FOUNDATION}
       ${CORE_ML}
+    OBJECT
   )
 
   target_compile_options(objcapi PUBLIC "-fobjc-arc")

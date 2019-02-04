@@ -629,15 +629,6 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
     endif()
   endif()
 
-  if (${IS_LIBRARY})
-    if(${SHARED})
-            target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
-    else()
-            target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
-    endif()
-  else()
-    target_link_libraries(${NAME} ${REQUIREMENTS})
-  endif()
   # make sure boost is always built
   add_dependencies(${NAME} boost)
 endmacro()
@@ -650,7 +641,10 @@ endmacro()
 #                 REQUIRES libx liby
 #                 MAC_REQUIRES libz libzz
 #                 LINUX_REQUIRES libk libj
-#                 [SHARED] [OUTPUT_NAME xxxx])
+#                 [SHARED] [SHARED_ALL_DEFINED]
+#                 [OBJECT]
+#                 [EXTERNAL_VISIBILITY]
+#                 [OUTPUT_NAME xxxx])
 # Example:
 #
 # make_library(NAME fileio
@@ -677,6 +671,7 @@ endmacro()
 # SHARED will build a shared library instead of a static library
 # EXTERNAL_VISIBILITY will make the symbols be publicly visible. Default is hidden
 # SHARED_ALL_DEFINED will require shared libraries to have all symbols defined
+# OBJECT will build an object library (see https://gitlab.kitware.com/cmake/community/wikis/doc/tutorials/Object-Library)
 #
 # All other targets which depends on this library (using the "requires" function)
 # will automatically include all recursive dependencies.
@@ -684,14 +679,14 @@ endmacro()
 # Boost, pthread is always added as a default dependency. OpenMP is added
 # when possible.
 macro(make_library NAME)
-  set(options SHARED EXTERNAL_VISIBILITY SHARED_ALL_DEFINED DEAD_STRIP)
+  set(options SHARED EXTERNAL_VISIBILITY SHARED_ALL_DEFINED DEAD_STRIP OBJECT)
   set(one_value_args COMPILE_FLAGS OUTPUT_NAME EXPORT_LINUX_MAP_FILE EXPORT_OSX_MAP_FILE)
   set(multi_value_args
-    SOURCES REQUIRES MAC_REQUIRES LINUX_REQUIRES
+    SOURCES REQUIRES MAC_REQUIRES LINUX_REQUIRES OBJECT_REQUIRES
     COMPILE_FLAGS_EXTRA COMPILE_FLAGS_EXTRA_CLANG COMPILE_FLAGS_EXTRA_GCC)
  CMAKE_PARSE_ARGUMENTS(make_library "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
   if(NOT make_library_SOURCES)
-    MESSAGE(FATAL_ERROR "make_library call with no sources")
+    MESSAGE(WARNING "make_library call with no sources")
   endif()
 
   if (APPLE)
@@ -704,11 +699,45 @@ macro(make_library NAME)
     endif()
   endif()
 
+  set(OBJECT_REQUIRES_FILES)
+  set(OBJECT_REQUIRES_DEPS)
+  foreach(object_target ${make_library_OBJECT_REQUIRES})
+    list(APPEND OBJECT_REQUIRES_FILES $<TARGET_OBJECTS:${object_target}>)
+    get_property(transitive_objects TARGET ${object_target} PROPERTY TRANSITIVE_OBJECT_REQUIRES)
+    foreach(transitive_object ${transitive_objects})
+      list(APPEND OBJECT_REQUIRES_FILES $<TARGET_OBJECTS:${transitive_object}>)
+    endforeach()
+    get_property(transitive_deps TARGET ${object_target} PROPERTY TRANSITIVE_REQUIRES)
+    foreach(transitive_dep ${transitive_deps})
+      list(APPEND OBJECT_REQUIRES_DEPS ${transitive_dep}>)
+    endforeach()
+  endforeach()
+
   if (${make_library_SHARED})
     message(STATUS "Shared Library: " ${NAME})
-    add_library(${NAME} SHARED ${make_library_SOURCES})
+    add_library(${NAME} SHARED ${make_library_SOURCES} ${OBJECT_REQUIRES_FILES})
+    target_link_libraries(${NAME} PRIVATE ${make_library_REQUIRES} ${OBJECT_REQUIRES_DEPS})
+  elseif(${make_library_OBJECT})
+    message(STATUS "Object Library: " ${NAME})
+    add_library(${NAME} OBJECT ${make_library_SOURCES})
+    if(NOT("${make_library_REQUIRES}" STREQUAL ""))
+      add_dependencies(${NAME} ${make_library_REQUIRES})
+    endif()
+    set_property(
+      TARGET ${NAME}
+      PROPERTY TRANSITIVE_REQUIRES ${make_library_REQUIRES}
+    )
+    set_property(
+      TARGET ${NAME}
+      PROPERTY TRANSITIVE_OBJECT_REQUIRES ${make_library_OBJECT_REQUIRES}
+    )
   else()
-    add_library(${NAME} STATIC ${make_library_SOURCES})
+    message(STATUS "Static Library: " ${NAME})
+    add_library(${NAME} STATIC ${make_library_SOURCES} ${OBJECT_REQUIRES_FILES})
+    target_link_libraries(${NAME} PUBLIC ${make_library_REQUIRES} ${OBJECT_REQUIRES_DEPS})
+  endif()
+  if(NOT("${make_library_OBJECT_REQUIRES}" STREQUAL ""))
+    add_dependencies(${NAME} ${make_library_OBJECT_REQUIRES})
   endif()
 
   make_target_impl("${NAME}" "${make_library_COMPILE_FLAGS}"
@@ -896,6 +925,7 @@ function (make_executable NAME)
 
   make_target_impl("${NAME}" "${make_library_COMPILE_FLAGS}"
     "${make_library_REQUIRES}" FALSE FALSE FALSE)
+  target_link_libraries(${NAME} "${make_library_REQUIRES}")
   if (make_library_OUTPUT_NAME)
           message(STATUS "make_executable ${NAME} ===> ${make_library_OUTPUT_NAME}")
           set_target_properties(${NAME} PROPERTIES OUTPUT_NAME ${make_library_OUTPUT_NAME})

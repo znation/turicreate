@@ -11,22 +11,22 @@ else()
 endif()
 
   make_library(unity
-         SOURCES
-          server/registration.cpp
-          server/unity_server.cpp
-          server/unity_server_init.cpp
-          server/unity_server_control.cpp
-          server/unity_server_init.cpp
-         REQUIRES
-          unity_core
-          unity_toolkits
-          perf
-          numerics
-          ${additional_unity_requirements}
-         COMPILE_FLAGS_EXTRA_GCC
-          -Wno-unknown-pragmas  # NOTE: used for auto-generated protobuf source files
-          -Wno-unused-function  # NOTE: used for auto-generated protobuf source files
-  ) 
+    SOURCES
+      server/registration.cpp
+      server/unity_server.cpp
+      server/unity_server_init.cpp
+      server/unity_server_control.cpp
+      server/unity_server_init.cpp
+    REQUIRES
+      unity_core
+      unity_toolkits
+      perf
+      numerics
+      ${additional_unity_requirements}
+    COMPILE_FLAGS_EXTRA_GCC
+      -Wno-unknown-pragmas  # NOTE: used for auto-generated protobuf source files
+      -Wno-unused-function  # NOTE: used for auto-generated protobuf source files
+  )
 
   # Pull in all the libraries in the extensions directory.
   get_property(EXTENSIONS_LIST DIRECTORY "extensions" PROPERTY EXTENSIONS_LIST)

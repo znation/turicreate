@@ -15,9 +15,10 @@ if(APPLE)
             base_fixture.mm
             vega_webkit_renderer.mm
         REQUIRES
-            vega_renderer
             ${WEBKIT_LIBRARY}
             ${XCTEST_LIBRARY}
+        OBJECT_REQUIRES
+            vega_renderer
     )
 
     make_boost_test(vega_example_tests.cxx REQUIRES vega_renderer_test_utils)
