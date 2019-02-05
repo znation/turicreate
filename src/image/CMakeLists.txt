@@ -11,6 +11,7 @@ add_library(image_type OBJECT
   image_util_impl.cpp
 )
 add_dependencies(image_type
+  boost
   logger
   image_io
 )
@@ -45,6 +46,7 @@ add_library(image_io OBJECT
 )
 
 add_dependencies(image_io
+  boost
   libpng
   libjpeg
 )
