@@ -48,6 +48,22 @@ set(TC_PLATFORM_WIN32 false)
 if (APPLE)
   set(TC_PLATFORM_APPLE true)
   add_definitions(-DTC_PLATFORM_APPLE)
+
+  find_library( FOUNDATION_LIBRARY Foundation)
+  message( STATUS "Foundation found at ${FOUNDATION_LIBRARY}")
+
+  find_library( APPKIT_LIBRARY AppKit)
+  message( STATUS "AppKit found at ${APPKIT_LIBRARY}")
+
+  find_library( COREGRAPHICS_LIBRARY CoreGraphics)
+  message( STATUS "CoreGraphics found at ${COREGRAPHICS_LIBRARY}")
+
+  find_library( JAVASCRIPTCORE_LIBRARY JavaScriptCore)
+  message( STATUS "JavaScriptCore found at ${JAVASCRIPTCORE_LIBRARY}")
+
+  find_library( CORETEXT_LIBRARY CoreText)
+  message( STATUS "CoreText found at ${CORETEXT_LIBRARY}")
+
 elseif (WIN32)
   set(TC_PLATFORM_WIN32 true)
   add_definitions(-DTC_PLATFORM_WIN32)
@@ -546,7 +562,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   message(STATUS "Debug build with C++ flags: " ${CMAKE_CXX_FLAGS_DEBUG})
   message(STATUS "Debug build with C flags: " ${CMAKE_C_FLAGS_DEBUG})
 else()
-  message(ERROR "Unknown build type: " ${CMAKE_BUILD_TYPE} "!. Rerun ./configure")
+  message(FATAL_ERROR "Unknown build type: " ${CMAKE_BUILD_TYPE} "!. Rerun ./configure")
 endif()
 
 

@@ -14,11 +14,17 @@ if(APPLE)
         SOURCES
             base_fixture.mm
             vega_webkit_renderer.mm
+            $<TARGET_OBJECTS:vega_renderer>
         REQUIRES
-            vega_renderer
             ${WEBKIT_LIBRARY}
             ${XCTEST_LIBRARY}
+            ${FOUNDATION_LIBRARY}
+            ${APPKIT_LIBRARY}
+            ${COREGRAPHICS_LIBRARY}
+            ${JAVASCRIPTCORE_LIBRARY}
     )
+    target_compile_options(vega_renderer_test_utils PUBLIC "-fobjc-arc")
+    add_dependencies(vega_renderer_test_utils vega_renderer)
 
     make_boost_test(vega_example_tests.cxx REQUIRES vega_renderer_test_utils)
     make_boost_test(vega_lite_example_tests.cxx REQUIRES vega_renderer_test_utils)

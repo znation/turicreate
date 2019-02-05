@@ -33,18 +33,28 @@ add_library(_capi_objects OBJECT
 )
 
 set(_capi_requires unity unity_core numerics)
-if(APPLE)
-  set(_capi_requires ${_capi_requires} vega_renderer)
-endif()
 add_dependencies(_capi_objects ${_capi_requires})
 
 set(_capi_sources "$<TARGET_OBJECTS:_capi_objects>")
+if(APPLE)
+  set(_capi_sources ${_capi_sources} "$<TARGET_OBJECTS:vega_renderer>")
+  set(_capi_requires
+    ${_capi_requires}
+    ${FOUNDATION_LIBRARY}
+    ${APPKIT_LIBRARY}
+    ${COREGRAPHICS_LIBRARY}
+    ${JAVASCRIPTCORE_LIBRARY}
+  )
+endif()
 
 make_library(capi 
   SOURCES
   ${_capi_sources}
   REQUIRES
   ${_capi_requires})
+if(APPLE)
+  add_dependencies(capi vega_renderer)
+endif()
     
 # Create a static version of the library that also bundles in the server initializer
 make_library(TuriCreate_static
@@ -88,7 +98,7 @@ macro(make_capi_library NAME)
     make_library(${NAME}
       SOURCES
         ${__capi_INITIALIZER_SOURCE_FILE}
-        $<TARGET_OBJECTS:_capi_objects>
+        ${_capi_sources}
        REQUIRES
        ${EXTRA_REQUIRES}
        ${__capi_REQUIRES}
@@ -130,7 +140,7 @@ macro(make_capi_library NAME)
         make_library(${NAME}
       SOURCES 
             ${__capi_INITIALIZER_SOURCE_FILE}
-            $<TARGET_OBJECTS:_capi_objects>
+            ${_capi_sources}
        REQUIRES
             ${EXTRA_REQUIRES}
             ${__capi_REQUIRES}
