@@ -5,5 +5,5 @@ make_library(shmipc
     shmipc.cpp
     shmipc_garbage_collect.cpp
   REQUIRES
-    logger fileio
+    logger serialization
   )

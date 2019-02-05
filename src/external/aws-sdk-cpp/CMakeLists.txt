@@ -253,10 +253,6 @@ make_library(aws-sdk-cpp
     -Wno-return-std-move
   )
 
-target_include_directories(aws-sdk-cpp SYSTEM
-  PUBLIC aws-cpp-sdk-core/include
-  PUBLIC aws-cpp-sdk-s3/include
-  )
 target_compile_definitions(aws-sdk-cpp PRIVATE -DENABLE_CURL_CLIENT)
 target_compile_definitions(aws-sdk-cpp PRIVATE -DENABLE_OPENSSL_ENCRYPTION)
 target_compile_definitions(aws-sdk-cpp PRIVATE -DJSON_USE_EXCEPTION=0)

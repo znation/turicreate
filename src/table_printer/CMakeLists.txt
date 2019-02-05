@@ -13,4 +13,4 @@ make_library(table_printer
 
 make_executable(table_printer_example
   SOURCES table_printer_examples.cpp
-  REQUIRES table_printer random)
+  REQUIRES table_printer random unity_core)

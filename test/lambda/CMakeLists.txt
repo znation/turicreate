@@ -8,4 +8,5 @@ make_executable(dummy_worker
   REQUIRES
     cppipc
     process
+    unity_core
 )

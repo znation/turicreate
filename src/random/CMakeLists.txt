@@ -17,7 +17,6 @@ make_library(random
   REQUIRES
     boost
     logger
-    parallel
     util
     ${PLATFORM_DEPENDENCIES}
     EXTERNAL_VISIBILITY

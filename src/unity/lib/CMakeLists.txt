@@ -34,6 +34,7 @@ make_library(unity_core
     unity_sarray_builder.cpp
     unity_sframe_builder.cpp
     visualization/columnwise_summary.cpp
+    $<TARGET_OBJECTS:image_io>
   REQUIRES
     flexible_type
     pylambda 
@@ -42,13 +43,13 @@ make_library(unity_core
     sframe_query_engine 
     libjson sgraph 
     curl 
-    image_type image_io
     startup_teardown
     pylambda_worker
     numerics
     visualization
     EXTERNAL_VISIBILITY
 )
+add_dependencies(unity_core image_io)
 
 make_shared_library_from_static(unity_core_shared
                                 REQUIRES

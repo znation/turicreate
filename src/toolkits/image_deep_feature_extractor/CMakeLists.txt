@@ -19,7 +19,7 @@ if(HAS_CORE_ML)
           class_registrations.cpp
           image_deep_feature_extractor_toolkit.cpp
         REQUIRES
-          fileio
+          serialization
           objc
           unity_coreml_model_export
           ${core_ml}

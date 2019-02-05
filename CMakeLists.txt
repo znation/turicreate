@@ -637,9 +637,19 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
 
   if (${IS_LIBRARY})
     if(${SHARED})
-            target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
+      target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
+
+      # TEMPORARY! Link all deps and external stuff.
+      # TODO - move external to object libraries.
+      # Maybe keep deps here (to avoid needing to repeat them elsewhere).
+      # TODO - if we keep any of these, make sure they are a no-op if they
+      # aren't actually used by this target.
+      target_link_libraries(${NAME} PRIVATE curl)
+      target_link_libraries(${NAME} PRIVATE libpng)
+      target_link_libraries(${NAME} PRIVATE libjpeg)
+      target_link_libraries(${NAME} PRIVATE aws-sdk-cpp)
     else()
-            target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
+      target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
     endif()
   else()
     target_link_libraries(${NAME} ${REQUIREMENTS})
@@ -913,7 +923,22 @@ function (make_executable NAME)
   if (APPLE)
           add_custom_command(TARGET ${NAME} POST_BUILD
                   COMMAND install_name_tool $<TARGET_FILE:${NAME}> -change libpython2.7.dylib @rpath/libpython2.7.dylib)
+
+    # Link against Foundation to support ObjC runtime
+    # (in case any .m/.mm files have been turned into .o and subsequently included
+    # in the executable target)
+    target_link_libraries(${NAME} ${FOUNDATION})
   endif()
+
+  # TEMPORARY! Link all deps and external stuff.
+  # TODO - move external to object libraries.
+  # Maybe keep deps here (to avoid needing to repeat them elsewhere).
+  # TODO - if we keep any of these, make sure they are a no-op if they
+  # aren't actually used by this target.
+  target_link_libraries(${NAME} curl)
+  target_link_libraries(${NAME} libpng)
+  target_link_libraries(${NAME} libjpeg)
+  target_link_libraries(${NAME} aws-sdk-cpp)
 
   if(NOT CLANG)
     if (NOT WIN32)
@@ -928,6 +953,12 @@ function (make_boost_test NAME)
   set(args ${ARGN})
   make_executable(${NAME}test SOURCES ${SOURCES} ${args})
   target_link_libraries(${NAME}test boost_test)
+
+  # HACK HACK HACK
+  # TODO - fix this
+  # For now, include target-under-test deps here (all deps for all tests)
+  # Eventually, figure out where to put these efficiently.
+  target_link_libraries(${NAME}test unity_core)
 
   add_test(${NAME} ${NAME}test)
 endfunction()
@@ -1065,6 +1096,8 @@ endforeach()
 
 include_directories(src)
 include_directories(SYSTEM src/external)
+include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
+include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
 include_directories(SYSTEM src/external/google)
 include_directories(src/platform)
 

@@ -63,7 +63,6 @@ make_library(unity_neural_net
     image_augmentation.cpp
     model_spec.cpp
   REQUIRES
-    image_type
     logger
     unity_core
     unity_coreml_model_export
