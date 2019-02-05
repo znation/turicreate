@@ -1,11 +1,6 @@
 project(TuriCreateObjC)
 
 if(APPLE AND HAS_MLCUSTOMMODEL)
-  find_library(FOUNDATION NAMES Foundation)
-  message("Foundation found at ${FOUNDATION}.")
-
-  find_library(CORE_ML NAMES CoreML)
-  message("CoreML found at ${CORE_ML}.")
 
   make_library(Recommender
     SOURCES
@@ -22,13 +17,8 @@ if(APPLE AND HAS_MLCUSTOMMODEL)
     DEAD_STRIP
   )
 
-  make_library(objcapi
-    SOURCES
-      TuriCreateObjC.m
-    REQUIRES
-      TuriCreate_static
-      ${FOUNDATION}
-      ${CORE_ML}
+  add_library(objcapi OBJECT
+    TuriCreateObjC.m
   )
 
   target_compile_options(objcapi PUBLIC "-fobjc-arc")

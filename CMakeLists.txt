@@ -48,22 +48,11 @@ set(TC_PLATFORM_WIN32 false)
 if (APPLE)
   set(TC_PLATFORM_APPLE true)
   add_definitions(-DTC_PLATFORM_APPLE)
-
-  find_library( FOUNDATION_LIBRARY Foundation)
-  message( STATUS "Foundation found at ${FOUNDATION_LIBRARY}")
-
-  find_library( APPKIT_LIBRARY AppKit)
-  message( STATUS "AppKit found at ${APPKIT_LIBRARY}")
-
-  find_library( COREGRAPHICS_LIBRARY CoreGraphics)
-  message( STATUS "CoreGraphics found at ${COREGRAPHICS_LIBRARY}")
-
-  find_library( JAVASCRIPTCORE_LIBRARY JavaScriptCore)
-  message( STATUS "JavaScriptCore found at ${JAVASCRIPTCORE_LIBRARY}")
-
-  find_library( CORETEXT_LIBRARY CoreText)
-  message( STATUS "CoreText found at ${CORETEXT_LIBRARY}")
-
+  find_library(APPKIT AppKit)
+  find_library(COREGRAPHICS CoreGraphics)
+  find_library(JAVASCRIPTCORE JavaScriptCore)
+  find_library(FOUNDATION Foundation)
+  find_library(CORE_ML CoreML)
 elseif (WIN32)
   set(TC_PLATFORM_WIN32 true)
   add_definitions(-DTC_PLATFORM_WIN32)

@@ -18,10 +18,10 @@ if(APPLE)
         REQUIRES
             ${WEBKIT_LIBRARY}
             ${XCTEST_LIBRARY}
-            ${FOUNDATION_LIBRARY}
-            ${APPKIT_LIBRARY}
-            ${COREGRAPHICS_LIBRARY}
-            ${JAVASCRIPTCORE_LIBRARY}
+            ${FOUNDATION}
+            ${APPKIT}
+            ${COREGRAPHICS}
+            ${JAVASCRIPTCORE}
     )
     target_compile_options(vega_renderer_test_utils PUBLIC "-fobjc-arc")
     add_dependencies(vega_renderer_test_utils vega_renderer)

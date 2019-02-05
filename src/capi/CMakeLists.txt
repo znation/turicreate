@@ -41,9 +41,9 @@ if(APPLE)
   set(_capi_requires
     ${_capi_requires}
     ${FOUNDATION_LIBRARY}
-    ${APPKIT_LIBRARY}
-    ${COREGRAPHICS_LIBRARY}
-    ${JAVASCRIPTCORE_LIBRARY}
+    ${APPKIT}
+    ${COREGRAPHICS}
+    ${JAVASCRIPTCORE}
   )
 endif()
 

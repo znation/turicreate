@@ -37,7 +37,16 @@ endif()
   endforeach()
 
   if(APPLE AND HAS_MLCUSTOMMODEL)
-    set(EXTRA_REQUIRES objcapi)
+    # TODO - this is temporary.
+    # Once all deps are object libraries, we can get rid of
+    # make_shared_library_from_static and just directly
+    # make a shared library from the objects.
+    make_library(unity_shared_temp_static
+      SOURCES
+      $<TARGET_OBJECTS:objcapi>
+    )
+    add_dependencies(unity_shared_temp_static objcapi)
+    set(EXTRA_REQUIRES unity_shared_temp_static)
   endif()
 
   make_shared_library_from_static(unity_shared
