@@ -12,7 +12,7 @@ if(APPLE AND HAS_MLCUSTOMMODEL)
       TuriCreate_static
     SHARED
     SHARED_ALL_DEFINED
-    EXPORT_OSX_MAP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/symbol_exports.ver
+    EXPORT_OSX_MAP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/symbol_exports.ver"
     DEAD_STRIP
   )
 

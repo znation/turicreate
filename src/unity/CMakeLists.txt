@@ -21,10 +21,15 @@ subdirs(extensions
     add_dependencies(unity ${loop_var})
   endforeach()
 
-  set(unity_shared_deps)
+  set(unity_shared_deps
+    "$<TARGET_OBJECTS:network>"
+  )
 
   if(APPLE AND HAS_MLCUSTOMMODEL)
-    list(APPEND unity_shared_deps "$<TARGET_OBJECTS:objcapi>")
+    set(unity_shared_deps
+      ${unity_shared_deps}
+      "$<TARGET_OBJECTS:objcapi>"
+    )
   endif()
 
   make_library(unity_shared
@@ -32,12 +37,13 @@ subdirs(extensions
       ${unity_shared_deps}
     REQUIRES
       TuriCreate_static
-    EXPORT_LINUX_MAP_FILE
-      ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver
-    EXPORT_OSX_MAP_FILE
-      ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver
+    EXPORT_LINUX_MAP_FILE "${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver"
+    # TODO this doesn't work on macOS, but doesn't appear to need to?
+    # (i.e. the collect_archive.sh script wasn't applying this on macOS previously)
+    #EXPORT_OSX_MAP_FILE "${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver"
     SHARED
     SHARED_ALL_DEFINED
+    DEAD_STRIP
   )
 
 # TODO are these used anywhere?
