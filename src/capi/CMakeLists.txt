@@ -57,6 +57,7 @@ set(_capi_objects
   "$<TARGET_OBJECTS:minipsutil>"
   "$<TARGET_OBJECTS:ml_data>"
   "$<TARGET_OBJECTS:nanosockets>"
+  "$<TARGET_OBJECTS:network>"
   "$<TARGET_OBJECTS:optimization>"
   "$<TARGET_OBJECTS:parallel>"
   "$<TARGET_OBJECTS:process>"

@@ -22,7 +22,6 @@ subdirs(extensions
   endforeach()
 
   set(unity_shared_deps
-    "$<TARGET_OBJECTS:network>"
   )
 
   if(APPLE AND HAS_MLCUSTOMMODEL)
@@ -45,6 +44,13 @@ subdirs(extensions
     SHARED_ALL_DEFINED
     DEAD_STRIP
   )
+
+  # same as unity_shared, but all symbols exported
+  # uses add_library instead of make_library so dependencies' symbols can be exported.
+  add_library(unity_shared_for_testing SHARED
+    ${unity_shared_deps}
+  )
+  target_link_libraries(unity_shared_for_testing PUBLIC TuriCreate_static)
 
 # TODO are these used anywhere?
 set(UNITY_ALL_LIBRARIES unity_shared)
