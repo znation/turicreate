@@ -28,40 +28,128 @@ set(_turi_capi_source_files
 )
 
 # This needs to be an object type library to avoid multiple compilations.
-add_library(_capi_objects OBJECT
-  ${_turi_capi_source_files}
+# (Most of the other OBJECT library targets in the repo are just to avoid
+#  multiple linkings from a single compilation of each translation unit.)
+
+set(_capi_objects
+  "$<TARGET_OBJECTS:capi>"
+
+  # Also list all dependencies (including transitive dependencies)
+
+  # External dependencies (built from src/external)
+  "$<TARGET_OBJECTS:aws-sdk-cpp>"
+  "$<TARGET_OBJECTS:libjson>"
+  "$<TARGET_OBJECTS:lz4>"
+  "$<TARGET_OBJECTS:protobuf>"
+  "$<TARGET_OBJECTS:uuid>"
+  "$<TARGET_OBJECTS:xgboost>"
+
+  # Then our own source code
+  "$<TARGET_OBJECTS:cancel_serverside_ops>"
+  "$<TARGET_OBJECTS:cppipc>"
+  "$<TARGET_OBJECTS:flexible_type>"
+  "$<TARGET_OBJECTS:globals>"
+  "$<TARGET_OBJECTS:fileio>"
+  "$<TARGET_OBJECTS:image_io>"
+  "$<TARGET_OBJECTS:image_type>"
+  "$<TARGET_OBJECTS:logger>"
+  "$<TARGET_OBJECTS:minipsutil>"
+  "$<TARGET_OBJECTS:ml_data>"
+  "$<TARGET_OBJECTS:nanosockets>"
+  "$<TARGET_OBJECTS:optimization>"
+  "$<TARGET_OBJECTS:parallel>"
+  "$<TARGET_OBJECTS:process>"
+  "$<TARGET_OBJECTS:pylambda>"
+  "$<TARGET_OBJECTS:random>"
+  "$<TARGET_OBJECTS:serialization>"
+  "$<TARGET_OBJECTS:sframe>"
+  "$<TARGET_OBJECTS:sframe_query_engine>"
+  "$<TARGET_OBJECTS:sgraph>"
+  "$<TARGET_OBJECTS:shmipc>"
+  "$<TARGET_OBJECTS:stack_trace>"
+  "$<TARGET_OBJECTS:startup_teardown>"
+  "$<TARGET_OBJECTS:supervised_learning>"
+  "$<TARGET_OBJECTS:table_printer>"
+  "$<TARGET_OBJECTS:timer>"
+  "$<TARGET_OBJECTS:unity>"
+  "$<TARGET_OBJECTS:unity_activity_classification>"
+  "$<TARGET_OBJECTS:unity_core>"
+  "$<TARGET_OBJECTS:unity_coreml_model_export>"
+  "$<TARGET_OBJECTS:unity_clustering>"
+  "$<TARGET_OBJECTS:unity_evaluation>"
+  "$<TARGET_OBJECTS:unity_factorization>"
+  "$<TARGET_OBJECTS:unity_feature_engineering>"
+  "$<TARGET_OBJECTS:unity_graph_analytics>"
+  "$<TARGET_OBJECTS:unity_image_export>"
+  "$<TARGET_OBJECTS:unity_ml_data_2>"
+  "$<TARGET_OBJECTS:unity_ml_model>"
+  "$<TARGET_OBJECTS:unity_nearest_neighbors>"
+  "$<TARGET_OBJECTS:unity_neural_net>"
+  "$<TARGET_OBJECTS:unity_object_detection>"
+  "$<TARGET_OBJECTS:unity_pattern_mining>"
+  "$<TARGET_OBJECTS:unity_prototype>"
+  "$<TARGET_OBJECTS:unity_recsys>"
+  "$<TARGET_OBJECTS:unity_sgd>"
+  "$<TARGET_OBJECTS:unity_sparse_similarity>"
+  "$<TARGET_OBJECTS:unity_text>"
+  "$<TARGET_OBJECTS:unity_util>"
+  "$<TARGET_OBJECTS:util>"
+  "$<TARGET_OBJECTS:visualization>"
 )
 
-set(_capi_requires unity unity_core numerics)
-add_dependencies(_capi_objects ${_capi_requires})
+set(_capi_requires
+  # External dependencies (from deps)
+  armadillo
+  boost
+  curl
+  libjpeg
+  libpng
+  openssl
+  nanomsg
+)
 
-set(_capi_sources "$<TARGET_OBJECTS:_capi_objects>")
 if(APPLE)
-  set(_capi_sources ${_capi_sources} "$<TARGET_OBJECTS:vega_renderer>")
+  set(_capi_objects
+    ${_capi_objects}
+    "$<TARGET_OBJECTS:image_deep_feature_extractor>"
+    "$<TARGET_OBJECTS:platform_config>"
+  )
   set(_capi_requires
     ${_capi_requires}
-    ${FOUNDATION_LIBRARY}
-    ${APPKIT}
-    ${COREGRAPHICS}
+    ${ACCELERATE}
+    ${CORE_GRAPHICS}
+    ${CORE_IMAGE}
+    ${CORE_ML}
+    ${CORE_VIDEO}
+    ${FOUNDATION}
     ${JAVASCRIPTCORE}
+    ${METAL}
+    ${METAL_PERFORMANCE_SHADERS}
   )
+  if(NOT TC_BUILD_IOS)
+    set(_capi_objects
+      ${_capi_objects}
+      "$<TARGET_OBJECTS:tcmps>"
+      "$<TARGET_OBJECTS:vega_renderer>"
+    )
+    set(_capi_requires
+      ${_capi_requires}
+      ${APPKIT}
+    )
+  endif()
 endif()
 
-make_library(capi 
-  SOURCES
-  ${_capi_sources}
-  REQUIRES
-  ${_capi_requires})
-if(APPLE)
-  add_dependencies(capi vega_renderer)
-endif()
+add_library(capi OBJECT
+  ${_turi_capi_source_files}
+)
     
 # Create a static version of the library that also bundles in the server initializer
 make_library(TuriCreate_static
   SOURCES
     default_server_initializer.cpp
+    ${_capi_objects}
   REQUIRES
-    capi
+    ${_capi_requires}
 )
 
 # A macro that allows building a custom C-API library.
@@ -98,7 +186,7 @@ macro(make_capi_library NAME)
     make_library(${NAME}
       SOURCES
         ${__capi_INITIALIZER_SOURCE_FILE}
-        ${_capi_sources}
+        ${_capi_objects}
        REQUIRES
        ${EXTRA_REQUIRES}
        ${__capi_REQUIRES}
@@ -140,7 +228,7 @@ macro(make_capi_library NAME)
         make_library(${NAME}
       SOURCES 
             ${__capi_INITIALIZER_SOURCE_FILE}
-            ${_capi_sources}
+            ${_capi_objects}
        REQUIRES
             ${EXTRA_REQUIRES}
             ${__capi_REQUIRES}

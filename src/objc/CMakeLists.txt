@@ -7,10 +7,9 @@ if(APPLE AND HAS_MLCUSTOMMODEL)
       TuriCreateObjC.m
       recommender_initialization.cpp
     REQUIRES
-      unity_recsys
-      capi
       ${FOUNDATION}
       ${CORE_ML}
+      TuriCreate_static
     SHARED
     SHARED_ALL_DEFINED
     EXPORT_OSX_MAP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/symbol_exports.ver

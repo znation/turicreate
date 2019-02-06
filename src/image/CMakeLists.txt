@@ -10,45 +10,18 @@ add_library(image_type OBJECT
   image_type.cpp
   image_util_impl.cpp
 )
-add_dependencies(image_type
-  boost
-  logger
-  image_io
-)
 
 make_executable(io_example
   SOURCES
     io_example.cpp
-    $<TARGET_OBJECTS:image_io>
-    $<TARGET_OBJECTS:fileio>
   REQUIRES
-    # deps & external
-    aws-sdk-cpp
-    curl
-    libpng
-    libjpeg
-
-    # in-project static libraries
-    # TODO - migrate these to object libs
-    cancel_serverside_ops
-    logger
-    globals
-    process
-    random
-    util
+    unity_shared
 )
-add_dependencies(io_example image_io)
 
 add_library(image_io OBJECT
   io.cpp
   jpeg_io.cpp
   png_io.cpp
-)
-
-add_dependencies(image_io
-  boost
-  libpng
-  libjpeg
 )
 
 #set to native if supported

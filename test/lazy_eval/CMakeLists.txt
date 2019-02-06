@@ -1,3 +1,3 @@
 project(lazy_eval_test)
 
-make_boost_test(lazy_eval_test.cxx REQUIRES logger)
+make_boost_test(lazy_eval_test.cxx REQUIRES unity_shared)

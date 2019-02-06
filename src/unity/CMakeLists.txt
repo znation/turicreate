@@ -4,28 +4,12 @@ subdirs(extensions
   lib
   toolkits)
 
-if(HAS_CORE_ML)
-  set(additional_unity_requirements image_deep_feature_extractor)
-else()
-  set(additional_unity_requirements "")
-endif()
-
-  make_library(unity
-         SOURCES
-          server/registration.cpp
-          server/unity_server.cpp
-          server/unity_server_init.cpp
-          server/unity_server_control.cpp
-          server/unity_server_init.cpp
-         REQUIRES
-          unity_core
-          unity_toolkits
-          perf
-          numerics
-          ${additional_unity_requirements}
-         COMPILE_FLAGS_EXTRA_GCC
-          -Wno-unknown-pragmas  # NOTE: used for auto-generated protobuf source files
-          -Wno-unused-function  # NOTE: used for auto-generated protobuf source files
+  add_library(unity OBJECT
+    server/registration.cpp
+    server/unity_server.cpp
+    server/unity_server_init.cpp
+    server/unity_server_control.cpp
+    server/unity_server_init.cpp
   ) 
 
   # Pull in all the libraries in the extensions directory.
@@ -36,24 +20,26 @@ endif()
     add_dependencies(unity ${loop_var})
   endforeach()
 
+  set(unity_shared_deps)
+
   if(APPLE AND HAS_MLCUSTOMMODEL)
-    # TODO - this is temporary.
-    # Once all deps are object libraries, we can get rid of
-    # make_shared_library_from_static and just directly
-    # make a shared library from the objects.
-    make_library(unity_shared_temp_static
-      SOURCES
-      $<TARGET_OBJECTS:objcapi>
-    )
-    add_dependencies(unity_shared_temp_static objcapi)
-    set(EXTRA_REQUIRES unity_shared_temp_static)
+    list(APPEND unity_shared_deps "$<TARGET_OBJECTS:objcapi>")
   endif()
 
-  make_shared_library_from_static(unity_shared
-        REQUIRES unity TuriCreate_static ${EXTRA_REQUIRES}
-        OUTPUT_NAME unity_shared
-        EXPORT_MAP ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver)
+  make_library(unity_shared
+    SOURCES
+      ${unity_shared_deps}
+    REQUIRES
+      TuriCreate_static
+    EXPORT_LINUX_MAP_FILE
+      ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver
+    EXPORT_OSX_MAP_FILE
+      ${CMAKE_SOURCE_DIR}/cmake/stdcxx_reduce_exports.ver
+    SHARED
+    SHARED_ALL_DEFINED
+  )
 
+# TODO are these used anywhere?
 set(UNITY_ALL_LIBRARIES unity_shared)
 set(UNITY_EXTENSION_LIBRARY unity_shared)
 
@@ -63,5 +49,4 @@ if(${TC_BUILD_PYTHON})
   include_directories(${PYTHON_INCLUDE_DIRS})
   message("Python library = ${PYTHON_LIBRARIES}")
 
-  make_empty_library(unity_python REQUIRES unity_shared)
 endif()

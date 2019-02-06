@@ -1,23 +1,23 @@
 project(fileio_test)
 
-make_executable(fs SOURCES fs REQUIRES unity_core)
-make_executable(general_fstream_test SOURCES general_fstream_test.cpp REQUIRES unity_core)
-make_executable(curl_dependency_test SOURCES curl_dependency_test.cpp REQUIRES unity_core)
-make_executable(fstream_bench SOURCES fstream_bench.cpp REQUIRES unity_core)
-make_boost_test(temp_file_test.cxx REQUIRES serialization)
-make_boost_test(fixed_size_cache_manager_test.cxx REQUIRES serialization)
-make_boost_test(cache_stream_test.cxx REQUIRES serialization)
-make_boost_test(general_fstream_test.cxx REQUIRES serialization)
-make_boost_test(parse_hdfs_url_test.cxx REQUIRES serialization)
-make_boost_test(block_cache_test.cxx REQUIRES serialization random)
+make_executable(fs SOURCES fs REQUIRES unity_shared)
+make_executable(general_fstream_test SOURCES general_fstream_test.cpp REQUIRES unity_shared)
+make_executable(curl_dependency_test SOURCES curl_dependency_test.cpp REQUIRES unity_shared)
+make_executable(fstream_bench SOURCES fstream_bench.cpp REQUIRES unity_shared)
+make_boost_test(temp_file_test.cxx REQUIRES unity_shared)
+make_boost_test(fixed_size_cache_manager_test.cxx REQUIRES unity_shared)
+make_boost_test(cache_stream_test.cxx REQUIRES unity_shared)
+make_boost_test(general_fstream_test.cxx REQUIRES unity_shared)
+make_boost_test(parse_hdfs_url_test.cxx REQUIRES unity_shared)
+make_boost_test(block_cache_test.cxx REQUIRES unity_shared)
 
 if (TC_ENABLE_REMOTEFS)
-  make_boost_test(s3api_test.cxx REQUIRES serialization)
+  make_boost_test(s3api_test.cxx REQUIRES unity_shared)
 endif()
 
 # this writes a big file
-# make_executable(windows_4gb_test SOURCES windows_4gb_test.cpp REQUIRES serialization)
+# make_executable(windows_4gb_test SOURCES windows_4gb_test.cpp REQUIRES unity_shared)
 #
 # requires s3
-# make_boost_test(sanitize_url_test.cxx REQUIRES serialization)
+# make_boost_test(sanitize_url_test.cxx REQUIRES unity_shared)
 

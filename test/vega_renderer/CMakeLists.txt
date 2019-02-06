@@ -28,7 +28,7 @@ if(APPLE)
         ${XCTEST_LIBRARY}
         ${FOUNDATION}
         ${APPKIT}
-        ${COREGRAPHICS}
+        ${CORE_GRAPHICS}
         ${JAVASCRIPTCORE}
     )
 

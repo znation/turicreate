@@ -49,10 +49,11 @@ if (APPLE)
   set(TC_PLATFORM_APPLE true)
   add_definitions(-DTC_PLATFORM_APPLE)
   find_library(APPKIT AppKit)
-  find_library(COREGRAPHICS CoreGraphics)
+  find_library(CORE_GRAPHICS CoreGraphics)
   find_library(JAVASCRIPTCORE JavaScriptCore)
   find_library(FOUNDATION Foundation)
   find_library(CORE_ML CoreML)
+  find_library(CORE_VIDEO CoreVideo)
 elseif (WIN32)
   set(TC_PLATFORM_WIN32 true)
   add_definitions(-DTC_PLATFORM_WIN32)
@@ -555,11 +556,14 @@ else()
 endif()
 
 
-
-
-
-
-
+#**************************************************************************/
+#*                                                                        */
+#*         Definitions and options to support dependencies                */
+#*                                                                        */
+#**************************************************************************/
+add_compile_options(-Dgoogle=__tc_google)
+add_compile_options(-DCoreML=__tc_CoreML)
+add_compile_options(-DHAVE_PTHREAD=1)
 
 ##############################################################################
 ##############################################################################
@@ -638,16 +642,6 @@ macro(make_target_impl NAME FLAGS REQUIREMENTS IS_LIBRARY SHARED SHARED_ALL_DEFI
   if (${IS_LIBRARY})
     if(${SHARED})
       target_link_libraries(${NAME} PRIVATE ${REQUIREMENTS})
-
-      # TEMPORARY! Link all deps and external stuff.
-      # TODO - move external to object libraries.
-      # Maybe keep deps here (to avoid needing to repeat them elsewhere).
-      # TODO - if we keep any of these, make sure they are a no-op if they
-      # aren't actually used by this target.
-      target_link_libraries(${NAME} PRIVATE curl)
-      target_link_libraries(${NAME} PRIVATE libpng)
-      target_link_libraries(${NAME} PRIVATE libjpeg)
-      target_link_libraries(${NAME} PRIVATE aws-sdk-cpp)
     else()
       target_link_libraries(${NAME} PUBLIC ${REQUIREMENTS})
     endif()
@@ -721,7 +715,6 @@ macro(make_library NAME)
   endif()
 
   if (${make_library_SHARED})
-    message(STATUS "Shared Library: " ${NAME})
     add_library(${NAME} SHARED ${make_library_SOURCES})
   else()
     add_library(${NAME} STATIC ${make_library_SOURCES})
@@ -879,7 +872,7 @@ function (make_executable NAME)
     COMPILE_FLAGS_EXTRA COMPILE_FLAGS_EXTRA_CLANG COMPILE_FLAGS_EXTRA_GCC)
   CMAKE_PARSE_ARGUMENTS(make_library "" "${one_value_args}" "${multi_value_args}" ${ARGN})
   if(NOT make_library_SOURCES)
-    MESSAGE(FATAL_ERROR "make_library call with no sources")
+    MESSAGE(FATAL_ERROR "make_executable call with no sources")
   endif()
 
   if (APPLE)
@@ -923,22 +916,7 @@ function (make_executable NAME)
   if (APPLE)
           add_custom_command(TARGET ${NAME} POST_BUILD
                   COMMAND install_name_tool $<TARGET_FILE:${NAME}> -change libpython2.7.dylib @rpath/libpython2.7.dylib)
-
-    # Link against Foundation to support ObjC runtime
-    # (in case any .m/.mm files have been turned into .o and subsequently included
-    # in the executable target)
-    target_link_libraries(${NAME} ${FOUNDATION})
   endif()
-
-  # TEMPORARY! Link all deps and external stuff.
-  # TODO - move external to object libraries.
-  # Maybe keep deps here (to avoid needing to repeat them elsewhere).
-  # TODO - if we keep any of these, make sure they are a no-op if they
-  # aren't actually used by this target.
-  target_link_libraries(${NAME} curl)
-  target_link_libraries(${NAME} libpng)
-  target_link_libraries(${NAME} libjpeg)
-  target_link_libraries(${NAME} aws-sdk-cpp)
 
   if(NOT CLANG)
     if (NOT WIN32)
@@ -954,15 +932,17 @@ function (make_boost_test NAME)
   make_executable(${NAME}test SOURCES ${SOURCES} ${args})
   target_link_libraries(${NAME}test boost_test)
 
-  # HACK HACK HACK
-  # TODO - fix this
-  # For now, include target-under-test deps here (all deps for all tests)
-  # Eventually, figure out where to put these efficiently.
-  target_link_libraries(${NAME}test unity_core)
-
   add_test(${NAME} ${NAME}test)
 endfunction()
 
+# Same as target_compile_options, but tests for whether the flag is known
+# to the compiler before proceeding.
+function (target_optional_compile_flag NAME FLAG)
+  check_cxx_compiler_flag(${FLAG} __has_flag)
+  if (${__has_flag})
+    target_compile_options(${NAME} PRIVATE ${FLAG})
+  endif()
+endfunction()
 
 # This is an external function
 # Usage:
@@ -1083,12 +1063,10 @@ add_custom_target(external_dependencies)
 include(ExternalProject)
 file(GLOB packages "${DEPS_CMAKE}/ExternalProject*.cmake")
 foreach(package ${packages})
-        message(STATUS "We found local package: ${package}")
         get_filename_component(packagename "${package}" NAME_WE)
         #package is of the form ExternalProjectXXX"
         include(${package})
         STRING(SUBSTRING "${packagename}" 15 -1 depname)
-        message(STATUS "We found local package definition: ${depname}")
         string(TOLOWER ${depname} depname)
         set(package_${depname} requires_${depname} CACHE STRING "Package map")
         add_dependencies(external_dependencies ex_${depname})
@@ -1096,6 +1074,7 @@ endforeach()
 
 include_directories(src)
 include_directories(SYSTEM src/external)
+include_directories(SYSTEM src/external/armadillo/include)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
 include_directories(SYSTEM src/external/google)
