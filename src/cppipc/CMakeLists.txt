@@ -18,7 +18,9 @@ add_library(cppipc OBJECT
   server/comm_server.cpp
   ipc_object_base.cpp
 )
+add_dependencies(cppipc boost)
 
 add_library(cancel_serverside_ops OBJECT
   server/cancel_ops.cpp
 )
+add_dependencies(cancel_serverside_ops boost)

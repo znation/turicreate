@@ -15,3 +15,4 @@ add_library(ml_data OBJECT
   row_reference.cpp
   testing_utils.cpp
 )
+add_dependencies(ml_data boost)

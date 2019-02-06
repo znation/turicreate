@@ -6,3 +6,4 @@ add_library(unity_object_detection OBJECT
   od_data_iterator.cpp
   od_yolo.cpp
 )
+add_dependencies(unity_object_detection boost)

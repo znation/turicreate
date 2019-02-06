@@ -18,8 +18,5 @@ add_library(supervised_learning OBJECT
   classifier_evaluations.cpp
   class_registrations.cpp
 )
-
-# TODO are these needed? They should not be.
-target_compile_options(supervised_learning PUBLIC "-Wno-unknown-pragmas")
-target_compile_options(supervised_learning PUBLIC "-Wno-unused-function")
+add_dependencies(supervised_learning boost)
 target_compile_definitions(supervised_learning PUBLIC "-DXGBOOST_CUSTOMIZE_MSG_")

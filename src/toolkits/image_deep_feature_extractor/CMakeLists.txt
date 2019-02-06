@@ -18,5 +18,6 @@ if(HAS_CORE_ML)
     class_registrations.cpp
     image_deep_feature_extractor_toolkit.cpp
   )
+  add_dependencies(image_deep_feature_extractor boost)
 
 endif()

@@ -12,3 +12,4 @@ add_library(unity_factorization OBJECT
   loss_model_profiles.cpp
   factorization_model_training.cpp
 )
+add_dependencies(unity_factorization boost)

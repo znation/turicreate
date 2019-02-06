@@ -10,3 +10,4 @@ add_library(nanosockets OBJECT
   publish_socket.cpp
   get_next_port_number.cpp
 )
+add_dependencies(nanosockets boost)

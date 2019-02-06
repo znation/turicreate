@@ -5,3 +5,4 @@ add_library(unity_activity_classification OBJECT
     sequence_iterator.cpp
     class_registrations.cpp
 )
+add_dependencies(unity_activity_classification boost)

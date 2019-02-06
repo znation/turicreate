@@ -9,3 +9,4 @@ add_library(unity_nearest_neighbors OBJECT
   lsh_neighbors.cpp
   class_registrations.cpp
 )
+add_dependencies(unity_nearest_neighbors boost)

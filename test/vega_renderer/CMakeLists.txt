@@ -16,6 +16,7 @@ if(APPLE)
         base_fixture.mm
         vega_webkit_renderer.mm
     )
+    add_dependencies(vega_renderer_test_utils boost)
     target_compile_options(vega_renderer_test_utils PUBLIC "-fobjc-arc")
 
     set(source_deps

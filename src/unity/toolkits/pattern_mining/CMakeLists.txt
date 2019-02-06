@@ -9,3 +9,4 @@ add_library(unity_pattern_mining OBJECT
   fp_results_tree.cpp
   rule_mining.cpp
 )
+add_dependencies(unity_pattern_mining boost)

@@ -5,3 +5,4 @@ add_library(optimization OBJECT
   lbfgs.cpp
   optimization_interface.cpp
 )
+add_dependencies(optimization boost)

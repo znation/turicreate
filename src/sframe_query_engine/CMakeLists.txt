@@ -17,3 +17,4 @@ add_library(sframe_query_engine OBJECT
    algorithm/ec_permute.cpp
    query_engine_lock.cpp
 )
+add_dependencies(sframe_query_engine boost)

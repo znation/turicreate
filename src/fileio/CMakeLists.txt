@@ -42,6 +42,7 @@ add_library(fileio OBJECT
   block_cache.cpp
 )
 add_dependencies(fileio
+  boost
   libxml2
   ${FILEIO_REMOTE_FS_REQUIRES}
   ${PLATFORM_DEPENDENCIES}

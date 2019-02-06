@@ -10,3 +10,4 @@ add_library(process OBJECT
   process.cpp
   ${PLATFORM_SOURCES}
 )
+add_dependencies(process boost)

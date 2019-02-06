@@ -4,28 +4,29 @@ project(TuriCreate)
 # references everything correctly.
 set(__CAPI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")
 
-set(_turi_capi_source_files
-  "${__CAPI_SOURCE_DIR}/impl/capi_error_handling.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_flexible_type.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_datetime.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_flex_dict.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_flex_list.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_flex_image.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_ndarray.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_functions.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_sarray.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_parameters.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_sframe.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_models.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_functions.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_initialization.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_variant.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_operators.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_flex_enum_list.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_wrapper_structs.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_memory_management.cpp"
-  "${__CAPI_SOURCE_DIR}/impl/capi_visualization.cpp"
+add_library(capi OBJECT
+  "impl/capi_error_handling.cpp"
+  "impl/capi_flexible_type.cpp"
+  "impl/capi_datetime.cpp"
+  "impl/capi_flex_dict.cpp"
+  "impl/capi_flex_list.cpp"
+  "impl/capi_flex_image.cpp"
+  "impl/capi_ndarray.cpp"
+  "impl/capi_functions.cpp"
+  "impl/capi_sarray.cpp"
+  "impl/capi_parameters.cpp"
+  "impl/capi_sframe.cpp"
+  "impl/capi_models.cpp"
+  "impl/capi_functions.cpp"
+  "impl/capi_initialization.cpp"
+  "impl/capi_variant.cpp"
+  "impl/capi_operators.cpp"
+  "impl/capi_flex_enum_list.cpp"
+  "impl/capi_wrapper_structs.cpp"
+  "impl/capi_memory_management.cpp"
+  "impl/capi_visualization.cpp"
 )
+add_dependencies(capi boost)
 
 # This needs to be an object type library to avoid multiple compilations.
 # (Most of the other OBJECT library targets in the repo are just to avoid
@@ -139,10 +140,6 @@ if(APPLE)
   endif()
 endif()
 
-add_library(capi OBJECT
-  ${_turi_capi_source_files}
-)
-    
 # Create a static version of the library that also bundles in the server initializer
 make_library(TuriCreate_static
   SOURCES

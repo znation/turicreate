@@ -7,3 +7,4 @@ add_library(sgraph OBJECT
   sgraph_io.cpp
   sgraph_constants.cpp
 )
+add_dependencies(sgraph boost)

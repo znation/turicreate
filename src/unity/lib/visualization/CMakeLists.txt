@@ -33,6 +33,7 @@ add_library(visualization OBJECT
   vega_spec.cpp
   ${VISUALIZATION_PLATFORM_SOURCES}
 )
+add_dependencies(visualization boost)
 
 set(GENERATED_VEGA_JSON_HEADERS
   vega_spec/boxes_and_whiskers.json

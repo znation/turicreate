@@ -10,7 +10,8 @@ subdirs(extensions
     server/unity_server_init.cpp
     server/unity_server_control.cpp
     server/unity_server_init.cpp
-  ) 
+  )
+  add_dependencies(unity boost)
 
   # Pull in all the libraries in the extensions directory.
   get_property(EXTENSIONS_LIST DIRECTORY "extensions" PROPERTY EXTENSIONS_LIST)

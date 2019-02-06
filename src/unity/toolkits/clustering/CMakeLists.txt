@@ -5,3 +5,4 @@ add_library(unity_clustering OBJECT
   class_registrations.cpp
   unity_kmeans.cpp
 )
+add_dependencies(unity_clustering boost)

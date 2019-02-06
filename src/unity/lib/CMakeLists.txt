@@ -35,4 +35,4 @@ add_library(unity_core OBJECT
   visualization/columnwise_summary.cpp
 )
 
-add_dependencies(unity_core curl)
+add_dependencies(unity_core boost curl)

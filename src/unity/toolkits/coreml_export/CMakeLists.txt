@@ -69,6 +69,7 @@ add_library(unity_coreml_model_export OBJECT
   MLModel/src/transforms/Pipeline.cpp
   MLModel/src/transforms/TreeEnsemble.cpp
 )
+add_dependencies(unity_coreml_model_export boost)
 
 # Use -w since most of this code lives in coremltools and is copied here.
 # We should find and fix compiler warnings at the source (coremltools).

@@ -33,3 +33,4 @@ project(sframe)
   sframe_compact.cpp
   rolling_aggregate.cpp
 )
+add_dependencies(sframe boost)

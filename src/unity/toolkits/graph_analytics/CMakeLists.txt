@@ -10,3 +10,4 @@ add_library(unity_graph_analytics OBJECT
   degree_count.cpp
   label_propagation.cpp
 )
+add_dependencies(unity_graph_analytics boost)

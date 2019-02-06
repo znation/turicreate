@@ -8,3 +8,4 @@ add_library(unity_text OBJECT
   perplexity.cpp
   class_registrations.cpp
 )
+add_dependencies(unity_text boost)

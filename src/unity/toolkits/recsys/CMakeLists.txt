@@ -10,3 +10,4 @@ add_library(unity_recsys OBJECT
   models/itemcf.cpp
   models/factorization_models.cpp
 )
+add_dependencies(unity_recsys boost)

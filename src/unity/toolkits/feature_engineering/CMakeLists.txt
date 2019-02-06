@@ -23,3 +23,4 @@ add_library(unity_feature_engineering OBJECT
   word_trimmer.cpp
   content_interpretation.cpp
 )
+add_dependencies(unity_feature_engineering boost)

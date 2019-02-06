@@ -8,3 +8,4 @@ add_library(unity_util OBJECT
   class_registrations.cpp
   random_sframe_generation.cpp
 )
+add_dependencies(unity_util boost)

@@ -30,3 +30,4 @@ add_library(unity_ml_data_2 OBJECT
 
   row_slicing_utilities.cpp
 )
+add_dependencies(unity_ml_data_2 boost)

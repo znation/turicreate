@@ -37,6 +37,7 @@ if(APPLE AND HAS_MPS AND NOT TC_BUILD_IOS)
       mps_weight.mm
       mps_device_manager.m
     )
+    add_dependencies(tcmps boost)
     target_compile_options(tcmps PUBLIC "-fobjc-arc -Wno-nullability-completeness -Wno-shadow-ivar")
 endif()
 
@@ -48,3 +49,4 @@ add_library(unity_neural_net OBJECT
   image_augmentation.cpp
   model_spec.cpp
 )
+add_dependencies(unity_neural_net boost)

@@ -12,3 +12,4 @@ add_library(util OBJECT
   testing_utils.cpp 
   web_util.cpp
 )
+add_dependencies(util boost)
