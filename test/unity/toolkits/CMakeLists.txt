@@ -11,17 +11,17 @@ add_subdirectory(object_detection)
 add_subdirectory(coreml_export)
 
 make_boost_test(kmeans_test.cxx
-  REQUIRES unity_shared
+  REQUIRES unity_shared_for_testing
 )
 
 make_boost_test (nearest_neighbors.cxx
-  REQUIRES unity_shared
+  REQUIRES unity_shared_for_testing
 )
 
 make_boost_test (topic_model.cxx
-  REQUIRES unity_shared
+  REQUIRES unity_shared_for_testing
 )
 
 make_boost_test (test_evaluation.cxx
-  REQUIRES unity_shared
+  REQUIRES unity_shared_for_testing
 )

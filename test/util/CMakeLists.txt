@@ -5,9 +5,10 @@ make_executable(time_fast_power
   REQUIRES unity_shared)
 
 if(NOT WIN32)
-  make_executable(test_crash_handler
-    SOURCES test_crash_handler.cpp
-    REQUIRES unity_shared)
+  # TODO - seems we can delete crash_handler? Nothing is using it.
+  #make_executable(test_crash_handler
+  #  SOURCES test_crash_handler.cpp
+  #  REQUIRES unity_shared)
 endif()
 
 make_boost_test(fast_power_test.cxx REQUIRES unity_shared)
