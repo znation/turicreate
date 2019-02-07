@@ -1,6 +1,6 @@
 project(vega_renderer_test)
 
-if(APPLE)
+if(APPLE AND NOT TC_BUILD_IOS)
 
     find_library( WEBKIT_LIBRARY WebKit )
     message( STATUS "WebKit found at ${WEBKIT_LIBRARY}")
@@ -36,5 +36,12 @@ if(APPLE)
     make_boost_test(vega_example_tests.cxx ${source_deps} REQUIRES ${target_deps})
     make_boost_test(vega_lite_example_tests.cxx ${source_deps} REQUIRES ${target_deps})
     make_boost_test(turicreate_example_tests.cxx ${source_deps} REQUIRES ${target_deps})
+
+    add_custom_command(
+        TARGET vega_renderer_test_utils PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/examples
+                ${CMAKE_CURRENT_BINARY_DIR}/examples
+    )
 
 endif()
