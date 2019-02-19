@@ -22,6 +22,7 @@ make_library(visualization OBJECT
     histogram.cpp
     io_buffer.cpp
     item_frequency.cpp
+    pipe.pb.cc
     plot.cpp
     process_wrapper.cpp
     registration.cpp
@@ -33,7 +34,8 @@ make_library(visualization OBJECT
     vega_data.cpp
     vega_spec.cpp
     ${VISUALIZATION_PLATFORM_SOURCES}
-  REQUIRES		
+  REQUIRES	
+    protobuf	
     process		
   EXTERNAL_VISIBILITY		
 )
