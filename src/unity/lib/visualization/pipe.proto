@@ -1,0 +1,92 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+
+package turi.visualization.pipe;
+
+message VegaSpec { string spec = 1; }
+
+message VegaData { string data = 1; }
+
+message Column {
+  string name = 1;
+
+  enum ColumnType {
+    INTEGER = 0;
+    FLOAT = 1;
+    STRING = 2;
+    VECTOR = 3;
+    LIST = 4;
+    DICT = 5;
+    DATETIME = 6;
+    UNDEFINED = 7;
+    IMAGE = 8;
+    ND_VECTOR = 9;
+  }
+  ColumnType type = 2;
+}
+
+message TableSpec {
+  int32 size = 1;
+  string title = 2;
+  repeated Column columns = 3;
+}
+
+message FlexVec { repeated float value; }
+
+message FlexList { repeated FlexibleType value; }
+
+message FlexDatetime {
+  uint64 posix_timestamp = 1;
+  int32 tz_15min_offset = 2;
+  int32 microsecond = 3;
+}
+
+message FlexUndefined {}
+
+message FlexImage {
+  int32 height = 1;
+  int32 width = 2;
+  int32 channels = 3;
+
+  enum Format {
+    JPG = 0;
+    PNG = 1;
+    RAW_ARRAY = 2;
+    UNDEFINED = 3;
+  }
+  Format format = 4;
+  bytes image_data = 10;
+}
+
+message FlexNDVectorDimension {
+  repeated FlexNDVector dimension = 1;
+}
+
+message FlexNDVector {
+  oneof vector {
+    FlexNDVectorDimension dimension = 1;
+    FlexVec values = 2;
+  }
+}
+
+message FlexibleType {
+  oneof value {
+    int64 integer = 1;
+    float float = 2;
+    string string = 3;
+    FlexVec vector = 4;
+    FlexList list = 5;
+    map<string, FlexibleType> dict = 6;
+    FlexDatetime datetime = 7;
+    FlexUndefined undefined = 8;
+    FlexImage image = 9;
+    FlexNDVector nd_vector = 10;
+  }
+}
+
+message TableRow {
+  int32 id = 1;
+  repeated FlexibleType data;
+}
+
+message TableData { repeated TableRow rows = 1; }
