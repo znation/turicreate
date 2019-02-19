@@ -31,14 +31,18 @@ message TableSpec {
   repeated Column columns = 3;
 }
 
-message FlexVec { repeated float value; }
+message FlexVec { repeated float value = 1; }
 
-message FlexList { repeated FlexibleType value; }
+message FlexList { repeated FlexibleType value = 1; }
 
 message FlexDatetime {
   uint64 posix_timestamp = 1;
   int32 tz_15min_offset = 2;
   int32 microsecond = 3;
+}
+
+message FlexDict {
+  map<string, FlexibleType> dict = 6;
 }
 
 message FlexUndefined {}
@@ -76,7 +80,7 @@ message FlexibleType {
     string string = 3;
     FlexVec vector = 4;
     FlexList list = 5;
-    map<string, FlexibleType> dict = 6;
+    FlexDict dict = 6;
     FlexDatetime datetime = 7;
     FlexUndefined undefined = 8;
     FlexImage image = 9;
@@ -86,7 +90,7 @@ message FlexibleType {
 
 message TableRow {
   int32 id = 1;
-  repeated FlexibleType data;
+  repeated FlexibleType data = 2;
 }
 
 message TableData { repeated TableRow rows = 1; }
