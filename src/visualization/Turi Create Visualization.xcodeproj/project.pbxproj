@@ -16,6 +16,9 @@
 		FC245BED1F4F541D009F54C6 /* VegaContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BEC1F4F541D009F54C6 /* VegaContainer.swift */; };
 		FC245BF31F4F7FFB009F54C6 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BF21F4F7FFB009F54C6 /* JSON.swift */; };
 		FC245BF51F4F8110009F54C6 /* Pipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BF41F4F8110009F54C6 /* Pipe.swift */; };
+		FC45528B221B920C001B58E5 /* pipe.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC45528A221B920C001B58E5 /* pipe.pb.swift */; };
+		FC45528E221B931D001B58E5 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC45528D221B931D001B58E5 /* SwiftProtobuf.framework */; };
+		FC455293221B9367001B58E5 /* SwiftProtobuf.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC455291221B9367001B58E5 /* SwiftProtobuf.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FC5F0B3C1F5F3A3E0001BCEE /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5F0B3B1F5F3A3E0001BCEE /* Error.swift */; };
 		FC76C48621F139A0008F52E5 /* Components in Resources */ = {isa = PBXBuildFile; fileRef = FC76C48521F139A0008F52E5 /* Components */; };
 		FC9066011F425B4800AE3881 /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9066001F425B4800AE3881 /* AppData.swift */; };
@@ -23,6 +26,20 @@
 		FCBFA19221EC6AB5002B48B3 /* index.js in Resources */ = {isa = PBXBuildFile; fileRef = FCBFA19121EC6AB5002B48B3 /* index.js */; };
 		FCE3954420B4C2CB0029FDB5 /* build in Resources */ = {isa = PBXBuildFile; fileRef = FCE3954320B4C2CB0029FDB5 /* build */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FC455294221B9367001B58E5 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FC455293221B9367001B58E5 /* SwiftProtobuf.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		92141E241FBEE02A009C76D8 /* NSWindowWorkaround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSWindowWorkaround.swift; sourceTree = "<group>"; };
@@ -45,6 +62,10 @@
 		FC3E34E0206EF50100B6B69A /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
 		FC3E34E2206EF50E00B6B69A /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
 		FC3E34E5206EF52000B6B69A /* index.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = index.css; sourceTree = "<group>"; };
+		FC45528A221B920C001B58E5 /* pipe.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = pipe.pb.swift; sourceTree = "<group>"; };
+		FC45528D221B931D001B58E5 /* SwiftProtobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftProtobuf.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/SwiftProtobuf-brvvbakpkfvingdeakrticoldaps/Build/Products/Debug/SwiftProtobuf.framework"; sourceTree = "<group>"; };
+		FC45528F221B933D001B58E5 /* SwiftProtobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SwiftProtobuf.framework; sourceTree = "<group>"; };
+		FC455291221B9367001B58E5 /* SwiftProtobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SwiftProtobuf.framework; sourceTree = "<group>"; };
 		FC5F0B3B1F5F3A3E0001BCEE /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		FC76C48521F139A0008F52E5 /* Components */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Components; sourceTree = "<group>"; };
 		FC78045F20729FF9004BE45B /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
@@ -70,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC45528E221B931D001B58E5 /* SwiftProtobuf.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,9 +109,11 @@
 		9226E7B71F366F2E00C33A64 = {
 			isa = PBXGroup;
 			children = (
+				FC455291221B9367001B58E5 /* SwiftProtobuf.framework */,
 				9226E7C21F366F2E00C33A64 /* Turi Create Visualization */,
 				9226E7C11F366F2E00C33A64 /* Products */,
 				921A27A021EDAAE1009A75E2 /* Recovered References */,
+				FC45528C221B931D001B58E5 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -115,6 +139,8 @@
 		FC1A87811FB1463200A67DAD /* src */ = {
 			isa = PBXGroup;
 			children = (
+				FC45528F221B933D001B58E5 /* SwiftProtobuf.framework */,
+				FC45528A221B920C001B58E5 /* pipe.pb.swift */,
 				FC245BF41F4F8110009F54C6 /* Pipe.swift */,
 				FC5F0B3B1F5F3A3E0001BCEE /* Error.swift */,
 				FC245BF21F4F7FFB009F54C6 /* JSON.swift */,
@@ -205,6 +231,14 @@
 			path = Table;
 			sourceTree = "<group>";
 		};
+		FC45528C221B931D001B58E5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FC45528D221B931D001B58E5 /* SwiftProtobuf.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		FC78045C20729F7F004BE45B /* sticky-table */ = {
 			isa = PBXGroup;
 			children = (
@@ -274,6 +308,7 @@
 				9226E7BC1F366F2E00C33A64 /* Sources */,
 				9226E7BD1F366F2E00C33A64 /* Frameworks */,
 				9226E7BE1F366F2E00C33A64 /* Resources */,
+				FC455294221B9367001B58E5 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -344,6 +379,7 @@
 				FC5F0B3C1F5F3A3E0001BCEE /* Error.swift in Sources */,
 				9226E7C61F366F2E00C33A64 /* ViewController.swift in Sources */,
 				9226E7C41F366F2E00C33A64 /* AppDelegate.swift in Sources */,
+				FC45528B221B920C001B58E5 /* pipe.pb.swift in Sources */,
 				FC245BF31F4F7FFB009F54C6 /* JSON.swift in Sources */,
 				FC9066011F425B4800AE3881 /* AppData.swift in Sources */,
 				FC245BF51F4F8110009F54C6 /* Pipe.swift in Sources */,
@@ -473,6 +509,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Turi\\ Create\\ Visualization/src",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Turi Create Visualization/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
@@ -488,6 +529,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Turi\\ Create\\ Visualization/src",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Turi Create Visualization/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
