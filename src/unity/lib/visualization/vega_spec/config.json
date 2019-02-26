@@ -37,7 +37,6 @@
         },
         "group-title": {
             "fontSize": 29,
-            "font": "HelveticaNeue, Arial",
             "fontWeight": "normal",
             "fill": "rgba(0,0,0,0.65)"
         }

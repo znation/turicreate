@@ -82,20 +82,23 @@ namespace turi{
       // Apply templated configuration values based on variation
 
       // Defaults
-      std::string gridColor = escape_string("rgba(204,204,204,1.0)");
       std::string axisTitlePadding = "20";
       std::string axisTitleFontSize = "14";
       std::string axisTitleFontWeight = escape_string("normal");
+      std::string backgroundColor_bw = escape_string("#ffffff");
+      std::string foregroundColor_bw = escape_string("#000000");
+      std::string gridColor = escape_string("rgba(204,204,204,1.0)");
       std::string labelColor = escape_string("rgba(0,0,0,0.847)");
       std::string labelFont = escape_string("\"San Francisco\", HelveticaNeue, Arial");
       std::string labelFontSize = "12";
       std::string labelPadding = "10";
+      std::string tickColor = escape_string("rgb(136,136,136)");
       std::string titleColor = labelColor;
       std::string titleFont = labelFont;
       std::string titleFontWeight = escape_string("normal");
       std::string titleFontSize = "18";
       std::string titleOffset = "30";
-      std::string tickColor = escape_string("rgb(136,136,136)");
+
       std::string data = "";
 
       // Default (medium) size is 720x550
@@ -110,6 +113,8 @@ namespace turi{
         gridColor = escape_string("rgba(255,255,255,0.098)");
         titleColor = labelColor;
         tickColor = escape_string("#A4AAAD");
+        backgroundColor_bw = escape_string("#000000");
+        foregroundColor_bw = escape_string("#ffffff");
       }
 
       // Overrides for small size
@@ -144,10 +149,13 @@ namespace turi{
       }
 
       return format(ret, {
-        {"{{gridColor}}", gridColor},
         {"{{axisTitlePadding}}", axisTitlePadding},
         {"{{axisTitleFontSize}}", axisTitleFontSize},
         {"{{axisTitleFontWeight}}", axisTitleFontWeight},
+        {"{{backgroundColor_bw}}", backgroundColor_bw},
+        {"{{foregroundColor_bw}}", foregroundColor_bw},
+        {"{{gridColor}}", gridColor},
+        {"{{height}}", height},
         {"{{labelColor}}", labelColor},
         {"{{labelFont}}", labelFont},
         {"{{labelFontSize}}", labelFontSize},
@@ -159,7 +167,7 @@ namespace turi{
         {"{{titleOffset}}", titleOffset},
         {"{{tickColor}}", tickColor},
         {"{{width}}", width},
-        {"{{height}}", height},
+
         {"{{pre_filled_data_values}}", data},
       });
     }

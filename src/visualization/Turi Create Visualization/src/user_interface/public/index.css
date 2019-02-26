@@ -1,6 +1,17 @@
 body{
     margin: 0px;
-    font-family: HelveticaNeue;
+    font-family: "San Francisco", HelveticaNeue;
+    background-color: white;
+}
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: rgb(50, 50, 50);
+    }
+}
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: rgb(236, 236, 236);
+    }
 }
 
 #hidden_cont{

@@ -22,7 +22,7 @@ def _get_client_app_path():
 
     if _sys.platform != 'darwin' and _sys.platform != 'linux2' and _sys.platform != 'linux' :
         raise NotImplementedError('Visualization is currently supported only on macOS and Linux.')
-    
+
     if _sys.platform == 'darwin':
         return _os.path.join(tcviz_dir, 'Turi Create Visualization.app', 'Contents', 'MacOS', 'Turi Create Visualization')
 
@@ -129,9 +129,7 @@ class Plot(object):
 
                 path_to_client = _get_client_app_path()
 
-                # TODO: allow autodetection of light/dark mode.
-                # Disabled for now, since the GUI side needs some work (ie. background color).
-                plot_variation = 0x10 # force light mode
+                plot_variation = 0x0 # default
                 self.__proxy__.call_function('show', {'path_to_client': path_to_client, 'variation': plot_variation})
 
     def save(self, filepath):
@@ -198,12 +196,12 @@ class Plot(object):
                 # try to see if canvas-prebuilt is globally installed
                 # if it is, then link it
                 # if not, tell the user to install it
-                (is_installed_exitcode, 
-                    is_installed_stdout, 
+                (is_installed_exitcode,
+                    is_installed_stdout,
                     is_installed_stderr) =  _run_cmdline(
                     "npm ls -g -json | grep canvas-prebuilt")
                 if is_installed_exitcode == _SUCCESS:
-                    # npm link canvas-prebuilt 
+                    # npm link canvas-prebuilt
                     link_exitcode, link_stdout, link_stderr = _run_cmdline(
                         "npm link canvas-prebuilt")
                     if link_exitcode == _PERMISSION_DENIED_ERROR_CODE:
@@ -212,7 +210,7 @@ class Plot(object):
                             "`npm link canvas-prebuilt` failed, " +
                             "Permission Denied.")
                     elif link_exitcode == _SUCCESS:
-                        # canvas-prebuilt link is now successful, so run the 
+                        # canvas-prebuilt link is now successful, so run the
                         # node vg2[png|svg] json_filepath out_filepath
                         # command again.
                         (exitcode, stdout, stderr) = _run_cmdline("node " +
@@ -244,9 +242,7 @@ class Plot(object):
         return _json.loads(self.__proxy__.call_function('get_data'))
 
     def get_vega(self, include_data=True):
-        # TODO: allow autodetection of light/dark mode.
-        # Disabled for now, since the GUI side needs some work (ie. background color).
-        plot_variation = 0x10 # force light mode
+        plot_variation = 0x0 # default
         return _json.loads(self.__proxy__.call_function('get_spec', {'include_data': include_data, 'variation': plot_variation}))
 
     def materialize(self):
