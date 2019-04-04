@@ -152,7 +152,7 @@ endif()
 if(APPLE)
   if(TC_BUILD_IOS)
     SET(TC_BASE_SDK iphoneos)
-    SET(COMPILER_FLAGS "${COMPILER_FLAGS} -miphoneos-version-min=12.0 -Wno-c++11-narrowing")
+    SET(COMPILER_FLAGS "${COMPILER_FLAGS} -miphoneos-version-min=10.0 -Wno-c++11-narrowing")
   else()
     SET(TC_BASE_SDK macosx)
 
@@ -298,6 +298,15 @@ add_definitions(-DEIGEN_MPL2_ONLY)
 #**************************************************************************/
 #*                                                                        */
 #*                      Force Disable OpenMP                              */
+
+if(NOT TC_COREMLTOOLS_DIR) 
+  set(TC_COREMLTOOLS_DIR ${CMAKE_SOURCE_DIR}/src/external/coremltools_wrap/coremltools/)
+else()
+  message("Using mlmodel interface in source directory ${TC_COREMLTOOLS_DIR}/mlmodel.")
+endif()
+
+include_directories(${TC_COREMLTOOLS_DIR})
+
 #*                                                                        */
 #**************************************************************************/
 add_library(openmp INTERFACE)
@@ -306,10 +315,23 @@ message(WARNING "OpenMP Libraries were not found")
 
 #**************************************************************************/
 #*                                                                        */
-#*             Adapt Compiler and Linker Flags to the system              */
+#*                      coremltools                                       */
 #*                                                                        */
 #**************************************************************************/
 
+if(NOT TC_COREMLTOOLS_DIR)
+  set(TC_COREMLTOOLS_DIR ${CMAKE_SOURCE_DIR}/src/external/coremltools_wrap/coremltools/)
+endif()
+
+message("Using ${TC_COREMLTOOLS_DIR} for coremltools directory.")
+include_directories(${TC_COREMLTOOLS_DIR}/)
+
+
+#**************************************************************************/
+#*                                                                        */
+#*             Adapt Compiler and Linker Flags to the system              */
+#*                                                                        */
+#**************************************************************************/
 
 if (CLANG)
 
@@ -404,23 +426,13 @@ if (MARCH)
 elseif (ARCH)
   set(ARCH_FLAG "-arch ${ARCH}")
 else()
-  set(MARCH "x86-64")
+  set(MARCH "nehalem")  # Old CPU archetecture; enables SSE up to 4.2 + popcnt + other instructions. 
   set(ARCH_FLAG "-march=${MARCH}")
 endif()
 
 # check if MTUNE is set
 if (NOT MTUNE)
-  #set to native if supported
-  check_cxx_compiler_flag(-mtune=native HAS_MTUNE_NATIVE)
-  check_cxx_compiler_flag(-mtune=${MARCH} HAS_MTUNE_MARCH)
-  check_cxx_compiler_flag(-mtune=${ARCH} HAS_MTUNE_ARCH)
-  if(HAS_MTUNE_NATIVE)
-    set(MTUNE "-mtune=native")
-  elseif(HAS_MTUNE_MARCH)
-    set(MTUNE "-mtune=${MARCH}")
-  elseif(HAS_MTUNE_ARCH)
-    set(MTUNE "-mtune=${ARCH}")
-  endif()
+  set(MTUNE "-mtune=generic") # Reommended way of setting this for generic distributions
 endif()
 
 set(EXTRA_OPTIMIZATION_FLAGS "")
@@ -493,12 +505,11 @@ set(CMAKE_CXX_FLAGS_DEBUG
   CACHE STRING "compiler options" FORCE)
 
 set(CMAKE_C_FLAGS_RELEASE
-  "${RELEASE_OPTIMIZATION_FLAGS} -Wno-attributes ${ARCH_FLAG} ${MTUNE} ${PROFILING_FLAGS} ${C_REAL_COMPILER_FLAGS} ${WERROR_FLAGS} -DNDEBUG ${ALTERNATE_LINKER} -DHAVE_PTHREAD=1 -DARMA_NO_DEBUG"
+  "${RELEASE_OPTIMIZATION_FLAGS} -Wno-attributes ${ARCH_FLAG} ${MTUNE} ${PROFILING_FLAGS} ${C_REAL_COMPILER_FLAGS} ${WERROR_FLAGS} -DNDEBUG ${ALTERNATE_LINKER} -DHAVE_PTHREAD=1"
   CACHE STRING "compiler options" FORCE)
 set(CMAKE_CXX_FLAGS_RELEASE
-  "${RELEASE_OPTIMIZATION_FLAGS} ${EXTRA_OPTIMIZATION_FLAGS} ${DISABLE_WARNING_FLAGS} ${PROFILING_FLAGS} -Wno-attributes ${ARCH_FLAG} ${MTUNE} ${CPP_REAL_COMPILER_FLAGS} ${WERROR_FLAGS} ${INT128_FLAGS} ${ALTERNATE_LINKER} -DNDEBUG -DHAVE_PTHREAD=1 -DARMA_NO_DEBUG"
+  "${RELEASE_OPTIMIZATION_FLAGS} ${EXTRA_OPTIMIZATION_FLAGS} ${DISABLE_WARNING_FLAGS} ${PROFILING_FLAGS} -Wno-attributes ${ARCH_FLAG} ${MTUNE} ${CPP_REAL_COMPILER_FLAGS} ${WERROR_FLAGS} ${INT128_FLAGS} ${ALTERNATE_LINKER} -DNDEBUG -DHAVE_PTHREAD=1"
   CACHE STRING "compiler options" FORCE)
-
 
 #**************************************************************************/
 #*                                                                        */
@@ -563,7 +574,6 @@ endif()
 add_compile_options(-Dgoogle=__tc_google)
 add_compile_options(-DCoreML=__tc_CoreML)
 add_compile_options(-DHAVE_PTHREAD=1)
-add_compile_options(-DEIGEN_MPL2_ONLY)
 
 ##############################################################################
 ##############################################################################
@@ -1118,6 +1128,7 @@ set(_TC_COMMON_OBJECTS
   "$<TARGET_OBJECTS:protobuf>"
   "$<TARGET_OBJECTS:uuid>"
   "$<TARGET_OBJECTS:xgboost>"
+  "$<TARGET_OBJECTS:coremltools_mlmodel>"
 
   # Then our own source code
   "$<TARGET_OBJECTS:annotation>"
@@ -1150,6 +1161,7 @@ set(_TC_COMMON_OBJECTS
   "$<TARGET_OBJECTS:table_printer>"
   "$<TARGET_OBJECTS:timer>"
   "$<TARGET_OBJECTS:unity>"
+  "$<TARGET_OBJECTS:unity_drawing_classifier>"
   "$<TARGET_OBJECTS:unity_activity_classification>"
   "$<TARGET_OBJECTS:unity_core>"
   "$<TARGET_OBJECTS:unity_coreml_model_export>"

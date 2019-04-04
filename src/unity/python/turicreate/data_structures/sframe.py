@@ -13,18 +13,18 @@ and is stored column wise.
 from __future__ import print_function as _
 from __future__ import division as _
 from __future__ import absolute_import as _
-from ..connect import main as glconnect
-from ..cython.cy_flexible_type import infer_type_of_list
-from ..cython.context import debug_trace as cython_context
-from ..cython.cy_sframe import UnitySFrameProxy
+from .._connect import main as glconnect
+from .._cython.cy_flexible_type import infer_type_of_list
+from .._cython.context import debug_trace as cython_context
+from .._cython.cy_sframe import UnitySFrameProxy
 from ..util import _is_non_string_iterable, _make_internal_url
-from ..util import infer_dbapi2_types
-from ..util import get_module_from_object, pytype_to_printf
+from ..util import _infer_dbapi2_types
+from ..util import _get_module_from_object, _pytype_to_printf
 from ..visualization import _get_client_app_path
 from .sarray import SArray, _create_sequential_sarray
 from .. import aggregate
 from .image import Image as _Image
-from ..deps import pandas, numpy, HAS_PANDAS, HAS_NUMPY
+from .._deps import pandas, numpy, HAS_PANDAS, HAS_NUMPY
 from .grouped_sframe import GroupedSFrame
 from ..visualization import Plot
 
@@ -100,7 +100,7 @@ def _get_global_dbapi_info(dbapi_module, conn):
     "the 'dbapi_module' argument to either from_sql or to_sql."
 
     if dbapi_module is None:
-        dbapi_module = get_module_from_object(conn)
+        dbapi_module = _get_module_from_object(conn)
         module_given = False
     else:
         module_given = True
@@ -1801,7 +1801,7 @@ class SFrame(object):
         if not all(result_types):
             missing_val_cols = [i for i,v in enumerate(result_types) if v is None]
             cols_to_force_cast.update(missing_val_cols)
-            inferred_types = infer_dbapi2_types(c, mod_info)
+            inferred_types = _infer_dbapi2_types(c, mod_info)
             cnt = 0
             for i in result_types:
                 if i is None:
@@ -1880,15 +1880,15 @@ class SFrame(object):
         col_info = list(zip(self.column_names(), self.column_types()))
 
         if not use_python_type_specifiers:
-            pytype_to_printf = lambda x: 's'
+            _pytype_to_printf = lambda x: 's'
 
         # DBAPI2 standard allows for five different ways to specify parameters
         sql_param = {
             'qmark'   : lambda name,col_num,col_type: '?',
             'numeric' : lambda name,col_num,col_type:':'+str(col_num+1),
             'named'   : lambda name,col_num,col_type:':'+str(name),
-            'format'  : lambda name,col_num,col_type:'%'+pytype_to_printf(col_type),
-            'pyformat': lambda name,col_num,col_type:'%('+str(name)+')'+pytype_to_printf(col_type),
+            'format'  : lambda name,col_num,col_type:'%'+_pytype_to_printf(col_type),
+            'pyformat': lambda name,col_num,col_type:'%('+str(name)+')'+_pytype_to_printf(col_type),
             }
 
         get_sql_param = sql_param[mod_info['paramstyle']]
@@ -4852,7 +4852,7 @@ class SFrame(object):
         ret_sf.add_columns(new_sf, inplace=True)
         return ret_sf
 
-    def unpack(self, column_name, column_name_prefix=None, column_types=None,
+    def unpack(self, column_name=None, column_name_prefix=None, column_types=None,
                na_value=None, limit=None):
         """
         Expand one column of this SFrame to multiple columns with each value in
@@ -4866,8 +4866,12 @@ class SFrame(object):
 
         Parameters
         ----------
-        column_name : str
-            Name of the unpacked column
+        column_name : str, optional
+            Name of the unpacked column, if provided. If not provided
+            and only one column is present then the column is unpacked. 
+            In case of multiple columns, name must be provided to know 
+            which column to be unpacked.
+        
 
         column_name_prefix : str, optional
             If provided, unpacked column names would start with the given
@@ -4973,12 +4977,44 @@ class SFrame(object):
         | 3  |    3.0    |    4.0    |    5.0    |
         +----+-----------+-----------+-----------+
         [3 rows x 4 columns]
+        
+        >>> sf = turicreate.SFrame([{'a':1,'b':2,'c':3},{'a':4,'b':5,'c':6}])
+        >>> sf.unpack()
+        +---+---+---+
+        | a | b | c |
+        +---+---+---+
+        | 1 | 2 | 3 |
+        | 4 | 5 | 6 |
+        +---+---+---+
+        [2 rows x 3 columns]
+
+
+
         """
-        if column_name not in self.column_names():
-            raise KeyError("column '" + column_name + "' does not exist in current SFrame")
+        if column_name is None:
+            if self.num_columns()==0:
+                raise RuntimeError("No column exists in the current SFrame")
+            
+            for t in range(self.num_columns()):
+                column_type = self.column_types()[t]
+                if column_type==dict or column_type==list or column_type==array.array:
+                    
+                    if column_name is None:
+                        column_name = self.column_names()[t]
+                    else:
+                        raise RuntimeError("Column name needed to unpack")
+            
+
+            if column_name is None:
+                raise RuntimeError("No columns can be unpacked")
+            elif column_name_prefix is None:
+                column_name_prefix=""
+        elif column_name not in self.column_names():
+            raise KeyError("Column '" + column_name + "' does not exist in current SFrame")
 
         if column_name_prefix is None:
             column_name_prefix = column_name
+
 
         new_sf = self[column_name].unpack(column_name_prefix, column_types, na_value, limit)
 
