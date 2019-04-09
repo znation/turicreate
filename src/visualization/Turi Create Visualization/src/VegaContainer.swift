@@ -34,11 +34,17 @@ class VegaContainer: NSObject, WKScriptMessageHandler {
     private var ready: Bool = false
     
     init(view: WKWebView) {
-        
         // initialize variables
         self.view = view;
         self.pipe = nil
         
+        // customize wkwebview
+        //self.view.isOpaque = false
+        self.view.wantsLayer = true
+        self.view.layer?.backgroundColor = NSColor.blue.cgColor
+        self.view.enclosingScrollView?.backgroundColor = NSColor.purple
+        self.view.setValue(false, forKey: "drawsBackground")
+
         // super init call
         super.init()
         

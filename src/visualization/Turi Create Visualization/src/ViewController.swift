@@ -19,7 +19,6 @@ class ViewController: NSViewController, NSWindowDelegate {
     
     override func viewDidAppear() {
         self.view.window?.delegate = self
-        self.view.layer?.backgroundColor = NSColor.white.cgColor
     }
     
     func windowShouldClose(_ sender: NSWindow) -> Bool {

@@ -1,4 +1,5 @@
 "config": {
+    "background": {{backgroundColor}},
     "axis": {
         "gridColor": {{gridColor}},
         "labelFont": {{labelFont}},

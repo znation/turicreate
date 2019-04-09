@@ -1,6 +1,7 @@
 body{
     margin: 0px;
-    font-family: HelveticaNeue;
+    font-family: "San Francisco", HelveticaNeue;
+    background-color: transparent;
 }
 
 #hidden_cont{

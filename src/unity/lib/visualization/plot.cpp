@@ -85,6 +85,7 @@ namespace turi{
       std::string axisTitlePadding = "20";
       std::string axisTitleFontSize = "14";
       std::string axisTitleFontWeight = escape_string("normal");
+      std::string backgroundColor = escape_string("null"); // transparent
       std::string backgroundColor_bw = escape_string("#ffffff");
       std::string foregroundColor_bw = escape_string("#000000");
       std::string gridColor = escape_string("rgba(204,204,204,1.0)");
@@ -107,8 +108,10 @@ namespace turi{
 
       // Overrides for dark mode
       tc_plot_variation color_variation = (tc_plot_variation)((uint32_t)variation & 0xf0);
-      if (color_variation == tc_plot_color_dark ||
-          (color_variation == tc_plot_variation_default && is_system_dark_mode())) {
+      bool is_dark_mode = color_variation == tc_plot_color_dark ||
+          (color_variation == tc_plot_variation_default && is_system_dark_mode()) ||
+          (color_variation == tc_plot_color_os_default && is_system_dark_mode());
+      if (is_dark_mode) {
         labelColor = escape_string("rgba(255,255,255,0.847)");
         gridColor = escape_string("rgba(255,255,255,0.098)");
         titleColor = labelColor;
@@ -143,6 +146,16 @@ namespace turi{
         titleOffset = "30";
       }
 
+      // Overrides for background color
+      tc_plot_variation background_variation = (tc_plot_variation)((uint32_t)variation & 0xf00);
+      if (background_variation == tc_plot_background_opaque) {
+        if (is_dark_mode) {
+          backgroundColor = escape_string("#333");
+        } else {
+          backgroundColor = escape_string("#eee");
+        }
+      }
+
       // Override for data inclusion
       if (include_data) {
         data = ", \"values\": [" + m_transformer->get()->vega_column_data() + "]";
@@ -152,6 +165,7 @@ namespace turi{
         {"{{axisTitlePadding}}", axisTitlePadding},
         {"{{axisTitleFontSize}}", axisTitleFontSize},
         {"{{axisTitleFontWeight}}", axisTitleFontWeight},
+        {"{{backgroundColor}}", backgroundColor},
         {"{{backgroundColor_bw}}", backgroundColor_bw},
         {"{{foregroundColor_bw}}", foregroundColor_bw},
         {"{{gridColor}}", gridColor},

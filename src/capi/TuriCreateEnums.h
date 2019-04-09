@@ -59,11 +59,14 @@ MAKE_NS_OPTIONS(uint64_t, tc_plot_variation){
     tc_plot_size_medium = 0x02,
     tc_plot_size_large = 0x03,
 
-    // Color variations
-    // default could be light/dark depending on OS settings
+    // Color variations (defaults to OS default)
     tc_plot_color_light = 0x10,
     tc_plot_color_dark = 0x20,
+    tc_plot_color_os_default = 0x30,
 
+    // Background variations (defaults to transparent)
+    tc_plot_background_transparent = 0x100,
+    tc_plot_background_opaque = 0x200,
 };
 
 MAKE_NS_OPTIONS(uint64_t, tc_ft_type_enum) {

@@ -129,6 +129,7 @@ class Plot(object):
 
                 path_to_client = _get_client_app_path()
 
+                # TODO - design an API that allows for user control of light/dark etc. in Python
                 plot_variation = 0x0 # default
                 self.__proxy__.call_function('show', {'path_to_client': path_to_client, 'variation': plot_variation})
 
@@ -242,7 +243,8 @@ class Plot(object):
         return _json.loads(self.__proxy__.call_function('get_data'))
 
     def get_vega(self, include_data=True):
-        plot_variation = 0x0 # default
+        # TODO - design an API that allows for user control of light/dark etc. in Python
+        plot_variation = 0x10 # force light mode for now
         return _json.loads(self.__proxy__.call_function('get_spec', {'include_data': include_data, 'variation': plot_variation}))
 
     def materialize(self):
