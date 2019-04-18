@@ -342,7 +342,7 @@ if (CLANG)
     set(_cpp11_optional_flags "${_cpp11_optional_flags} -Wno-stdlibcxx-not-found")
   endif()
 
-  set(CPP11_FLAGS "-stdlib=libc++ -Wno-deprecated-register -Wno-enum-compare -Wno-conversion-null -Wno-constant-logical-operand -Wno-parentheses-equality -ftemplate-depth=900 ${_cpp11_optional_flags}")
+  set(CPP11_FLAGS "-Wno-deprecated-register -Wno-enum-compare -Wno-conversion-null -Wno-constant-logical-operand -Wno-parentheses-equality -ftemplate-depth=900 ${_cpp11_optional_flags}")
 
   set(WERROR_FLAGS "-Werror -Wall -Wsign-compare")
 else()
@@ -463,6 +463,10 @@ set(DISABLE_WARNING_FLAGS "")
 if (COMPILE_PROFILING MATCHES 1)
         set(PROFILING_FLAGS "-DUSE_EVENT_LOG -DUSE_TRACEPOINT")
         set(EXTRA_OPTIMIZATION_FLAGS "${EXTRA_OPTIMIZATION_FLAGS} ${PROFILING_FLAGS}")
+endif()
+
+if (CLANG)
+  add_compile_options("-stdlib=libc++")
 endif()
 
 # Set up the 128 bit integer support; defines INT128_FLAGS
