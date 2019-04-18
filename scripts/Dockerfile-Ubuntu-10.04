@@ -109,6 +109,9 @@ RUN make install
 
 # Copy cxxabi.h from libstdc++ 4.4 into a path it will be found in
 RUN cp /usr/include/c++/4.4/cxxabi.h /usr/local/include/
+RUN cp /usr/include/c++/4.4/cxxabi-forced.h /usr/local/include/
+RUN mkdir -p /usr/local/include/bits
+RUN cp /usr/include/c++/4.4/x86_64-linux-gnu/bits/cxxabi_tweaks.h /usr/local/include/bits/
 
 # Start at repo root (mounted into Docker)
 WORKDIR /build
