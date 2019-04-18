@@ -247,6 +247,7 @@ endif()
 #*                                                                        */
 #**************************************************************************/
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 
 if(WIN32)
@@ -367,10 +368,17 @@ if (CLANG)
   # clang 9.0.0 and earlier will warn (error with -Werror) on unused -pthread during linking
   # so adding only to compile options is what we need.
   add_compile_options(-pthread)
+
+  # Explicitly set libc++ as the stdlib and explicitly link it
+  # (Not sure why this is necessary but otherwise we get libstdc++ by default.)
+  set(CPP_REAL_COMPILER_FLAGS  "${CPP_REAL_COMPILER_FLAGS} -stdlib=libc++ -Xlinker -lc++")
 else()
   set(C_REAL_COMPILER_FLAGS "${C_REAL_COMPILER_FLAGS} -pthread")
   set(CPP_REAL_COMPILER_FLAGS "${CPP_REAL_COMPILER_FLAGS} -pthread")
 endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_REAL_COMPILER_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CPP_REAL_COMPILER_FLAGS}")
 
 # Disable address space randomization for OSX lion and above
 if (APPLE)
@@ -450,6 +458,8 @@ else()
   endif()
   set(ARCH_FLAG "-march=${MARCH}")
 endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_FLAG}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_FLAG}")
 
 # check if MTUNE is set
 if (NOT MTUNE)
@@ -463,10 +473,6 @@ set(DISABLE_WARNING_FLAGS "")
 if (COMPILE_PROFILING MATCHES 1)
         set(PROFILING_FLAGS "-DUSE_EVENT_LOG -DUSE_TRACEPOINT")
         set(EXTRA_OPTIMIZATION_FLAGS "${EXTRA_OPTIMIZATION_FLAGS} ${PROFILING_FLAGS}")
-endif()
-
-if (CLANG)
-  add_compile_options("-stdlib=libc++")
 endif()
 
 # Set up the 128 bit integer support; defines INT128_FLAGS
@@ -589,9 +595,13 @@ set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "Build Type")
 if (CMAKE_BUILD_TYPE MATCHES "Release")
   message(STATUS "Release build with C++ flags: " ${CMAKE_CXX_FLAGS_RELEASE})
   message(STATUS "Release build with C flags: " ${CMAKE_C_FLAGS_RELEASE})
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_RELEASE}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
 elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   message(STATUS "Debug build with C++ flags: " ${CMAKE_CXX_FLAGS_DEBUG})
   message(STATUS "Debug build with C flags: " ${CMAKE_C_FLAGS_DEBUG})
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_DEBUG}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
 else()
   message(FATAL_ERROR "Unknown build type: " ${CMAKE_BUILD_TYPE} "!. Rerun ./configure")
 endif()
