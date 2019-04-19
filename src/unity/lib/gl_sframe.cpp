@@ -1077,6 +1077,20 @@ std::shared_ptr<unity_sarray> gl_sarray_reference::get_proxy() const {
   return m_sf.select_column(m_column_name).get_proxy();
 }
 
+/*
+ * Must explicitly implement move constructor/operator (on Clang 8.0 at least).
+ *
+ * Otherwise, we get an error that a class containing a reference can't have
+ * an automatically generated move constructor/operator, because the
+ * intended behavior can't be inferred.
+ */
+gl_sarray_reference::gl_sarray_reference(gl_sarray_reference&& other) : m_sf(other.m_sf), m_column_name(other.m_column_name) {
+}
+gl_sarray_reference& gl_sarray_reference::operator=(gl_sarray_reference&& other) {
+  m_sf = other.m_sf;
+  m_column_name = other.m_column_name;
+  return *this;
+}
 
 /**************************************************************************/
 /*                                                                        */
