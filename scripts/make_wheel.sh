@@ -89,7 +89,7 @@ if [[ -z "${BUILD_NUMBER}" ]]; then
 fi
 
 if [[ -z "${NUM_PROCS}" ]]; then
-  NUM_PROCS=4
+  NUM_PROCS=$(nproc)
 fi
 
 if [[ -z "${TARGET_DIR}" ]]; then
