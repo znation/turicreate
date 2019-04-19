@@ -489,7 +489,15 @@ endif()
 #enable Wno-unused-command-line-argument if available
 check_cxx_compiler_flag(-Wno-unused-command-line-argument HAS_WNO_UNUSED_COMMAND_LINE_ARGUMENT)
 if(HAS_WNO_UNUSED_COMMAND_LINE_ARGUMENT)
+        add_compile_options(-Wno-unused-command-line-argument)
         set(DISABLE_WARNING_FLAGS "${DISABLE_WARNING_FLAGS} -Wno-unused-command-line-argument")
+endif()
+
+#enable Wno-unknown-warning-option if available
+check_cxx_compiler_flag(-Wno-unknown-warning-option HAS_WNO_UNUSED_COMMAND_LINE_ARGUMENT)
+if(HAS_WNO_UNUSED_COMMAND_LINE_ARGUMENT)
+        add_compile_options(-Wno-unknown-warning-option)
+        set(DISABLE_WARNING_FLAGS "${DISABLE_WARNING_FLAGS} -Wno-unknown-warning-option")
 endif()
 
 #disable gcc-only flags on clang (newer clang with XCode 5.1 errors on these)
