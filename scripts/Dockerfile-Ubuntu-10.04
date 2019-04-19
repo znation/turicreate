@@ -3,7 +3,7 @@
 # This image is intended for building Turi Create for maximum compatibility
 # with various Linux distributions.
 # Based on Ubuntu 10.04 for compatibility with older glibc versions.
-# Builds llvm 3.5.2 from source using GCC 4.8, then builds llvm 8.0.0 with clang and libc++,
+# Builds llvm 3.5.2 from source using GCC 4.8, then builds llvm 7.0.1 with clang and libc++,
 # using libstdc++ ABI 4.8 for ABI compatibility with older libstdc++ versions.
 
 FROM ubuntu:10.04
@@ -47,7 +47,7 @@ WORKDIR /src
 RUN tar xf openssl-1.1.0j.tar.gz
 WORKDIR /src/openssl-1.1.0j
 RUN ./config --prefix=/usr/local
-RUN make -j4 --quiet
+RUN make -j24 --quiet
 RUN make install
 RUN ldconfig
 
@@ -57,7 +57,7 @@ WORKDIR /src
 RUN tar xf Python-2.7.15.tgz
 WORKDIR /src/Python-2.7.15
 RUN ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared --enable-loadable-sqlite-extensions
-RUN make -j4 --quiet
+RUN make -j24 --quiet
 RUN make install
 RUN ldconfig
 
@@ -67,7 +67,7 @@ WORKDIR /src
 RUN tar xf Python-3.5.6.tgz
 WORKDIR /src/Python-3.5.6
 RUN ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared --enable-loadable-sqlite-extensions
-RUN make -j4 --quiet
+RUN make -j24 --quiet
 RUN make install
 RUN ldconfig
 
@@ -77,7 +77,7 @@ WORKDIR /src
 RUN tar xf Python-3.6.8.tgz
 WORKDIR /src/Python-3.6.8
 RUN ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared --enable-loadable-sqlite-extensions
-RUN make -j4 --quiet
+RUN make -j24 --quiet
 RUN make install
 RUN ldconfig
 
@@ -104,19 +104,19 @@ RUN cmake ../llvm-3.5.2.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/
 RUN make -j4
 RUN make install
 
-# Install llvm 8.0 from source with clang and libc++ (no libc++abi)
-ADD https://releases.llvm.org/8.0.0/llvm-8.0.0.src.tar.xz /src/llvm-8.0.0.src.tar.xz
-ADD https://releases.llvm.org/8.0.0/cfe-8.0.0.src.tar.xz /src/cfe-8.0.0.src.tar.xz
-ADD https://releases.llvm.org/8.0.0/libcxx-8.0.0.src.tar.xz /src/libcxx-8.0.0.src.tar.xz
+# Install llvm 7.0.1 from source with clang and libc++ (no libc++abi)
+ADD https://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz /src/llvm-7.0.1.src.tar.xz
+ADD https://releases.llvm.org/7.0.1/cfe-7.0.1.src.tar.xz /src/cfe-7.0.1.src.tar.xz
+ADD https://releases.llvm.org/7.0.1/libcxx-7.0.1.src.tar.xz /src/libcxx-7.0.1.src.tar.xz
 WORKDIR /src
-RUN tar xf llvm-8.0.0.src.tar.xz
-RUN tar xf cfe-8.0.0.src.tar.xz
-RUN tar xf libcxx-8.0.0.src.tar.xz
-RUN mv cfe-8.0.0.src llvm-8.0.0.src/tools/clang
-RUN mv libcxx-8.0.0.src llvm-8.0.0.src/projects/libcxx
-RUN mkdir llvm-8.0.0.build
-WORKDIR /src/llvm-8.0.0.build
-RUN cmake ../llvm-8.0.0.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLIBCXX_CXX_ABI=libstdc++ -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON
+RUN tar xf llvm-7.0.1.src.tar.xz
+RUN tar xf cfe-7.0.1.src.tar.xz
+RUN tar xf libcxx-7.0.1.src.tar.xz
+RUN mv cfe-7.0.1.src llvm-7.0.1.src/tools/clang
+RUN mv libcxx-7.0.1.src llvm-7.0.1.src/projects/libcxx
+RUN mkdir llvm-7.0.1.build
+WORKDIR /src/llvm-7.0.1.build
+RUN cmake ../llvm-7.0.1.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLIBCXX_CXX_ABI=libstdc++
 RUN make -j4
 RUN make install
 
@@ -124,8 +124,11 @@ RUN make install
 RUN find /usr/include -name 'cxxabi.h'
 RUN cp /usr/include/c++/4.8/cxxabi.h /usr/local/include/
 RUN mkdir -p /usr/local/include/bits
-RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/cxxabi_tweaks.h /usr/local/include/bits/
+RUN cp /usr/include/c++/4.8/bits/cxxabi_forced.h /usr/local/include/bits/
 RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/c++config.h /usr/local/include/bits/
+RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/cpu_defines.h /usr/local/include/bits/
+RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/cxxabi_tweaks.h /usr/local/include/bits/
+RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/os_defines.h /usr/local/include/bits/
 
 # Start at repo root (mounted into Docker)
 WORKDIR /build
