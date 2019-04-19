@@ -128,7 +128,8 @@
       "title": "{{xlabel}}",
       "orient": "bottom",
       "scale": "xscale",
-      "tickMinStep": 1
+      "grid": true
+      {{xTickMinStep}}
     },
     {
       "orient": "bottom",
@@ -138,6 +139,7 @@
       "title": "{{ylabel}}",
       "orient": "left",
       "scale": "yscale",
+      "grid": true,
       "tickCount": 5,
       "offset": 5
     }

@@ -50,6 +50,13 @@ std::shared_ptr<Plot> plot_histogram(
     }
 
     std::string spec = histogram_spec(title, xlabel, ylabel, self->dtype());
+    std::string xTickMinStep = "";
+    if (self->dtype() == flex_type_enum::INTEGER) {
+      xTickMinStep = ",\"tickMinStep\":1";
+    }
+    spec = format(spec, {
+      {"{{xTickMinStep}}", xTickMinStep},
+    });
     double size_array = static_cast<double>(self->size());
     return std::make_shared<Plot>(spec, transformation, size_array);
 }
