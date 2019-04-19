@@ -125,6 +125,7 @@ RUN find /usr/include -name 'cxxabi.h'
 RUN cp /usr/include/c++/4.8/cxxabi.h /usr/local/include/
 RUN mkdir -p /usr/local/include/bits
 RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/cxxabi_tweaks.h /usr/local/include/bits/
+RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/c++config.h /usr/local/include/bits/
 
 # Start at repo root (mounted into Docker)
 WORKDIR /build
