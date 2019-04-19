@@ -160,7 +160,7 @@ build_wheel_linux_python36:
     paths:
       - release/src/objc/libRecommender.dylib
 
-build_recommender_ios_12:
+.build_recommender_ios_12:
   tags:
     - macos10.14
   stage: build
