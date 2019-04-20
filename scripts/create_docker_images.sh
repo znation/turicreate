@@ -44,8 +44,24 @@ if [[ -n $PERSIST_TO_REPO_DIR ]]; then
   (test -f .docker_images/image-18.04.gz && docker load -i .docker_images/image-18.04.gz) || true
 fi
 
-(docker image ls turicreate/build-image-10.04:${TC_BUILD_IMAGE_VERSION} | grep turicreate/build-image) || \
-cat scripts/Dockerfile-Ubuntu-10.04 | docker build -t turicreate/build-image-10.04:${TC_BUILD_IMAGE_VERSION} -
+build_image() {
+  set +e
+  docker image ls turicreate/build-image-$1:${TC_BUILD_IMAGE_VERSION} | grep turicreate/build-image
+  set -e
+  if [[ $? ]]; then
+    # command failure (non-zero exit code) means no image found; let's make one.
+    mkdir -p deps/build/docker
+    cp scripts/Dockerfile-Ubuntu-$1 deps/build/docker/Dockerfile
+    cp -a deps/src/openssl-1.0.2 deps/build/docker/
+    cp -a deps/src/curl-7.33.0 deps/build/docker/
+    docker build -t turicreate/build-image-$1:${TC_BUILD_IMAGE_VERSION} -f scripts/Dockerfile-Ubuntu-$1 deps/build/docker/
+  fi
+}
+
+build_image 10.04
+build_image 12.04
+build_image 14.04
+build_image 18.04
 
 (docker image ls turicreate/build-image-12.04:${TC_BUILD_IMAGE_VERSION} | grep turicreate/build-image) || \
 cat scripts/Dockerfile-Ubuntu-12.04 | docker build -t turicreate/build-image-12.04:${TC_BUILD_IMAGE_VERSION} -

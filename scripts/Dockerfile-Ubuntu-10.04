@@ -3,7 +3,7 @@
 # This image is intended for building Turi Create for maximum compatibility
 # with various Linux distributions.
 # Based on Ubuntu 10.04 for compatibility with older glibc versions.
-# Builds llvm 3.5.2 from source using GCC 4.8, then builds llvm 7.0.1 with clang and libc++,
+# Builds llvm 3.5.2 from source using GCC 4.8, then builds llvm 8.0.0 with clang and libc++,
 # using libstdc++ ABI 4.8 for ABI compatibility with older libstdc++ versions.
 
 FROM ubuntu:10.04
@@ -30,59 +30,65 @@ RUN add-apt-repository ppa:git-core/ppa
 RUN apt-get update
 
 # Install dependencies
-RUN apt-get -y install vim-common gcc g++ libgif-dev libx11-dev ccache make zlib1g-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev perl-modules patch rsync git xz-utils file wget libc6-dev-i386 zip
+RUN apt-get -y install vim-common gcc g++ libgif-dev libx11-dev ccache make zlib1g-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev perl-modules patch rsync git xz-utils file libc6-dev-i386 zip
+
+# Install OpenSSL and curl from source
+# The built-in SSL is so old it can't talk to anything on the internet anymore
+# (so even get-pip.py doesn't work!)
+WORKDIR /src
+COPY /openssl-1.0.2/ .
+WORKDIR /src/openssl-1.0.2
+RUN ./config --prefix=/usr/local
+RUN make -j24 --quiet
+RUN make --quiet install
+RUN ldconfig
+
+WORKDIR /src
+COPY /curl-7.33.0/ .
+WORKDIR /src/curl-7.33.0
+RUN ./config --prefix=/usr/local
+RUN make -j24 --quiet
+RUN make --quiet install
 
 # Install cmake from binary release
-ADD https://cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz /opt/cmake-3.13.4-Linux-x86_64.tar.gz
 WORKDIR /opt
+RUN curl -O https://cmake.org/files/v3.13/cmake-3.13.4-Linux-x86_64.tar.gz
 RUN tar xf cmake-3.13.4-Linux-x86_64.tar.gz
 ENV PATH="/opt/cmake-3.13.4-Linux-x86_64/bin:${PATH}"
 
-# Install OpenSSL from source
-# The built-in SSL is so old it can't talk to anything on the internet anymore
-# (so even get-pip.py doesn't work!)
-ADD https://www.openssl.org/source/openssl-1.1.0j.tar.gz /src/openssl-1.1.0j.tar.gz
-WORKDIR /src
-RUN tar xf openssl-1.1.0j.tar.gz
-WORKDIR /src/openssl-1.1.0j
-RUN ./config --prefix=/usr/local
-RUN make -j24 --quiet
-RUN make install
-RUN ldconfig
-
 # Install Python 2.7 from source
-ADD http://www.python.org/ftp/python/2.7.15/Python-2.7.15.tgz /src/Python-2.7.15.tgz
 WORKDIR /src
+RUN curl -O http://www.python.org/ftp/python/2.7.15/Python-2.7.15.tgz
 RUN tar xf Python-2.7.15.tgz
 WORKDIR /src/Python-2.7.15
 RUN ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared --enable-loadable-sqlite-extensions
 RUN make -j24 --quiet
-RUN make install
+RUN make --quiet install
 RUN ldconfig
 
 # Install Python 3.5 from source
-ADD https://www.python.org/ftp/python/3.5.6/Python-3.5.6.tgz /src/Python-3.5.6.tgz
 WORKDIR /src
+RUN curl -O https://www.python.org/ftp/python/3.5.6/Python-3.5.6.tgz
 RUN tar xf Python-3.5.6.tgz
 WORKDIR /src/Python-3.5.6
 RUN ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared --enable-loadable-sqlite-extensions
 RUN make -j24 --quiet
-RUN make install
+RUN make --quiet install
 RUN ldconfig
 
 # Install Python 3.6 from source
-ADD https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tgz /src/Python-3.6.8.tgz
 WORKDIR /src
+RUN curl -O https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tgz
 RUN tar xf Python-3.6.8.tgz
 WORKDIR /src/Python-3.6.8
 RUN ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared --enable-loadable-sqlite-extensions
 RUN make -j24 --quiet
-RUN make install
+RUN make --quiet install
 RUN ldconfig
 
 # Install pip and virtualenv
-ADD https://bootstrap.pypa.io/get-pip.py /src/get-pip.py
 WORKDIR /src
+RUN curl -O https://bootstrap.pypa.io/get-pip.py
 RUN python2.7 get-pip.py
 RUN pip2.7 install virtualenv
 RUN python3.5 get-pip.py
@@ -91,43 +97,57 @@ RUN python3.6 get-pip.py
 RUN pip3.6 install virtualenv
 
 # Install gcc 4.8.5 from source
-ADD https://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.bz2 /src/gcc-4.8.5.tar.bz2
 WORKDIR /src
+RUN curl -O https://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.bz2
 RUN tar xf gcc-4.8.5.tar.bz2
 WORKDIR /src/gcc-4.8.5
 RUN ./contrib/download_prerequisites
 RUN ./configure
-RUN make
-RUN make install
-
-ENV CC="gcc-4.8"
-ENV CXX="g++-4.8"
-
-# Install llvm 7.0.1 from source with clang and libc++ (no libc++abi)
-ADD https://releases.llvm.org/7.0.1/llvm-7.0.1.src.tar.xz /src/llvm-7.0.1.src.tar.xz
-ADD https://releases.llvm.org/7.0.1/cfe-7.0.1.src.tar.xz /src/cfe-7.0.1.src.tar.xz
-ADD https://releases.llvm.org/7.0.1/libcxx-7.0.1.src.tar.xz /src/libcxx-7.0.1.src.tar.xz
-WORKDIR /src
-RUN tar xf llvm-7.0.1.src.tar.xz
-RUN tar xf cfe-7.0.1.src.tar.xz
-RUN tar xf libcxx-7.0.1.src.tar.xz
-RUN mv cfe-7.0.1.src llvm-7.0.1.src/tools/clang
-RUN mv libcxx-7.0.1.src llvm-7.0.1.src/projects/libcxx
-RUN mkdir llvm-7.0.1.build
-WORKDIR /src/llvm-7.0.1.build
-RUN cmake ../llvm-7.0.1.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_COMPILER=gcc-4.8 -DCMAKE_CXX_COMPILER=g++-4.8 -DLIBCXX_CXX_ABI=libstdc++
-RUN make -j24
-RUN make install
+RUN (make -j24 || make VERBOSE=1)
+RUN make --quiet install
 
 # Copy cxxabi.h into a path it will be found in
-RUN find /usr/local/include -name 'cxxabi.h'
-RUN cp /usr/include/c++/4.8/cxxabi.h /usr/local/include/
+RUN cp /usr/local/include/c++/4.8.5/cxxabi.h /usr/local/include/
 RUN mkdir -p /usr/local/include/bits
-RUN cp /usr/include/c++/4.8/bits/cxxabi_forced.h /usr/local/include/bits/
-RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/c++config.h /usr/local/include/bits/
-RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/cpu_defines.h /usr/local/include/bits/
-RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/cxxabi_tweaks.h /usr/local/include/bits/
-RUN cp /usr/include/c++/4.8/x86_64-linux-gnu/bits/os_defines.h /usr/local/include/bits/
+RUN cp /usr/local/include/c++/4.8.5/bits/cxxabi_forced.h /usr/local/include/bits/
+RUN find /usr/local/include/c++ -name os_defines.h
+RUN find /usr/local/include/c++/4.8.5/x86_64-linux-gnu/
+RUN cp /usr/local/include/c++/4.8.5/x86_64-linux-gnu/bits/c++config.h /usr/local/include/bits/
+RUN cp /usr/local/include/c++/4.8.5/x86_64-linux-gnu/bits/cpu_defines.h /usr/local/include/bits/
+RUN cp /usr/local/include/c++/4.8.5/x86_64-linux-gnu/bits/cxxabi_tweaks.h /usr/local/include/bits/
+RUN cp /usr/local/include/c++/4.8.5/x86_64-linux-gnu/bits/os_defines.h /usr/local/include/bits/
+
+# Install llvm 3.5.2 from source with clang and libc++ (no libc++abi)
+WORKDIR /src
+RUN curl -O https://releases.llvm.org/3.5.2/llvm-3.5.2.src.tar.xz
+RUN curl -O https://releases.llvm.org/3.5.2/cfe-3.5.2.src.tar.xz
+RUN curl -O https://releases.llvm.org/3.5.2/libcxx-3.5.2.src.tar.xz
+RUN tar xf llvm-3.5.2.src.tar.xz
+RUN tar xf cfe-3.5.2.src.tar.xz
+RUN tar xf libcxx-3.5.2.src.tar.xz
+RUN mv cfe-3.5.2.src llvm-3.5.2.src/tools/clang
+RUN mv libcxx-3.5.2.src llvm-3.5.2.src/projects/libcxx
+RUN mkdir llvm-3.5.2.build
+WORKDIR /src/llvm-3.5.2.build
+RUN cmake ../llvm-3.5.2.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libstdc++
+RUN make -j24
+RUN make --quiet install
+
+# Install llvm 8.0.0 from source with clang and libc++ (no libc++abi)
+WORKDIR /src
+RUN curl -O https://releases.llvm.org/8.0.0/llvm-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/cfe-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/libcxx-8.0.0.src.tar.xz
+RUN tar xf llvm-8.0.0.src.tar.xz
+RUN tar xf cfe-8.0.0.src.tar.xz
+RUN tar xf libcxx-8.0.0.src.tar.xz
+RUN mv cfe-8.0.0.src llvm-8.0.0.src/tools/clang
+RUN mv libcxx-8.0.0.src llvm-8.0.0.src/projects/libcxx
+RUN mkdir llvm-8.0.0.build
+WORKDIR /src/llvm-8.0.0.build
+RUN cmake ../llvm-8.0.0.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLIBCXX_CXX_ABI=libstdc++
+RUN make -j24
+RUN make --quiet install
 
 # Start at repo root (mounted into Docker)
 WORKDIR /build
