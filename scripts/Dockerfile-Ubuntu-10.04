@@ -33,7 +33,7 @@ RUN apt-get -y install vim-common gcc g++ libgif-dev libx11-dev ccache make zlib
 
 # Install gcc 4.8.5 from source
 WORKDIR /src
-RUN curl -O https://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.bz2
+ADD https://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.bz2 /src/gcc-4.8.5.tar.bz2
 RUN tar xf gcc-4.8.5.tar.bz2
 WORKDIR /src/gcc-4.8.5
 RUN ./contrib/download_prerequisites
