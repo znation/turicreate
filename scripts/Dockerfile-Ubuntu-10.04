@@ -36,9 +36,9 @@ WORKDIR /src
 ADD https://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.bz2 /src/gcc-4.8.5.tar.bz2
 RUN tar xf gcc-4.8.5.tar.bz2
 WORKDIR /src/gcc-4.8.5
-RUN ./contrib/download_prerequisites
-RUN ./configure --enable-languages=c,c++
-RUN make --quiet -j4
+RUN ./contrib/download_prerequisites > /dev/null
+RUN ./configure --enable-languages=c,c++ > /dev/null
+RUN (make --quiet -j4 > /dev/null) || (make --quiet -j1)
 RUN make --quiet install-strip
 ENV LD_LIBRARY_PATH="/usr/local/lib64/:$LD_LIBRARY_PATH"
 RUN ldconfig
