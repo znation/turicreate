@@ -59,6 +59,7 @@ WORKDIR /src/openssl-1.1.0j
 RUN ./config --prefix=/usr/local
 RUN make -j4 --quiet
 RUN make install
+ENV LD_LIBRARY_PATH="/usr/local/ssl/lib/:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 # Install Python 2.7 from source
