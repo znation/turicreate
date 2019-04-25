@@ -346,6 +346,8 @@ if (CLANG)
   set(CPP11_FLAGS "-Wno-deprecated-register -Wno-enum-compare -Wno-conversion-null -Wno-constant-logical-operand -Wno-parentheses-equality -ftemplate-depth=900 ${_cpp11_optional_flags}")
 
   set(WERROR_FLAGS "-Werror -Wall -Wsign-compare")
+
+  include_directories(SYSTEM /usr/local/include/c++/v1/)
 else()
   # non-clang
   set(CPP11_FLAGS "-Wno-enum-compare -Wno-conversion-null -ftemplate-depth=900 -Wno-unknown-pragmas")

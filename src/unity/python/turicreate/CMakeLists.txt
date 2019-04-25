@@ -81,10 +81,12 @@ elseif(LINUX)
 
 	if(CLANG)
 		find_library(LIBCXX c++)
-		add_custom_target(
-			copy_libcxx_deps ALL
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${LIBCXX}.1.0" "${CMAKE_CURRENT_BINARY_DIR}"
-      COMMAND ln -s ${CMAKE_CURRENT_BINARY_DIR}/libc++.so.1.0 ${CMAKE_CURRENT_BINARY_DIR}/libc++.so.1
-		)
+    if(LIBCXX)
+      add_custom_target(
+        copy_libcxx_deps ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${LIBCXX}.1.0" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ln -s ${CMAKE_CURRENT_BINARY_DIR}/libc++.so.1.0 ${CMAKE_CURRENT_BINARY_DIR}/libc++.so.1
+      )
+    endif()
   endif()
 endif()
