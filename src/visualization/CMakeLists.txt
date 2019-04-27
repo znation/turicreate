@@ -7,13 +7,31 @@ endif()
 
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
+  # Build JavaScript (client app code)
+  add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/tcviz.js"
+    COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
+            "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
+            --module amd
+            --allowJs
+            --jsx react
+            --sourceMap
+            --outFile "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/tcviz.js"
+            --removeComments
+            "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.js"
+    COMMENT "Building tcviz.js using TypeScript 3.4.5"
+  )
+  add_custom_target(tcviz_javascript
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tcviz.js
+  )
+
   if(APPLE)
     set(VISUALIZATION_XCODE_OUTPUT
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Turi Create Visualization.app/Contents/_CodeSignature/CodeResources"
       # TODO - there are probably more files that should go here, but this one might be sufficient.
       # I'm hoping it reliably changes every build.
     )
-    set(VISUALIZATION_XCODE_INPUT
+    set(VISUALIZATION_XCODE_DEPENDENCIES
+      tcviz_javascript
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/project.pbxproj"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Base.lproj/Main.storyboard"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Info.plist"
@@ -47,12 +65,11 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
     )
-    message(WARNING "VISUALIZATION_XCODE_INPUT is ${VISUALIZATION_XCODE_INPUT}")
     add_custom_command(
       OUTPUT "${VISUALIZATION_XCODE_OUTPUT}"
       COMMAND xcodebuild -project "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/" -configuration ${CMAKE_BUILD_TYPE} SYMROOT=${CMAKE_CURRENT_BINARY_DIR}
       COMMENT "Building visualization client via xcodebuild"
-      DEPENDS ${VISUALIZATION_XCODE_INPUT}
+      DEPENDS ${VISUALIZATION_XCODE_DEPENDENCIES}
       VERBATIM
     )
     add_custom_target(visualization_client DEPENDS "${VISUALIZATION_XCODE_OUTPUT}")
