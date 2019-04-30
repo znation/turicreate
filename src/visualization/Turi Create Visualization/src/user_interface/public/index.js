@@ -1,4 +1,3 @@
-alert("Attach debugger now");
 if(window.navigator.platform == 'MacIntel'){
   window.vegaResult = null;
   function log(level) {
@@ -20,12 +19,4 @@ if(window.navigator.platform == 'MacIntel'){
   console.info = log("info");
   console.warn = log("warn");
   console.error = log("error");
-
-  if (document.readyState == 'complete') {
-    window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
-  } else {
-    window.addEventListener('load', function() {
-      window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
-    });
-  }
 }

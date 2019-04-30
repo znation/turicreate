@@ -228,3 +228,11 @@ window.handleInput = function(data){
 }
 
 window.addEventListener('contextmenu', event => event.preventDefault());
+
+if (document.readyState == 'complete') {
+  window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
+} else {
+  window.addEventListener('load', function() {
+    window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
+  });
+}
