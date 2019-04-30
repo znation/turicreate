@@ -12,10 +12,11 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
             --module ES6
+            --target ES5
             --allowJs
             --jsx react
             --sourceMap
-            --out "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/"
+            --outDir "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/"
             --removeComments
             "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
