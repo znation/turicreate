@@ -20,8 +20,13 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.js"
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
   )
+  add_custom_target(tcviz_frontend_copy
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/"
+    COMMENT "Copying frontend assets from public/ to build/"
+  )
   add_custom_target(tcviz_javascript
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tcviz.js
+    DEPENDS tcviz_frontend_copy
   )
 
   if(APPLE)
