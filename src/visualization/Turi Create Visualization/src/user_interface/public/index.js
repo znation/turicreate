@@ -1,3 +1,4 @@
+alert("Attach debugger now");
 if(window.navigator.platform == 'MacIntel'){
   window.vegaResult = null;
   function log(level) {

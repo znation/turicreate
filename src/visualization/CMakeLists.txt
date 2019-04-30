@@ -11,13 +11,13 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/tcviz.js"
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
-            --module amd
+            --module ES6
             --allowJs
             --jsx react
             --sourceMap
-            --outFile "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/tcviz.js"
+            --out "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/"
             --removeComments
-            "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.js"
+            "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
   )
   add_custom_target(tcviz_frontend_copy
@@ -53,8 +53,8 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/package.json"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.css"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
