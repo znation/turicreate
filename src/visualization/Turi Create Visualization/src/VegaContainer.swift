@@ -425,13 +425,16 @@ class VegaContainer: NSObject, WKScriptMessageHandler {
         let json_string = String(data: arrData, encoding: .utf8)!
         let updateJS = String(format: "setSpec(%@);", json_string)
         
-        self.view.evaluateJavaScript(updateJS, completionHandler: {(value, err) in
-            if err != nil {
+        self.view.evaluateJavaScript(updateJS, completionHandler: {(value, optionalError) in
+            switch (optionalError) {
+            case .none:
+                break
+            case .some(let err):
+                let nserr = err as NSError
+                log(String(format: "Got error:\n\n%@\n\nwhile running script:\n\n%@\n", nserr.debugDescription, updateJS))
                 // if we got here, we got a JS error
-                log(err.debugDescription)
                 assert(false)
             }
-            
             debug_log("successfully sent vega spec to JS")
         })
     }
