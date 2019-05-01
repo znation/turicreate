@@ -25,13 +25,13 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
   )
   add_custom_target(tcviz_frontend_copy
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${CMAKE_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend assets from public/"
   )
   add_custom_target(tcviz_frontend_deps
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${CMAKE_FRONTEND_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${CMAKE_FRONTEND_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${CMAKE_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_javascript
