@@ -20,3 +20,8 @@ if(window.navigator.platform == 'MacIntel'){
   console.warn = log("warn");
   console.error = log("error");
 }
+
+window.onerror = function(message, filename, lineno, colno, error) {
+    console.warn("Unhandled JavaScript error: " + message + " at " + filename + ":" + lineno + ":" + colno);
+    console.error("Underlying error object was: ", error);
+};

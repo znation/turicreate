@@ -13,6 +13,7 @@ class ViewController: NSViewController, NSWindowDelegate, WKUIDelegate {
         let webConfiguration = WKWebViewConfiguration()
         customWebView = CustomWebKitView(frame: .zero, configuration: webConfiguration)
         customWebView.uiDelegate = self
+        customWebView.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         view = customWebView
     }
     

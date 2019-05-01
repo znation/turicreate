@@ -21,7 +21,26 @@
             <div class="loader"></div>
         </div>
     </div>
+
+    <!-- deps -->
+    <script type="text/javascript" src="require.js"></script>
+
+    <!-- entry point to tcviz app -->
     <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="tcviz.js" type="module"></script>
+
+    <script type="text/javascript">
+      require(['tcviz'], function() {
+        console.log("tcviz is loaded");
+        if(window.navigator.platform == 'MacIntel'){
+          if (document.readyState == 'complete') {
+            window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
+          } else {
+            window.addEventListener('load', function() {
+              window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
+            });
+          }
+        }
+      });
+    </script>
   </body>
 </html>

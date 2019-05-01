@@ -92,6 +92,7 @@ window.setSpec = function setSpec(value) {
             break;
     }
 }
+console.log("setSpec is ", typeof(window.setSpec));
 
 window.setProtoMessage = function setProtoMessage(value){
     
@@ -228,11 +229,3 @@ window.handleInput = function(data){
 }
 
 window.addEventListener('contextmenu', event => event.preventDefault());
-
-if (document.readyState == 'complete') {
-  window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
-} else {
-  window.addEventListener('load', function() {
-    window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
-  });
-}

@@ -13,6 +13,8 @@
 		9226E7C81F366F2E00C33A64 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9226E7C71F366F2E00C33A64 /* Assets.xcassets */; };
 		9226E7CB1F366F2E00C33A64 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9226E7C91F366F2E00C33A64 /* Main.storyboard */; };
 		92D462DB1F6BCB6600101404 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D462DA1F6BCB6600101404 /* Debugging.swift */; };
+		92E5D5132278FF2900CA8E81 /* tcviz.js in Resources */ = {isa = PBXBuildFile; fileRef = 92E5D5112278FF2900CA8E81 /* tcviz.js */; };
+		92E5D5142278FF2900CA8E81 /* tcviz.css in Resources */ = {isa = PBXBuildFile; fileRef = 92E5D5122278FF2900CA8E81 /* tcviz.css */; };
 		DEDC3BAD22419BFA00E1DA13 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEDC3BAC22419BFA00E1DA13 /* WebKit.framework */; };
 		FC245BED1F4F541D009F54C6 /* VegaContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BEC1F4F541D009F54C6 /* VegaContainer.swift */; };
 		FC245BF31F4F7FFB009F54C6 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BF21F4F7FFB009F54C6 /* JSON.swift */; };
@@ -34,14 +36,14 @@
 		9226E7CC1F366F2E00C33A64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92D462DA1F6BCB6600101404 /* Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debugging.swift; sourceTree = "<group>"; };
 		92E526C221EDAC29008D3183 /* dropdown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dropdown.png; sourceTree = "<group>"; };
+		92E5D5112278FF2900CA8E81 /* tcviz.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = tcviz.js; sourceTree = "<group>"; };
+		92E5D5122278FF2900CA8E81 /* tcviz.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = tcviz.css; sourceTree = "<group>"; };
 		DEDC3BAC22419BFA00E1DA13 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		FC245BEC1F4F541D009F54C6 /* VegaContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VegaContainer.swift; sourceTree = "<group>"; };
 		FC245BF21F4F7FFB009F54C6 /* JSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		FC245BF41F4F8110009F54C6 /* Pipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pipe.swift; sourceTree = "<group>"; };
 		FC30EEFF2227409B009ECF53 /* message.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = message.json; sourceTree = "<group>"; };
 		FC3E34CC206EEF3100B6B69A /* package.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
-		FC3E34D0206EF08500B6B69A /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
-		FC3E34D2206EF09800B6B69A /* index.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = index.css; sourceTree = "<group>"; };
 		FC3E34DC206EF4EB00B6B69A /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
 		FC3E34DE206EF4F600B6B69A /* index.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = index.css; sourceTree = "<group>"; };
 		FC3E34E0206EF50100B6B69A /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
@@ -196,8 +198,8 @@
 			children = (
 				FC30EEFE22274080009ECF53 /* format */,
 				FC3E34D6206EF42200B6B69A /* elements */,
-				FC3E34D0206EF08500B6B69A /* index.js */,
-				FC3E34D2206EF09800B6B69A /* index.css */,
+				92E5D5122278FF2900CA8E81 /* tcviz.css */,
+				92E5D5112278FF2900CA8E81 /* tcviz.js */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -528,6 +530,8 @@
 			files = (
 				9226E7C81F366F2E00C33A64 /* Assets.xcassets in Resources */,
 				9226E7CB1F366F2E00C33A64 /* Main.storyboard in Resources */,
+				92E5D5142278FF2900CA8E81 /* tcviz.css in Resources */,
+				92E5D5132278FF2900CA8E81 /* tcviz.js in Resources */,
 				FCE2E218222A264300A58EF0 /* index.module.scss in Resources */,
 				FCE2E221222CBCE600A58EF0 /* build in Resources */,
 			);
