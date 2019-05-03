@@ -11,7 +11,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   file(MAKE_DIRECTORY ${TC_FRONTEND_DIR})
 
   # Build JavaScript (client app code)
-  add_custom_command(OUTPUT "${TC_FRONTEND_DIR}/tcviz.js"
+  add_custom_target(tcviz_javascript_build
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
             --module amd
@@ -24,6 +24,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
   )
+  add_dependencies(tcviz_javascript_build node)
   add_custom_target(tcviz_frontend_copy
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend assets from public/"
@@ -34,8 +35,8 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
-  add_custom_target(tcviz_javascript
-    DEPENDS ${TC_FRONTEND_DIR}/tcviz.js
+  add_custom_target(tcviz_frontend_assets
+    DEPENDS tcviz_javascript_build
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
   )
@@ -47,7 +48,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       # I'm hoping it reliably changes every build.
     )
     set(VISUALIZATION_XCODE_DEPENDENCIES
-      tcviz_javascript
+      tcviz_frontend_assets
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/project.pbxproj"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Base.lproj/Main.storyboard"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Info.plist"
