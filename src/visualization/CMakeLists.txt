@@ -137,7 +137,6 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     set(V8_CONTEXT_SNAPSHOT "${CMAKE_CURRENT_BINARY_DIR}/deps/cef/src/cef/Release/v8_context_snapshot.bin")
     set(SNAPSHOT_BLOB "${CMAKE_CURRENT_BINARY_DIR}/deps/cef/src/cef/Release/snapshot_blob.bin")
     set(NATIVES_BLOB "${CMAKE_CURRENT_BINARY_DIR}/deps/cef/src/cef/Release/natives_blob.bin")
-    set(TC_NPM_BUILD "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build")
 
     include_directories(
       ${CMAKE_CURRENT_BINARY_DIR}/deps/cef/src/cef
@@ -169,7 +168,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
                     ${TC_VIZ_HTML_DIRECTORY}
 
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    ${TC_NPM_BUILD}
+                    ${TC_FRONTEND_DIR}
                     ${TC_VIZ_HTML_DIRECTORY}
 
             COMMAND ${CMAKE_COMMAND} -E make_directory

@@ -13,8 +13,6 @@
 		9226E7C81F366F2E00C33A64 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9226E7C71F366F2E00C33A64 /* Assets.xcassets */; };
 		9226E7CB1F366F2E00C33A64 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9226E7C91F366F2E00C33A64 /* Main.storyboard */; };
 		92D462DB1F6BCB6600101404 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D462DA1F6BCB6600101404 /* Debugging.swift */; };
-		92E5D5132278FF2900CA8E81 /* tcviz.js in Resources */ = {isa = PBXBuildFile; fileRef = 92E5D5112278FF2900CA8E81 /* tcviz.js */; };
-		92E5D5142278FF2900CA8E81 /* tcviz.css in Resources */ = {isa = PBXBuildFile; fileRef = 92E5D5122278FF2900CA8E81 /* tcviz.css */; };
 		DEDC3BAD22419BFA00E1DA13 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEDC3BAC22419BFA00E1DA13 /* WebKit.framework */; };
 		FC245BED1F4F541D009F54C6 /* VegaContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BEC1F4F541D009F54C6 /* VegaContainer.swift */; };
 		FC245BF31F4F7FFB009F54C6 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC245BF21F4F7FFB009F54C6 /* JSON.swift */; };
@@ -22,8 +20,6 @@
 		FC5F0B3C1F5F3A3E0001BCEE /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5F0B3B1F5F3A3E0001BCEE /* Error.swift */; };
 		FC9066011F425B4800AE3881 /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9066001F425B4800AE3881 /* AppData.swift */; };
 		FCDED10D2271105700099FA4 /* CustomWebKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDED10C2271105700099FA4 /* CustomWebKitView.swift */; };
-		FCE2E218222A264300A58EF0 /* index.module.scss in Resources */ = {isa = PBXBuildFile; fileRef = FCE2E1F9222A264300A58EF0 /* index.module.scss */; };
-		FCE2E221222CBCE600A58EF0 /* build in Resources */ = {isa = PBXBuildFile; fileRef = FCE2E220222CBCE600A58EF0 /* build */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -530,10 +526,6 @@
 			files = (
 				9226E7C81F366F2E00C33A64 /* Assets.xcassets in Resources */,
 				9226E7CB1F366F2E00C33A64 /* Main.storyboard in Resources */,
-				92E5D5142278FF2900CA8E81 /* tcviz.css in Resources */,
-				92E5D5132278FF2900CA8E81 /* tcviz.js in Resources */,
-				FCE2E218222A264300A58EF0 /* index.module.scss in Resources */,
-				FCE2E221222CBCE600A58EF0 /* build in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
