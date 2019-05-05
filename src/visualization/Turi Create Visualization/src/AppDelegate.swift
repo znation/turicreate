@@ -7,13 +7,27 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    @IBOutlet weak var save_image_object: NSMenuItem!
-    @IBOutlet weak var save_vega_object: NSMenuItem!
-    @IBOutlet weak var print_vega_image: NSMenuItem!
-    @IBOutlet weak var page_setup_object: NSMenuItem!
+    var save_image_object: NSMenuItem
+    var save_vega_object: NSMenuItem
+    var print_vega_image: NSMenuItem
+    var page_setup_object: NSMenuItem
     
+    override init() {
+        save_image_object = NSMenuItem(title: "Export as PNG", action: #selector(self.save_image), keyEquivalent: "S")
+        save_image_object.keyEquivalentModifierMask = .command
+        
+        save_vega_object = NSMenuItem(title: "Export as Vega JSON", action: #selector(self.save_vega), keyEquivalent: "S")
+        save_vega_object.keyEquivalentModifierMask = NSEvent.ModifierFlags(rawValue: NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue)
+        
+        print_vega_image = NSMenuItem(title: "Print...", action: #selector(self.print_vega), keyEquivalent: "P")
+        print_vega_image.keyEquivalentModifierMask = .command
+        
+        page_setup_object = NSMenuItem(title: "Page Setup...", action: #selector(self.print_vega), keyEquivalent: "P")
+        page_setup_object.keyEquivalentModifierMask = NSEvent.ModifierFlags(rawValue: NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue)
+
+    }
     
-    @IBAction func print_vega(_ sender: Any) {
+    @objc func print_vega(_ sender: Any) {
         SharedData.shared.vegaContainer?.get_image {image in
             let nsImage = NSImageView(image: image)
             nsImage.sizeToFit()
@@ -29,15 +43,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    @IBAction func save_image(_ sender: Any) {
+    @objc func save_image(_ sender: Any) {
         SharedData.shared.vegaContainer?.save_image()
     }
     
-    @IBAction func save_vega(_ sender: Any) {
+    @objc func save_vega(_ sender: Any) {
         SharedData.shared.vegaContainer?.save_vega()
     }
     
-    @IBAction func save_data(_ sender: Any) {
+    func save_data(_ sender: Any) {
         SharedData.shared.vegaContainer?.save_data()
     }
     
