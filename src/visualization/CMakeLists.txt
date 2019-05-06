@@ -7,7 +7,7 @@ endif()
 
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
-  set(TC_FRONTEND_DIR ${CMAKE_CURRENT_BINARY_DIR}/frontend)
+  set(TC_FRONTEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
   file(MAKE_DIRECTORY ${TC_FRONTEND_DIR})
 
   # Build JavaScript (client app code)
