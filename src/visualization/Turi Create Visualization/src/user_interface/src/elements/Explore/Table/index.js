@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StickyTable, Row, Cell } from './sticky-table'
-import './index.css';
+import './index.css.json';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import faAngleUp from '@fortawesome/fontawesome-free-solid/faAngleUp'

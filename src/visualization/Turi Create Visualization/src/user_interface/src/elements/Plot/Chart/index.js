@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import './index.css';
+import './index.css.json';
 
 var vega = require('vega');
 var vegaTooltip = require('vega-tooltip');

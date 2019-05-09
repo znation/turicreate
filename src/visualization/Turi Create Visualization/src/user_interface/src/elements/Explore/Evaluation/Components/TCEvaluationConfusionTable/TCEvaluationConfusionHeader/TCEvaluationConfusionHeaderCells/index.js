@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './index.scss';
+import './index.scss.json';
 
 import down from './assets/down.svg';
 import caret_down from './assets/caret-down.svg';

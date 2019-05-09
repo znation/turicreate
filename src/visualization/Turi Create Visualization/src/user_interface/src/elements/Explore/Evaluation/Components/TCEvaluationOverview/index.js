@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './index.scss';
+import './index.scss.json';
 
 import TCEvaluationSettings from '../TCEvaluationSettings';
 import TCEvaluationMetrics from '../TCEvaluationMetrics';

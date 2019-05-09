@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import style from './index.module.scss';
+import style from './index.module.scss.json';
 
 import error from './assets/error.svg';
 

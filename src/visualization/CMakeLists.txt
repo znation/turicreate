@@ -1,5 +1,6 @@
 project(Turi)
 
+add_subdirectory(tools)
 
 if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
@@ -10,7 +11,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   set(TC_FRONTEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
   file(MAKE_DIRECTORY ${TC_FRONTEND_DIR})
 
-  # Build JavaScript (client app code)
+  # Build JavaScript (client app code) with typescript
   add_custom_target(tcviz_javascript_build
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
@@ -25,6 +26,16 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
   )
   add_dependencies(tcviz_javascript_build node)
+
+  # Build SCSS (modular styles) with sassc
+  #add_custom_target(tcviz_scss_build
+  #  COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/sassc"
+  #          --help
+  #  COMMAND false
+  #  COMMENT "Building style modules (CSS + JSON) using sassc 3.5.0"
+  #)
+  #add_dependencies(tcviz_scss_build sassc)
+
   add_custom_target(tcviz_frontend_copy
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend assets from public/"
@@ -37,6 +48,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   )
   add_custom_target(tcviz_frontend_assets
     DEPENDS tcviz_javascript_build
+    #DEPENDS tcviz_scss_build
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
   )

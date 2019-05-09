@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import style from './index.module.scss';
+import style from './index.module.scss.json';
 
 import ImageContainer from './ImageContainer';
 
-import imgProperties from './ImageContainer/index.module.scss';
+import imgProperties from './ImageContainer/index.module.scss.json';
 import { of } from 'rxjs';
 
 // has to be a multiple of 3 to work properly
