@@ -1147,6 +1147,7 @@ foreach(package ${packages})
 endforeach()
 
 include_directories(src)
+include_directories(SYSTEM deps/src/libsass-3.5.5/include)
 include_directories(SYSTEM src/external)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
