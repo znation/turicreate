@@ -51,18 +51,18 @@ int main(int argc, const char *argv[])
   int ret = parse_command_line(argc, argv, vm);
   if (ret != 0) return ret;
 
-  
-
-
+  std::string module = vm["module"].as<std::string>();
+  Sass_File_Context* file_context = sass_make_file_context(module.c_str());
+  Sass_Context* context = sass_file_context_get_context(file_context);
+  Sass_Compiler* compiler = sass_make_file_compiler(file_context);
+  sass_compiler_parse(compiler);
+  sass_compiler_execute(compiler);
+  std::string output = sass_context_get_output_string(context);
+  // Retrieve errors during compilation
+  int error_status = sass_context_get_error_status(context);
+  std::string json_error = sass_context_get_error_json(context);
+  // Release memory dedicated to the C compiler
+  sass_delete_compiler(compiler);
+  sass_delete_file_context(file_context);
+  return error_status;
 }
-
-Sass_File_Context* context = sass_make_file_context(vm["module"].as<std::string>());
-Sass_Compiler* compiler = sass_make_file_compiler(sass_context);
-sass_compiler_parse(compiler)
-sass_compiler_execute(compiler)
-std::string output = sass_context_get_output_string(context)
-// Retrieve errors during compilation
-error_status = sass_context_get_error_status(context)
-json_error = sass_context_get_error_json(context)
-// Release memory dedicated to the C compiler
-sass_delete_compiler(compiler)
