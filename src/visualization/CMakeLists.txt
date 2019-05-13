@@ -1,7 +1,5 @@
 project(Turi)
 
-add_subdirectory(tools)
-
 if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
@@ -27,15 +25,6 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   )
   add_dependencies(tcviz_javascript_build node)
 
-  # Build SCSS (modular styles) with sassc
-  #add_custom_target(tcviz_scss_build
-  #  COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/sassc"
-  #          --help
-  #  COMMAND false
-  #  COMMENT "Building style modules (CSS + JSON) using sassc 3.5.0"
-  #)
-  #add_dependencies(tcviz_scss_build sassc)
-
   add_custom_target(tcviz_frontend_copy
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend assets from public/"
@@ -44,6 +33,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/styled-components-4.2.0/styled-components.js" "${TC_FRONTEND_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets
