@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { StickyTable, Row, Cell } from './sticky-table'
-import './index.css.json';
+import { StickyTable, Row, Cell } from './sticky-table';
+import styled from 'styled-components';
 
 import FontAwesomeIcon from '@fortawesome/react-fontawesome'
 import faAngleUp from '@fortawesome/fontawesome-free-solid/faAngleUp'
@@ -13,94 +13,133 @@ var numberWithCommas = d3.format(",");
 class TcTable extends Component {
 
   renderCell(value, type){
+    let arrow_right = styled.div`
+      position: absolute;
+      top:0px;
+      right:-20px;
+      display: none;
+      color:#108EE9;
+    `;
+    let default_span_color = styled.span`
+      color: #000000;
+    `;
+    let array_value = styled.div`
+      max-width: 190px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow:ellipsis;
+      color: #108EE9;
+      font-family: HelveticaNeue;
+      font-size: 12px;
+      line-height: 16.8px;
+    `;
+
     switch (type) {
       case "string":
+        let string_val = styled.div`
+          position:relative;
+          max-width: 190px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          color: #108EE9;
+        `;
         return (
           <div style={{"position":"relative"}}>
-            <div className="string_val" onClick={(e) => this.divClick(e)}>
-              <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+            <string_val onClick={(e) => this.divClick(e)}>
+              <default_span_color onClick={(e) => this.spanClick(e)}>
                 { value }
-              </span>
-            </div>
-            <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
+              </default_span_color>
+            </string_val>
+            <arrow_right onClick={(e) => this.arrowClick(e)}>
               <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
               <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-            </div>
+            </arrow_right>
           </div>
         );
       case "float":
         return (
-          <div className="float_val">
+          <div>
             { value }
           </div>
         );
       case "integer":
         return (
-          <div className="int_val">
+          <div>
             { value }
           </div>
         );
       case "image":
         return (
-          <div className="image_val">
+          <div>
                 <img src={ "data:image/" + value.format + ";base64," + value.data }  height={32} data-image-row={value.idx} data-image-column={value.column} alt={value.width + "x" + value.height + " image"} />
           </div>
         );
 
       case "dictionary":
+        let dictionary_value = styled.div`
+          max-width: 190px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          color: #108EE9;
+          font-family: HelveticaNeue;
+          font-size: 12px;
+          line-height: 16.8px;
+        `;
         return (
           <div style={{"position":"relative"}}>
-            <div className="dictionary_value" onClick={(e) => this.divClick(e)}>
-              <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+            <dictionary_value onClick={(e) => this.divClick(e)}>
+              <default_span_color onClick={(e) => this.spanClick(e)}>
                 { JSON.stringify(value) }
-              </span>
-            </div>
-            <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
+              </default_span_color>
+            </dictionary_value>
+            <arrow_right onClick={(e) => this.arrowClick(e)}>
               <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
               <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-            </div>
+            </arrow_right>
           </div>
         );
       case "array":
-          return (
-            <div style={{"position":"relative"}}>
-              <div className="array_value" onClick={(e) => this.divClick(e)}>
-                <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
-                  { value }
-                </span>
-              </div>
-              <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-                <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-                <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-              </div>
-            </div>
-              );
+        return (
+          <div style={{"position":"relative"}}>
+            <array_value onClick={(e) => this.divClick(e)}>
+              <default_span_color onClick={(e) => this.spanClick(e)}>
+                { value }
+              </default_span_color>
+            </array_value>
+            <arrow_right onClick={(e) => this.arrowClick(e)}>
+              <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+              <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+            </arrow_right>
+          </div>
+        );
       case "list":
         return (
           <div style={{"position":"relative"}}>
-            <div className="array_value" onClick={(e) => this.divClick(e)}>
-              <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+            <array_value onClick={(e) => this.divClick(e)}>
+              <default_span_color onClick={(e) => this.spanClick(e)}>
                 { JSON.stringify(value) }
-              </span>
-            </div>
-            <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
+              </default_span_color>
+            </array_value>
+            <arrow_right onClick={(e) => this.arrowClick(e)}>
               <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
               <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-            </div>
+            </arrow_right>
           </div>
                 );
       case "ndarray":
             return (
-              <div style={{"position":"relative"}}>
-                <div className="array_value" onClick={(e) => this.divClick(e)}>
-                  <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
-                    { JSON.stringify(value) }
-                  </span>
-                </div>
-                <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-                  <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-                  <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-                </div>
+                <div style={{"position":"relative"}}>
+                  <array_value onClick={(e) => this.divClick(e)}>
+                    <default_span_color onClick={(e) => this.spanClick(e)}>
+                      { JSON.stringify(value) }
+                    </default_span_color>
+                  </array_value>
+                  <arrow_right onClick={(e) => this.arrowClick(e)}>
+                    <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+                    <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+                  </arrow_right>
                 </div>
               );
       default:
