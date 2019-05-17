@@ -1,7 +1,5 @@
 project(Turi)
 
-add_subdirectory(tools)
-
 if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
