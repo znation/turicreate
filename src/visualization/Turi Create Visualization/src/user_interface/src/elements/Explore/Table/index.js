@@ -478,7 +478,7 @@ class TcTable extends Component {
     var $this = this;
     return function(e) {
       if(result == "image"){
-        if($this.image_source_container != null && e.target.getElementsByTagName("img")[0]){
+        if($this.image_source_container != null && e.target.getElementsByTagName("img")[0] && e.target.classList.contains('elements')){
           $this.image_source_container.src = "";
         }
       }
@@ -574,47 +574,6 @@ class TcTable extends Component {
 
     this.table_array = [];
 
-    let header_element = styled(Cell)`
-      padding-left: 10px;
-      padding-right: 10px;
-      padding-top: 14px;
-      padding-bottom: 14px;
-      text-align: left;
-      border-right: 1px solid #E9E9E9;
-      border-bottom: 1px solid #E9E9E9;
-      font-family: HelveticaNeue;
-      font-size: 12px;
-      line-height: 16.8px;
-      vertical-align: middle;
-    `;
-
-    let element = styled(Cell)`
-      padding-left: 10px;
-      padding-right: 38px;
-      padding-top: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #E9E9E9;
-      max-height: 0px;
-      transition: max-height 5s ease-out;
-      vertical-align: middle;
-      font-family: HelveticaNeue;
-      font-size: 12px;
-      line-height: 16.8px;
-    `;
-
-    let accordion_helper = styled.css`
-      border-right: 1px solid #FFFFFF;
-      border-bottom: 1px solid #FFFFFF;
-    `;
-
-    let accordion_helper_element = styled(element)(accordion_helper);
-    let accordion_helper_header_element = styled(header_element)(accordion_helper);
-
-    let accordion_helper_header_element = styled(header_element)`
-      border-right: 1px solid #FFFFFF;
-      border-bottom: 1px solid #FFFFFF;
-    `;
-
     for (var r = 0; r < this.data.values.length+1; r++) {
       var cells = [];
       for (var c = 0; c < this.table_spec["column_names"].length+1; c++) {
@@ -622,7 +581,7 @@ class TcTable extends Component {
           if(r === 0){
             cells.push(<Cell className="header" key={c+"_"+r}></Cell>);
           }else{
-            cells.push(<header_element key={c+"_"+r}>{this.data.values[r-1]["__idx"]}</header_element>);
+            cells.push(<Cell className="header_element" key={c+"_"+r}>{this.data.values[r-1]["__idx"]}</Cell>);
             row_ids.push(this.data.values[r-1]["__idx"]);
           }
         }else{
@@ -631,7 +590,7 @@ class TcTable extends Component {
           }else{
             var element_type = this.table_spec["column_types"][c-1];
             var element_column_name = this.table_spec["column_names"][c-1];
-            cells.push(<element onMouseEnter={this.hoverImage(this.table_spec["column_types"][c-1])} onMouseLeave={this.hoverOutImage(this.table_spec["column_types"][c-1])} onClick={(e) => this.cellClick(e)} x={r} x_c={c} y={element_column_name} flex_type={element_type} key={c+"_"+r}>{ this.renderCell(this.data.values[r-1][element_column_name], element_type )}</element>);
+            cells.push(<Cell className="elements" onMouseEnter={this.hoverImage(this.table_spec["column_types"][c-1])} onMouseLeave={this.hoverOutImage(this.table_spec["column_types"][c-1])} onClick={(e) => this.cellClick(e)} x={r} x_c={c} y={element_column_name} flex_type={element_type} key={c+"_"+r}>{ this.renderCell(this.data.values[r-1][element_column_name], element_type )}</Cell>);
           }
         }
       }
@@ -639,10 +598,10 @@ class TcTable extends Component {
 
       if(this.y == r){
         var empty_cells = [];
-        empty_cells.push(<accordion_helper_header_element key={"0_"+r+"modal"}>&nbsp;</accordion_helper_header_element>);
+        empty_cells.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"modal"}>&nbsp;</Cell>);
 
         for(var x = 1; x < cells.length;x++){
-          empty_cells.push(<accordion_helper_element key={x+"_"+r+"modal"}>&nbsp;</accordion_helper_element>);
+          empty_cells.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"modal"}>&nbsp;</Cell>);
         }
 
         rows.push(<Row key={"modal"} accordion={true}>
@@ -650,10 +609,10 @@ class TcTable extends Component {
                   </Row>);
 
         var empty_cells_1 = [];
-        empty_cells_1.push(<accordion_helper_header_element key={"0_"+r+"spacer1"}>&nbsp;</accordion_helper_header_element>);
+        empty_cells_1.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"spacer1"}>&nbsp;</Cell>);
 
         for(var x = 1; x < cells.length;x++){
-          empty_cells_1.push(<accordion_helper_element key={x+"_"+r+"spacer1"}>&nbsp;</accordion_helper_element>);
+          empty_cells_1.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"spacer1"}>&nbsp;</Cell>);
         }
 
         rows.push(<Row key={"spacer1"} spacers={true}>
@@ -661,10 +620,10 @@ class TcTable extends Component {
                   </Row>);
 
         var empty_cells_2 = [];
-        empty_cells_2.push(<header_element key={"0_"+r+"spacer2"}>&nbsp;</header_element>);
+        empty_cells_2.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"spacer2"}>&nbsp;</Cell>);
 
         for(var x = 1; x < cells.length;x++){
-          empty_cells_2.push(<accordion_helper_element key={x+"_"+r+"spacer2"}>&nbsp;</accordion_helper_element>);
+          empty_cells_2.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"spacer2"}>&nbsp;</Cell>);
         }
 
         rows.push(<Row key={"spacer2"} spacers={true}>
@@ -672,10 +631,10 @@ class TcTable extends Component {
                   </Row>);
           
         var empty_cells_3 = [];
-        empty_cells_3.push(<accordion_helper_header_element key={"0_"+r+"spacer3"}>&nbsp;</accordion_helper_header_element>);
+        empty_cells_3.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"spacer3"}>&nbsp;</Cell>);
           
         for(var x = 1; x < cells.length;x++){
-            empty_cells_3.push(<accordion_helper_element key={x+"_"+r+"spacer3"}>&nbsp;</accordion_helper_element>);
+            empty_cells_3.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"spacer3"}>&nbsp;</Cell>);
         }
           
         rows.push(<Row key={"spacer3"} spacers={true}>
@@ -692,21 +651,11 @@ class TcTable extends Component {
       
     var parent_context = this;
 
-    if (this.title != "") {
-      let titleElement = styled.h1`
-        padding-top: 17px;
-        padding-left: 17px;
-        margin-bottom: 30px;
-        font-family: HelveticaNeue;
-        font-size: 24px;
-        color: rgba(0,0,0,0.75);
-        line-height: 28.8px;
-        font-weight: 200;
-      `;
+    if(this.title != ""){
       var tableTitle = (
-                          <titleElement key="tableTitle">
+                          <h1 className="tableTitle"  key="tableTitle">
                             {this.title}
-                          </titleElement>
+                          </h1>
                         );
       this.table_array.push(tableTitle);
     }
