@@ -13,8 +13,10 @@ const fs = require('fs');
 const path = require('path');
 
 if (process.argv.length != 4) {
-    console.log(`css_module.compiler.js usage:
-node css_module_compiler.js <input_css_module> <output_dir>
+    console.log(`css_module_compiler.js usage:
+node css_module_compiler.js <input_css_module> <output_object_file>
+
+Writes a JSON object describing the CSS, and a mapping of original to unique class names.
     `);
     process.exit(1);
 }
@@ -22,12 +24,15 @@ node css_module_compiler.js <input_css_module> <output_dir>
 assert(process.argv[0].endsWith('node'));
 assert(process.argv[1].endsWith('css_module_compiler.js'));
 const inputFile = process.argv[2];
-const outputDir = process.argv[3];
+const outputFile = process.argv[3];
 const input = String(fs.readFileSync(inputFile));
 const parsed = css.parse(input, { source: inputFile });
 const classNameMap = {};
 
 for (const rule of parsed.stylesheet.rules) {
+    if (rule.type == 'comment') {
+        continue;
+    }
     for (let i = 0; i < rule.selectors.length; i++) {
         const selector = rule.selectors[i];
         const parsedSelector = cssWhat(selector);
@@ -46,14 +51,12 @@ for (const rule of parsed.stylesheet.rules) {
     }
 }
 
-const outputCSS = css.stringify(parsed, {compress: true});
-const inputFileParsed = path.parse(inputFile);
-const outputCSSFile = path.join(outputDir, inputFileParsed.name + ".css");
-fs.writeFileSync(outputCSSFile, outputCSS);
+const output = {
+    "css": parsed,
+    "json": classNameMap
+};
 
-const outputJSON = JSON.stringify(classNameMap);
-const outputJSONFile = path.join(outputDir, inputFileParsed.name + ".json");
-fs.writeFileSync(outputJSONFile, outputJSON);
+fs.writeFileSync(outputFile, JSON.stringify(output));
 
 function makeUniqueID() {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

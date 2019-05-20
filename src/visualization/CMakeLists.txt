@@ -8,8 +8,56 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
 
   set(TC_FRONTEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
   file(MAKE_DIRECTORY ${TC_FRONTEND_DIR})
+  set(SCSS_SOURCES
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/ToggleButton/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/utils.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/ProgressBar/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/ImageLabeler/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/NavigationBar/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/ErrorBar/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelModal/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettings/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/TCEvaluationImageCellsHover/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationOverview/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.scss"
+  )
+  set(CSS_SOURCES
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
+  )
 
   # Build JavaScript (client app code) with typescript
+  # TODO - use CMake compile/link phases instead of custom target
+  # (and run tsc only at link time)
   add_custom_target(tcviz_javascript_build
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
@@ -25,14 +73,14 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   )
   add_dependencies(tcviz_javascript_build node)
 
-  # Build SCSS (modular styles) with sassc
-  #add_custom_target(tcviz_scss_build
-  #  COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/sassc"
-  #          --help
-  #  COMMAND false
-  #  COMMENT "Building style modules (CSS + JSON) using sassc 3.5.0"
-  #)
-  #add_dependencies(tcviz_scss_build sassc)
+  # Build CSS Modules with css_module_compiler.js
+  set(CMAKE_CSS_COMPILE_OBJECT "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_compiler.js <SOURCE> <OBJECT>")
+  add_library(tcviz_css_build OBJECT
+    ${CSS_SOURCES}
+  )
+  set_target_properties(tcviz_css_build PROPERTIES LINKER_LANGUAGE C)
+  set_source_files_properties(tcviz_css_build PROPERTIES LANGUAGE CSS)
+  add_dependencies(tcviz_css_build sassc)
 
   add_custom_target(tcviz_frontend_copy
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
@@ -46,7 +94,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   )
   add_custom_target(tcviz_frontend_assets
     DEPENDS tcviz_javascript_build
-    #DEPENDS tcviz_scss_build
+    DEPENDS tcviz_css_build
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
   )
