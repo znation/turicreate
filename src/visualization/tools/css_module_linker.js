@@ -12,7 +12,7 @@ const path = require('path');
 
 if (process.argv.length < 4) {
     console.log(`css_module_linker.js usage:
-node css_module_linker.js <target_path> <object_file> [<object_file>] [<object_file>] [...]
+node css_module_linker.js <target_file> <object_file> [<object_file>] [<object_file>] [...]
 
 Expects object files produced by css_module_compiler.js.
     `);
@@ -20,9 +20,12 @@ Expects object files produced by css_module_compiler.js.
 }
 
 assert(process.argv[0].endsWith('node'));
-assert(process.argv[1].endsWith('css_module_compiler.js'));
-const targetPath = process.argv[2];
+assert(process.argv[1].endsWith('css_module_linker.js'));
+const targetFile = process.argv[2];
 const objectFiles = process.argv.slice(3);
+
+console.log("DEBUG: targetFile is ", targetFile);
+console.log("DEBUG: objectFiles are ", objectFiles);
 
 const outputCSS = [];
 for (const objectFile of objectFiles) {

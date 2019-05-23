@@ -74,13 +74,15 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   add_dependencies(tcviz_javascript_build node)
 
   # Build CSS Modules with css_module_compiler.js
-  set(CMAKE_CSS_COMPILE_OBJECT "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_compiler.js <SOURCE> <OBJECT>")
-  add_library(tcviz_css_build OBJECT
+  set(CMAKE_CSS_OUTPUT_EXTENSION ".csso")
+  set(CMAKE_CSS_COMPILE_OBJECT "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_compiler.js ${CMAKE_CSS_COMPILER} <SOURCE> <OBJECT>")
+  set(CMAKE_CSS_CREATE_STATIC_LIBRARY "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_linker.js <TARGET> <OBJECTS>")
+  add_library(tcviz_css OBJECT
     ${CSS_SOURCES}
   )
-  set_target_properties(tcviz_css_build PROPERTIES LINKER_LANGUAGE C)
-  set_source_files_properties(tcviz_css_build PROPERTIES LANGUAGE CSS)
-  add_dependencies(tcviz_css_build sassc)
+  set_target_properties(tcviz_css PROPERTIES LINKER_LANGUAGE CSS)
+  set_source_files_properties(${CSS_SOURCES} PROPERTIES LANGUAGE CSS)
+  add_dependencies(tcviz_css node)
 
   add_custom_target(tcviz_frontend_copy
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
@@ -94,7 +96,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   )
   add_custom_target(tcviz_frontend_assets
     DEPENDS tcviz_javascript_build
-    DEPENDS tcviz_css_build
+    DEPENDS tcviz_css
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
   )

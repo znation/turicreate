@@ -56,6 +56,7 @@ const output = {
     "json": classNameMap
 };
 
+console.log("Writing CSS object file to ", outputFile);
 fs.writeFileSync(outputFile, JSON.stringify(output));
 
 function makeUniqueID() {
