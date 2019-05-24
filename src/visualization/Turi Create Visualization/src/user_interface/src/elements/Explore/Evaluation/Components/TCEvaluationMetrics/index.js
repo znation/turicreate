@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './index.scss.json';
 
-import TCEvaluationTooltip from '../TCEvaluationTooltip';
+import TCEvaluationTooltip from '../TCEvaluationTooltip/index';
 
 import info from './assets/info.svg';
 

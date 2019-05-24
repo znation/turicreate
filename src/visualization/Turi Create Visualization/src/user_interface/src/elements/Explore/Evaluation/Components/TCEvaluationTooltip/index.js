@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.scss.json');
 
-import carret from './assets/carret.svg';
+var carret = require('image!./assets/carret.svg');
 
 class TCEvaluationTooltip extends Component {
   render() {
     return (
-      <div className="TCEvaluationTooltip">
-        <div className="TCEvaluationTooltipText">
+      <div className={css.TCEvaluationTooltip}>
+        <div className={css.TCEvaluationTooltipText}>
           {this.props.text}
         </div>
-        <div className="TCEvaluationCarret">
+        <div className={css.TCEvaluationCarret}>
           <img src={carret}
                height={9}
-               className="TCEvaluationCarretIcon"/>
+               className={css.TCEvaluationCarretIcon}/>
         </div>
       </div>
     );

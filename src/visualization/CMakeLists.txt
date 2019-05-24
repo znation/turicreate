@@ -40,20 +40,20 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.scss"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.scss"
   )
   set(CSS_SOURCES
-    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.css"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
   )
 
   # Build JavaScript (client app code) with typescript

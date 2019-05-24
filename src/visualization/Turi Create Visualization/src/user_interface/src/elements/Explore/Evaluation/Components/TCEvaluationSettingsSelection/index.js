@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.css.json');
 
 class TCEvaluationSettingsSelection extends Component {
   render() {

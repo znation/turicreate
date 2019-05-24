@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.scss.json');
 var filter = require('image!./assets/filter.svg');
 
 import TCEvaluationSettingsSelection from '../TCEvaluationSettingsSelection/index';
@@ -19,7 +19,7 @@ class TCEvaluationSettings extends Component {
   renderSettings = () => {
     if(this.state.open) {
       return (
-        <div className="TCEvaluationSettingsSelectionContainer">
+        <div className={css.TCEvaluationSettingsSelectionContainer}>
           <TCEvaluationSettingsSelection accuracy={this.props.accuracy}
                                          changeAccuracy={this.props.changeAccuracy.bind(this)}
                                          precision={this.props.precision}
@@ -35,8 +35,8 @@ class TCEvaluationSettings extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationSettings">
-        <div className="TCEvaluationSettingsImage"
+      <div className={css.TCEvaluationSettings}>
+        <div className={css.TCEvaluationSettingsImage}
              onClick={this.changeOpenClose.bind(this)}>
           <img src={filter}
                height={20}
