@@ -6,8 +6,9 @@ endif()
 
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
-  set(TC_FRONTEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
-  file(MAKE_DIRECTORY ${TC_FRONTEND_DIR})
+  set(TC_FRONTEND_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
+  set(TC_FRONTEND_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/")
+  file(MAKE_DIRECTORY ${TC_FRONTEND_BUILD_DIR})
   set(SCSS_SOURCES
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.module.scss"
@@ -67,17 +68,16 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             --jsx react
             --sourceMap
             --removeComments
-            --outFile "${TC_FRONTEND_DIR}/tcviz.js"
+            --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
             "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
   )
   add_dependencies(tcviz_javascript_build node)
 
   # Build CSS Modules with css_module_compiler.js
-  set(CMAKE_CSS_OUTPUT_EXTENSION ".csso")
   set(CMAKE_CSS_COMPILE_OBJECT "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_compiler.js ${CMAKE_CSS_COMPILER} <SOURCE> <OBJECT>")
-  set(CMAKE_CSS_CREATE_STATIC_LIBRARY "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_linker.js <TARGET> <OBJECTS>")
-  add_library(tcviz_css OBJECT
+  set(CMAKE_CSS_CREATE_STATIC_LIBRARY "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_linker.js <TARGET> \"${TC_FRONTEND_SOURCE_DIR}\" \"${TC_FRONTEND_BUILD_DIR}\" <OBJECTS>")
+  add_library(tcviz_css STATIC
     ${CSS_SOURCES}
   )
   set_target_properties(tcviz_css PROPERTIES LINKER_LANGUAGE CSS)
@@ -85,13 +85,15 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   add_dependencies(tcviz_css node)
 
   add_custom_target(tcviz_frontend_copy
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend assets from public/"
   )
   add_custom_target(tcviz_frontend_deps
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets
@@ -228,7 +230,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
                     ${TC_VIZ_HTML_DIRECTORY}
 
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    ${TC_FRONTEND_DIR}
+                    ${TC_FRONTEND_BUILD_DIR}
                     ${TC_VIZ_HTML_DIRECTORY}
 
             COMMAND ${CMAKE_COMMAND} -E make_directory

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import './index.css.json';
+var css = require('json!./index.css.json');
 
 var vega = require('vega');
 var vegaTooltip = require('vega-tooltip');
@@ -139,9 +139,9 @@ class TcPlot extends Component {
     render() {
         return (
                 <div>
-                <div className={["vega_container"].join(' ')} ref={(vega_container) => { this.vega_container = vega_container; }}>
+                <div className={[css.vega_container].join(' ')} ref={(vega_container) => { this.vega_container = vega_container; }}>
                 </div>
-                <div className={["hidden_cont"].join(' ')} ref={(hidden_container) => { this.hidden_container = hidden_container; }}>
+                <div className={[css.hidden_cont].join(' ')} ref={(hidden_container) => { this.hidden_container = hidden_container; }}>
                 </div>
                 </div>
                 );

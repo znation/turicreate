@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-import './index.css.json';
+var css = require('json!./index.css.json');
 
 export default class Row extends Component {
   render() {
@@ -9,7 +9,7 @@ export default class Row extends Component {
       console.log(this.props);
     }
     return (
-      <div {...this.props} className={'sticky-table-row ' + (this.props.className || '')}>
+      <div {...this.props} className={css['sticky-table-row'] + ' ' + (this.props.className || '')}>
         {this.props.children}
       </div>
     );

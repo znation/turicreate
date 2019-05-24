@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-import './index.css.json';
+var css = require('json!./index.css.json');
 
 export default class Table extends Component {
   render() {
     return (
-      <div {...this.props} className={'sticky-table-container ' + (this.props.className || '')}>
+      <div {...this.props} className={css['sticky-table-container'] + ' ' + (this.props.className || '')}>
         {this.props.children}
       </div>
     );

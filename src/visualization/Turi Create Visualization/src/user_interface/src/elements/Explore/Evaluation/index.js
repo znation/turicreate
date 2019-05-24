@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 
-import TCEvaluationOverview from './Components/TCEvaluationOverview';
-import TCEvaluationTable from './Components/TCEvaluationTable';
-import TCEvaluationFooter from './Components/TCEvaluationFooter';
+import TCEvaluationOverview from './Components/TCEvaluationOverview/index';
+import TCEvaluationTable from './Components/TCEvaluationTable/index';
+import TCEvaluationFooter from './Components/TCEvaluationFooter/index';
 
 class TCEvaluation extends Component {
   constructor(props){

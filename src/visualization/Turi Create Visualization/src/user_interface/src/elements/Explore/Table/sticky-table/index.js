@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import Table from './Table';
-import Row from './Row';
-import Cell from './Cell';
+import Table from './Table/index';
+import Row from './Row/index';
+import Cell from './Cell/index';
 
 var JSONPretty = require('react-json-pretty');
 var elementResizeEvent = require('element-resize-event');

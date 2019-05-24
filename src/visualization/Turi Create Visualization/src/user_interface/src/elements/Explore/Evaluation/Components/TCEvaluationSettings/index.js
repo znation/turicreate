@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './index.scss.json';
-import filter from './assets/filter.svg';
+var filter = require('image!./assets/filter.svg');
 
-import TCEvaluationSettingsSelection from '../TCEvaluationSettingsSelection';
+import TCEvaluationSettingsSelection from '../TCEvaluationSettingsSelection/index';
 
 class TCEvaluationSettings extends Component {
   constructor(props){

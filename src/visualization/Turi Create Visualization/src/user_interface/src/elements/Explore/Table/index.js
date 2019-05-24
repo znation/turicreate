@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import { StickyTable, Row, Cell } from './sticky-table'
-import './index.css.json';
+import { StickyTable, Row, Cell } from './sticky-table/index'
+var css = require('json!./index.css.json');
 
-import FontAwesomeIcon from '@fortawesome/react-fontawesome'
-import faAngleUp from '@fortawesome/fontawesome-free-solid/faAngleUp'
-import faAngleDown from '@fortawesome/fontawesome-free-solid/faAngleDown'
+import { FontAwesomeIcon } from '../../fontawesome'
 
 var d3 = require("d3");
 
@@ -20,32 +18,32 @@ class TcTable extends Component {
       case "string":
         return (
           <div style={{"position":"relative"}}>
-            <div className="string_val" onClick={(e) => this.divClick(e)}>
-              <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+            <div className={css.string_val} onClick={(e) => this.divClick(e)}>
+              <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
                 { value }
               </span>
             </div>
-            <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-              <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-              <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+            <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
+              <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+              <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
             </div>
           </div>
         );
       case "float":
         return (
-          <div className="float_val">
+          <div className={css.float_val}>
             { value }
           </div>
         );
       case "integer":
         return (
-          <div className="int_val">
+          <div className={css.int_val}>
             { value }
           </div>
         );
       case "image":
         return (
-          <div className="image_val">
+          <div className={css.image_val}>
                 <img src={ "data:image/" + value.format + ";base64," + value.data }  height={32} data-image-row={value.idx} data-image-column={value.column} alt={value.width + "x" + value.height + " image"} />
           </div>
         );
@@ -53,56 +51,56 @@ class TcTable extends Component {
       case "dictionary":
         return (
           <div style={{"position":"relative"}}>
-            <div className="dictionary_value" onClick={(e) => this.divClick(e)}>
-              <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+            <div className={css.dictionary_value} onClick={(e) => this.divClick(e)}>
+              <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
                 { JSON.stringify(value) }
               </span>
             </div>
-            <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-              <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-              <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+            <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
+              <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+              <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
             </div>
           </div>
         );
       case "array":
           return (
             <div style={{"position":"relative"}}>
-              <div className="array_value" onClick={(e) => this.divClick(e)}>
-                <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+              <div className={css.array_value} onClick={(e) => this.divClick(e)}>
+                <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
                   { value }
                 </span>
               </div>
-              <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-                <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-                <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+              <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
+                <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+                <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
               </div>
             </div>
               );
       case "list":
         return (
           <div style={{"position":"relative"}}>
-            <div className="array_value" onClick={(e) => this.divClick(e)}>
-              <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+            <div className={css.array_value} onClick={(e) => this.divClick(e)}>
+              <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
                 { JSON.stringify(value) }
               </span>
             </div>
-            <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-              <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-              <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+            <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
+              <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+              <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
             </div>
           </div>
                 );
       case "ndarray":
             return (
               <div style={{"position":"relative"}}>
-                <div className="array_value" onClick={(e) => this.divClick(e)}>
-                  <span className="default_span_color" onClick={(e) => this.spanClick(e)}>
+                <div className={css.array_value} onClick={(e) => this.divClick(e)}>
+                  <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
                     { JSON.stringify(value) }
                   </span>
                 </div>
-                <div className="arrow_right" onClick={(e) => this.arrowClick(e)}>
-                  <FontAwesomeIcon icon={faAngleDown} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-                  <FontAwesomeIcon icon={faAngleUp} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
+                <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
+                  <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
+                  <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
                 </div>
                 </div>
               );
@@ -543,18 +541,18 @@ class TcTable extends Component {
       for (var c = 0; c < this.table_spec["column_names"].length+1; c++) {
         if(c === 0){
           if(r === 0){
-            cells.push(<Cell className="header" key={c+"_"+r}></Cell>);
+            cells.push(<Cell className={css.header} key={c+"_"+r}></Cell>);
           }else{
-            cells.push(<Cell className="header_element" key={c+"_"+r}>{this.data.values[r-1]["__idx"]}</Cell>);
+            cells.push(<Cell className={css.header_element} key={c+"_"+r}>{this.data.values[r-1]["__idx"]}</Cell>);
             row_ids.push(this.data.values[r-1]["__idx"]);
           }
         }else{
           if(r === 0){
-            cells.push(<Cell className={"header"} key={c+"_"+r}><span>{this.table_spec["column_names"][c-1]}</span></Cell>);
+            cells.push(<Cell className={css.header} key={c+"_"+r}><span>{this.table_spec["column_names"][c-1]}</span></Cell>);
           }else{
             var element_type = this.table_spec["column_types"][c-1];
             var element_column_name = this.table_spec["column_names"][c-1];
-            cells.push(<Cell className="elements" onMouseEnter={this.hoverImage(this.table_spec["column_types"][c-1])} onMouseLeave={this.hoverOutImage(this.table_spec["column_types"][c-1])} onClick={(e) => this.cellClick(e)} x={r} x_c={c} y={element_column_name} flex_type={element_type} key={c+"_"+r}>{ this.renderCell(this.data.values[r-1][element_column_name], element_type )}</Cell>);
+            cells.push(<Cell className={css.elements} onMouseEnter={this.hoverImage(this.table_spec["column_types"][c-1])} onMouseLeave={this.hoverOutImage(this.table_spec["column_types"][c-1])} onClick={(e) => this.cellClick(e)} x={r} x_c={c} y={element_column_name} flex_type={element_type} key={c+"_"+r}>{ this.renderCell(this.data.values[r-1][element_column_name], element_type )}</Cell>);
           }
         }
       }
@@ -562,10 +560,10 @@ class TcTable extends Component {
 
       if(this.y == r){
         var empty_cells = [];
-        empty_cells.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"modal"}>&nbsp;</Cell>);
+        empty_cells.push(<Cell className={[css.header_element, css.accordion_helper].join(' ')} key={"0_"+r+"modal"}>&nbsp;</Cell>);
 
         for(var x = 1; x < cells.length;x++){
-          empty_cells.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"modal"}>&nbsp;</Cell>);
+          empty_cells.push(<Cell className={[css.elements, css.accordion_helper].join(' ')} key={x+"_"+r+"modal"}>&nbsp;</Cell>);
         }
 
         rows.push(<Row key={"modal"} accordion={true}>
@@ -573,10 +571,10 @@ class TcTable extends Component {
                   </Row>);
 
         var empty_cells_1 = [];
-        empty_cells_1.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"spacer1"}>&nbsp;</Cell>);
+        empty_cells_1.push(<Cell className={[css.header_element, css.accordion_helper].join(' ')} key={"0_"+r+"spacer1"}>&nbsp;</Cell>);
 
         for(var x = 1; x < cells.length;x++){
-          empty_cells_1.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"spacer1"}>&nbsp;</Cell>);
+          empty_cells_1.push(<Cell className={[css.elements, css.accordion_helper].join(' ')} key={x+"_"+r+"spacer1"}>&nbsp;</Cell>);
         }
 
         rows.push(<Row key={"spacer1"} spacers={true}>
@@ -584,10 +582,10 @@ class TcTable extends Component {
                   </Row>);
 
         var empty_cells_2 = [];
-        empty_cells_2.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"spacer2"}>&nbsp;</Cell>);
+        empty_cells_2.push(<Cell className={[css.header_element, css.accordion_helper].join(' ')} key={"0_"+r+"spacer2"}>&nbsp;</Cell>);
 
         for(var x = 1; x < cells.length;x++){
-          empty_cells_2.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"spacer2"}>&nbsp;</Cell>);
+          empty_cells_2.push(<Cell className={[css.elements, css.accordion_helper].join(' ')} key={x+"_"+r+"spacer2"}>&nbsp;</Cell>);
         }
 
         rows.push(<Row key={"spacer2"} spacers={true}>
@@ -595,10 +593,10 @@ class TcTable extends Component {
                   </Row>);
           
         var empty_cells_3 = [];
-        empty_cells_3.push(<Cell className={"header_element accordion_helper"} key={"0_"+r+"spacer3"}>&nbsp;</Cell>);
+        empty_cells_3.push(<Cell className={[css.header_element, css.accordion_helper].join(' ')} key={"0_"+r+"spacer3"}>&nbsp;</Cell>);
           
         for(var x = 1; x < cells.length;x++){
-            empty_cells_3.push(<Cell className={"elements accordion_helper"} key={x+"_"+r+"spacer3"}>&nbsp;</Cell>);
+            empty_cells_3.push(<Cell className={[css.elements, css.accordion_helper].join(' ')} key={x+"_"+r+"spacer3"}>&nbsp;</Cell>);
         }
           
         rows.push(<Row key={"spacer3"} spacers={true}>
@@ -617,7 +615,7 @@ class TcTable extends Component {
 
     if(this.title != ""){
       var tableTitle = (
-                          <h1 className="tableTitle"  key="tableTitle">
+                          <h1 className={css.tableTitle}  key="tableTitle">
                             {this.title}
                           </h1>
                         );
@@ -625,7 +623,7 @@ class TcTable extends Component {
     }
 
     var tableBody = (
-                      <div className="resize_container" key="tableBody" style={{ "height": this.state.windowHeight-44, "width": this.state.windowWidth}}>
+                      <div className={css.resize_container} key="tableBody" style={{ "height": this.state.windowHeight-44, "width": this.state.windowWidth}}>
                      <StickyTable parent_context={parent_context} scroll_state={this.table_scroll} scrollVal={this.scrollVal} size={this.size} step_size={this.step_size} set_lower={this.set_lower} set_higher={this.set_higher}  y={this.y} data={this.data_sent} column_name={this.column_name} scroll_callback={this.callbackScroll} reset_scroll={this.reset_scroll} style={{ "height": this.state.windowHeight-44, "width": this.state.windowWidth}}>
                           {rows}
                         </StickyTable>
@@ -633,14 +631,14 @@ class TcTable extends Component {
                     );
 
     var tableFooter = (
-                        <div className="BottomTable" key="tableFooter">
+                        <div className={css.BottomTable} key="tableFooter">
                           &nbsp;
-                          <div className="numberOfRows">
+                          <div className={css.numberOfRows}>
                             {numberWithCommas(this.size)} rows
                           </div>
-                          <div className="jumpToRowContainer">
-                            <input className="rowNumber" id="rowNum" onKeyDown={this.enterPressJumpRow.bind(this)} placeholder="Row #"/>
-                            <img className="enterSymbol" onClick={this.rowHandler.bind(this)} src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAAAxCAYAAABnCd/9AAAAAXNSR0IArs4c6QAAA9RJREFUaAXtmk1oE0EUx80mahCiglKKpSAiHrTUSz1YBL9REEE8BBSqLQrRNm1BvPSk9ODHQSHpRywKwUMvxVIQrccqanvw5qEHD4LooQgeaqGY5svfK01Yt7t1d7Mpm00Wys6+nZl9/1/fm5mdrG9DlR0DAwNn8vn8HWRP9/T03DaS7zO64UV7LBa7jq4EfwHR5/f7d0ej0W9S1h6K1uDVa6D0o+0pf8tQRCdgQnLWO4qV9G56wTYyMrIxlUo9I32uWNHjaTDxeHwrUMaBcsoKFKnr2VRKJBINAHlvB4pnwQClKZ1OzyCwWUTaOTwXMUzHJ4DygUhptAOk0MZTY8zQ0NDebDY7CZTNBYF2z56KGIC0OAFFYHoNjGN6HOvIbsi6tZ1jYwxrhqOIjBDKiz6f7zHvIbNuFW3GL0cihuX2LR42BZRLnK9x/shAeMiMA26tUxIYAChESgxxjyirX0i3MzvccKtoM37ZTqVkMhlkzTAKkIt6D8LeomevFJstMIODgzsWFhZeIr7VSCjjjK2+jfpbb7vlVBoeHt6Ty+Wm14Ky3iLK8TxLYGRAzWQyM0DZVw5n3NSnaTAMsucZUN8Cpc5NAsrliykwDLIyw0wAZUu5HHFbv2uCAYSPNcp9xpQEZb/bnC+nP4Yzx9jY2CbSJ8nDL5fTAbf2rQuGfdJtc3NzEzh93K2Ol9uvVWCYeRrZJ31D6hwo5eG0r2NsuldKH1bb8sz9VtsY1f8HDKlzcGWjZ5dRAwv2nYxNfRbqu6pqcfBlNXsa4rJ57AQUV4m048wyGKBc5b/7mg4Mf4Cy03kltwmQPu2kj8w+tUNFQCF14qrrWnGFgKRSLX10wkFheyClY696k0SMfCtSOzQEFDatHxI1NThaMHINnH6+FWkHUFpzv2oviws8vix6rijKOeD8rgYaMrYGg8EfRlrVO/vLddi6bOZH8UkuGowambHz4HnqvTJTd73rsETJkCEvCAZD/1aBESflRZItTIHTZNdpwMySoiW9iNp9thPtiqmk7qyrq+s7YXYEcVNqezWVdcEIgEgkMl9fX38WOKPVBKSg1RCMVAiHw0vd3d1tFB8UGlTLeU0wAoGIyff29vYxY92knK2B0RAgcp4A5wJwFjW3PHn534hRq5bpjWnuGHB+qu1eLFsCIwCYsT4FAoHDwPniRSAFTZbBSMPOzs6vpFUrcKYLHWnPLKJyWlslXdsCIwJJq1+hUOgkxXEDwZ8N7BVhtg1G1HV0dPxhdRumKB8PqY8loqmit0t1XwnUCs2W+Sm3DRhR6susdRdg78y2dWO9vzv+PVLOdXkdAAAAAElFTkSuQmCC" height={8}/>
+                          <div className={css.jumpToRowContainer}>
+                            <input className={css.rowNumber} id="rowNum" onKeyDown={this.enterPressJumpRow.bind(this)} placeholder="Row #"/>
+                            <img className={css.enterSymbol} onClick={this.rowHandler.bind(this)} src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAAAxCAYAAABnCd/9AAAAAXNSR0IArs4c6QAAA9RJREFUaAXtmk1oE0EUx80mahCiglKKpSAiHrTUSz1YBL9REEE8BBSqLQrRNm1BvPSk9ODHQSHpRywKwUMvxVIQrccqanvw5qEHD4LooQgeaqGY5svfK01Yt7t1d7Mpm00Wys6+nZl9/1/fm5mdrG9DlR0DAwNn8vn8HWRP9/T03DaS7zO64UV7LBa7jq4EfwHR5/f7d0ej0W9S1h6K1uDVa6D0o+0pf8tQRCdgQnLWO4qV9G56wTYyMrIxlUo9I32uWNHjaTDxeHwrUMaBcsoKFKnr2VRKJBINAHlvB4pnwQClKZ1OzyCwWUTaOTwXMUzHJ4DygUhptAOk0MZTY8zQ0NDebDY7CZTNBYF2z56KGIC0OAFFYHoNjGN6HOvIbsi6tZ1jYwxrhqOIjBDKiz6f7zHvIbNuFW3GL0cihuX2LR42BZRLnK9x/shAeMiMA26tUxIYAChESgxxjyirX0i3MzvccKtoM37ZTqVkMhlkzTAKkIt6D8LeomevFJstMIODgzsWFhZeIr7VSCjjjK2+jfpbb7vlVBoeHt6Ty+Wm14Ky3iLK8TxLYGRAzWQyM0DZVw5n3NSnaTAMsucZUN8Cpc5NAsrliykwDLIyw0wAZUu5HHFbv2uCAYSPNcp9xpQEZb/bnC+nP4Yzx9jY2CbSJ8nDL5fTAbf2rQuGfdJtc3NzEzh93K2Ol9uvVWCYeRrZJ31D6hwo5eG0r2NsuldKH1bb8sz9VtsY1f8HDKlzcGWjZ5dRAwv2nYxNfRbqu6pqcfBlNXsa4rJ57AQUV4m048wyGKBc5b/7mg4Mf4Cy03kltwmQPu2kj8w+tUNFQCF14qrrWnGFgKRSLX10wkFheyClY696k0SMfCtSOzQEFDatHxI1NThaMHINnH6+FWkHUFpzv2oviws8vix6rijKOeD8rgYaMrYGg8EfRlrVO/vLddi6bOZH8UkuGowambHz4HnqvTJTd73rsETJkCEvCAZD/1aBESflRZItTIHTZNdpwMySoiW9iNp9thPtiqmk7qyrq+s7YXYEcVNqezWVdcEIgEgkMl9fX38WOKPVBKSg1RCMVAiHw0vd3d1tFB8UGlTLeU0wAoGIyff29vYxY92knK2B0RAgcp4A5wJwFjW3PHn534hRq5bpjWnuGHB+qu1eLFsCIwCYsT4FAoHDwPniRSAFTZbBSMPOzs6vpFUrcKYLHWnPLKJyWlslXdsCIwJJq1+hUOgkxXEDwZ8N7BVhtg1G1HV0dPxhdRumKB8PqY8loqmit0t1XwnUCs2W+Sm3DRhR6susdRdg78y2dWO9vzv+PVLOdXkdAAAAAElFTkSuQmCC" height={8}/>
                           </div>
                         </div>
                       );
@@ -655,9 +653,9 @@ class TcTable extends Component {
                               </div>
                               <img id="image_source_container" src="" />
                               <div id="image_loading_container">
-                                <div className="table_loading_parent">
-                                    <div className="table_loader_container">
-                                        <div className="table_loader"></div>
+                                <div className={css.table_loading_parent}>
+                                    <div className={css.table_loader_container}>
+                                        <div className={css.table_loader}></div>
                                     </div>
                                 </div>
                               </div>

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './index.scss.json';
 
-import TCEvaluationSettings from '../TCEvaluationSettings';
-import TCEvaluationMetrics from '../TCEvaluationMetrics';
+import TCEvaluationSettings from '../TCEvaluationSettings/index';
+import TCEvaluationMetrics from '../TCEvaluationMetrics/index';
 
 import * as d3 from "d3";
 
