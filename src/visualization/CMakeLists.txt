@@ -9,7 +9,23 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   set(TC_FRONTEND_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
   set(TC_FRONTEND_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/")
   file(MAKE_DIRECTORY ${TC_FRONTEND_BUILD_DIR})
-  set(SCSS_SOURCES
+  set(CSS_SOURCES
+    # CSS files
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
+
+    # SCSS files
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/ToggleButton/index.module.scss"
@@ -39,21 +55,6 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
-  )
-  set(CSS_SOURCES
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
   )
 
   # Build JavaScript (client app code) with typescript
@@ -126,24 +127,15 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/AppData.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.html"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/package.json"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
     )
     add_custom_command(
       OUTPUT "${VISUALIZATION_XCODE_OUTPUT}"
