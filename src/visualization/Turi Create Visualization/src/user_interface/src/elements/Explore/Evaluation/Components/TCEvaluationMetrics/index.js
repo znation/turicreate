@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.css.json');
 
 import TCEvaluationTooltip from '../TCEvaluationTooltip/index';
 
-import info from './assets/info.svg';
+var info = require('image!./assets/info.svg');
 
 class TCEvaluationMetrics extends Component {
   
   renderIcon = () => {
     if(this.props.tooltip){
       return (
-        <div className="TCEvaluationMetricsInfoIcon">
+        <div className={css.TCEvaluationMetricsInfoIcon}>
           <img src={info}
                height={10}
                width={10}/>
@@ -22,7 +22,7 @@ class TCEvaluationMetrics extends Component {
   renderTooltip = () => {
     if(this.props.tooltip){
       return (
-        <div className="TCEvaluationMetricsTooltipContainer">
+        <div className={css.TCEvaluationMetricsTooltipContainer}>
           <TCEvaluationTooltip text={this.props.tooltip}/>
         </div>
       );
@@ -31,15 +31,15 @@ class TCEvaluationMetrics extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationMetrics">
-        <div className="TCEvaluationMetricsTitleContainer">
-          <div className="TCEvaluationMetricsTitle">
+      <div className={css.TCEvaluationMetrics}>
+        <div className={css.TCEvaluationMetricsTitleContainer}>
+          <div className={css.TCEvaluationMetricsTitle}>
             {this.props.title}
           </div>
           {this.renderIcon()}
           {this.renderTooltip()}
         </div>
-        <div className="TCEvaluationMetricsValueContainer">
+        <div className={css.TCEvaluationMetricsValueContainer}>
           {this.props.value}
         </div>
       </div>

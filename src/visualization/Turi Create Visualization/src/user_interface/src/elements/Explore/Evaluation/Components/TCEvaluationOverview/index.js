@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.scss.json');
 
 import TCEvaluationSettings from '../TCEvaluationSettings/index';
 import TCEvaluationMetrics from '../TCEvaluationMetrics/index';
@@ -65,10 +65,10 @@ class TCEvaluationOverview extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationOverview">
-        <div className="TCEvaluationOverviewContainer">
-          <div className="TCEvaluationOverviewTitleContainer">
-            <div className="TCEvaluationOverviewTitle">
+      <div className={css.TCEvaluationOverview}>
+        <div className={css.TCEvaluationOverviewContainer}>
+          <div className={css.TCEvaluationOverviewTitleContainer}>
+            <div className={css.TCEvaluationOverviewTitle}>
               Overview
             </div>
             <TCEvaluationSettings accuracy={this.props.accuracy_visible}
@@ -80,7 +80,7 @@ class TCEvaluationOverview extends Component {
                                   f1_score={this.props.f1_score_visible}
                                   changeF1Score={this.props.changeF1Score.bind(this)}/> 
           </div>
-          <div className="TCEvaluationOverviewMetricsContainer">
+          <div className={css.TCEvaluationOverviewMetricsContainer}>
             <TCEvaluationMetrics title={"Model"}
                                  value={this.props.model_type}/>
             <TCEvaluationMetrics title={"Number of Iterations"}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import './index.scss.json';
-import TCEvaluationCells from './TCEvaluationCells';
+var css = require('json!./index.css.json');
+import TCEvaluationCells from './TCEvaluationCells/index';
 
 class TCEvaluationRows extends Component {
 
@@ -73,12 +73,12 @@ class TCEvaluationRows extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationRows"
+      <div className={css.TCEvaluationRows}
            style={this.renderSelected()}
            onClick={this.props.onclick.bind(this, this.props.data.name)}
            onMouseEnter={this.mouse_enter.bind(this)}
            onMouseLeave={this.mouse_leave.bind(this)}>
-        <div className="TCEvaluationRowContainer">
+        <div className={css.TCEvaluationRowContainer}>
           <TCEvaluationCells value={this.props.data.name}/>
           <TCEvaluationCells type="images"
                              value={this.props.data.correct_images}/>

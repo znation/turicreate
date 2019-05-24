@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.scss.json');
 
-import TCEvaluationRows from './TCEvaluationRows';
-import TCEvaluationHeader from './TCEvaluationHeader';
+import TCEvaluationRows from './TCEvaluationRows/index';
+import TCEvaluationHeader from './TCEvaluationHeader/index';
 
 class TCEvaluationTable extends Component {
 
@@ -129,9 +129,9 @@ class TCEvaluationTable extends Component {
 
   selectClassName = () =>{
     if(this.props.footer_open) {
-      return "TCEvaluationTable TCEvaluationTableOpen";
+      return css.TCEvaluationTable + ' ' + css.TCEvaluationTableOpen;
     }else{
-      return "TCEvaluationTable";
+      return css.TCEvaluationTable;
     }
   }
 

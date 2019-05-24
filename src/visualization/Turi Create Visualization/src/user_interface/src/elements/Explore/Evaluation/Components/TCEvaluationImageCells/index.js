@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './index.scss.json';
 
-import TCEvaluationImageCellsHover from './TCEvaluationImageCellsHover';
+import TCEvaluationImageCellsHover from './TCEvaluationImageCellsHover/index';
 
 class TCEvaluationImageCells extends Component {
   constructor(props){
