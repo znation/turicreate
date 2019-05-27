@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var css = require('json!./index.scss.json');
 
 class TCEvaluationImageCellsHover extends Component {
   render() {
     return (
-      <div className="TCEvaluationImageCellsHover">
+      <div className={css.TCEvaluationImageCellsHover}>
         <img width={200}
              src={this.props.src} />
       </div>

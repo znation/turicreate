@@ -56,11 +56,61 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
   )
+  set(JAVASCRIPT_SOURCES
+  "Turi Create Visualization/src/user_interface/src/tcviz.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/ToggleButton/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/ProgressBar/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/ImageLabeler/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/NavigationBar/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/ErrorBar/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/utils.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelModal/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/fontawesome.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettings/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/TCEvaluationImageCellsHover/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationOverview/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.js"
+  )
+  set(JAVASCRIPT_TARGETS)
+  foreach(JS_SOURCE ${JAVASCRIPT_SOURCES})
+    string(REPLACE "Turi Create Visualization/src/user_interface/src/" "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/" JS_TARGET "${JS_SOURCE}")
+    list(APPEND JAVASCRIPT_TARGETS "${JS_TARGET}")
+  endforeach()
 
   # Build JavaScript (client app code) with typescript
-  # TODO - use CMake compile/link phases instead of custom target
-  # (and run tsc only at link time)
-  add_custom_target(tcviz_javascript_build
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
             --module amd
@@ -71,9 +121,12 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             --removeComments
             --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
             "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
+    COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
+    BUILD_BYPRODUCTS ${JAVASCRIPT_TARGETS}
+    DEPENDS node ${JAVASCRIPT_SOURCES}
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
+    VERBATIM
   )
-  add_dependencies(tcviz_javascript_build node)
 
   # Build CSS Modules with css_module_compiler.js
   set(CMAKE_CSS_COMPILE_OBJECT "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_compiler.js ${CMAKE_CSS_COMPILER} <SOURCE> <OBJECT>")
@@ -99,7 +152,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets
-    DEPENDS tcviz_javascript_build
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
     DEPENDS tcviz_css
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps

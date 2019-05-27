@@ -28,13 +28,8 @@ assert(process.argv[0].endsWith('node'));
 assert(process.argv[1].endsWith('css_module_compiler.js'));
 const inputFile = process.argv[2];
 const outputFile = process.argv[3];
-let input = String(fs.readFileSync(inputFile));
 
-// If the filename ends in .scss, run through sassc compiler first
-if (inputFile.endsWith('.scss')) {
-    input = compileSCSS(input);
-}
-
+const input = compileSCSS(inputFile);
 const parsed = css.parse(input, { source: inputFile });
 const classNameMap = {};
 
@@ -73,6 +68,6 @@ function makeUniqueID() {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-function compileSCSS(str) {
-    return child_process.execSync(path.join(__dirname, '../../../deps/local/bin/sassc'), {input: str}).toString('utf8');
+function compileSCSS(inputFile) {
+    return child_process.execFileSync(path.join(__dirname, '../../../deps/local/bin/sassc'), [inputFile]).toString('utf8');
 }
