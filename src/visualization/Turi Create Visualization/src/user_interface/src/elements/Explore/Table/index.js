@@ -63,20 +63,8 @@ class TcTable extends Component {
           </div>
         );
       case "array":
-          return (
-            <div style={{"position":"relative"}}>
-              <div className={css.array_value} onClick={(e) => this.divClick(e)}>
-                <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
-                  { value }
-                </span>
-              </div>
-              <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
-                <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-                <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-              </div>
-            </div>
-              );
       case "list":
+      case "ndarray":
         return (
           <div style={{"position":"relative"}}>
             <div className={css.array_value} onClick={(e) => this.divClick(e)}>
@@ -90,20 +78,6 @@ class TcTable extends Component {
             </div>
           </div>
                 );
-      case "ndarray":
-            return (
-              <div style={{"position":"relative"}}>
-                <div className={css.array_value} onClick={(e) => this.divClick(e)}>
-                  <span className={css.default_span_color} onClick={(e) => this.spanClick(e)}>
-                    { JSON.stringify(value) }
-                  </span>
-                </div>
-                <div className={css.arrow_right} onClick={(e) => this.arrowClick(e)}>
-                  <FontAwesomeIcon icon={"faAngleDown"} style={{"display": "block"}} onClick={(e) => this.spanClick(e)} />
-                  <FontAwesomeIcon icon={"faAngleUp"} style={{"display": "none"}} onClick={(e) => this.spanClick(e)} />
-                </div>
-                </div>
-              );
       default:
         return (
           <div>
