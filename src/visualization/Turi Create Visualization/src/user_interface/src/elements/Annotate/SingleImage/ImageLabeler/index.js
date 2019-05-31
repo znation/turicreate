@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
+var style = require('json!./index.module.scss.json');
 
 class ImageLabeler extends Component {
   constructor(props){

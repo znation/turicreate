@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import down from './assets/down.svg';
-import caret_down from './assets/caret-down.svg';
+var down = require('image!./assets/down.svg');
+var caret_down = require('image!./assets/caret-down.svg');
 
 class TCEvaluationHeaderCell extends Component {
 
@@ -10,21 +10,21 @@ class TCEvaluationHeaderCell extends Component {
     if(this.props.enabled){
       if(this.props.direction){
         return (
-          <div className="TCEvaluationHeaderCellDropDown"
+          <div className={styles.TCEvaluationHeaderCellDropDown}
                style={{"transform": "rotate(180deg)"}}>
             <img src={caret_down}/>
           </div>
         )
       }else{
         return (
-          <div className="TCEvaluationHeaderCellDropDown">
+          <div className={styles.TCEvaluationHeaderCellDropDown}>
             <img src={caret_down}/>
           </div>
         )
       }
     }else{
       return (
-        <div className="TCEvaluationHeaderCellDropDown">
+        <div className={styles.TCEvaluationHeaderCellDropDown}>
           <img src={down}/>
         </div>
       )
@@ -34,13 +34,13 @@ class TCEvaluationHeaderCell extends Component {
   render() {
     if(this.props.type == "images"){
       return (
-        <div className="TCEvaluationHeaderCellImages">
+        <div className={styles.TCEvaluationHeaderCellImages}>
           {this.props.name}
         </div>
       );
     }else if(this.props.type == "percent"){
       return (
-        <div className="TCEvaluationHeaderCellPercent"
+        <div className={styles.TCEvaluationHeaderCellPercent}
              onClick={this.props.onclick.bind(this)}>
           {this.props.name}
           {this.renderCarret()}
@@ -48,7 +48,7 @@ class TCEvaluationHeaderCell extends Component {
       );
     }else if(this.props.type == "amount"){
       return (
-        <div className="TCEvaluationHeaderCellAmount"
+        <div className={styles.TCEvaluationHeaderCellAmount}
              onClick={this.props.onclick.bind(this)}>
           {this.props.name}
           {this.renderCarret()}
@@ -56,7 +56,7 @@ class TCEvaluationHeaderCell extends Component {
       );
     }else{
       return (
-        <div className="TCEvaluationHeaderCellText"
+        <div className={styles.TCEvaluationHeaderCellText}
              onClick={this.props.onclick.bind(this)}>
           {this.props.name}
           {this.renderCarret()}

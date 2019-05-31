@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
+var style = require('json!./index.module.scss.json');
 
-import leftArrow from './assets/left_arrow.svg';
-import rightArrow from './assets/right_arrow.svg';
+var leftArrow = require('image!./assets/left_arrow.svg');
+var rightArrow = require('image!./assets/right_arrow.svg');
 import ImageLabeler from './ImageLabeler/index'
 
-import SimilarImage from './SimilarImage';
+import SimilarImage from './SimilarImage/index';
 
 class SingleImage extends Component {
 

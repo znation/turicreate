@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
+var styles = require('json!./index.module.scss.json');
 
-import ImageContainer from './ImageContainer';
+import ImageContainer from './ImageContainer/index';
 
-import imgProperties from './ImageContainer/index.module.scss.json';
-import { of } from 'rxjs';
+var imgProperties = require('json!./ImageContainer/index.module.scss.json');
 
 // has to be a multiple of 3 to work properly
 const CELL_PADDING = 3;
@@ -145,7 +144,7 @@ class InfiniteScroll extends Component {
 
   render() {
     return (
-      <div className={`${style.InfiniteScroll} ${style.noselect}`}
+      <div className={`${styles.InfiniteScroll} ${styles.noselect}`}
            ref={this.currentComponent}
            onScroll={this.handleScroll}
            onClick={this.onBackClick.bind(this)}>

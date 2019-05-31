@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import down_arrow from './assets/down.svg';
-import cancel from './assets/cancel.svg';
-import TCEvaluationConfusionTable from '../TCEvaluationConfusionTable';
-import TCEvaluationImageViewerContainer from '../TCEvaluationImageViewerContainer';
+var down_arrow = require('image!./assets/down.svg');
+var cancel = require('image!./assets/cancel.svg');
+import TCEvaluationConfusionTable from '../TCEvaluationConfusionTable/index.js';
+import TCEvaluationImageViewerContainer from '../TCEvaluationImageViewerContainer/index.js';
 
 class TCEvaluationFooter extends Component {
 
@@ -57,7 +57,7 @@ class TCEvaluationFooter extends Component {
 
   renderPill = (key, value) => {
     return (
-      <div className="TCEvaluationFooterLabelIcon">
+      <div className={styles.TCEvaluationFooterLabelIcon}>
         <span>
           {key} :&nbsp;
         </span>
@@ -72,7 +72,7 @@ class TCEvaluationFooter extends Component {
 
   renderPredictedPill = (key, value) => {
     return (
-      <div className="TCEvaluationFooterLabelIcon">
+      <div className={styles.TCEvaluationFooterLabelIcon}>
         <span>
           {key} :&nbsp;
         </span>
@@ -92,7 +92,7 @@ class TCEvaluationFooter extends Component {
   renderLabel = () => {
     if(this.props.filter_confusion != null){
       return(
-        <div className="TCEvaluationFooterLabel">
+        <div className={styles.TCEvaluationFooterLabel}>
           {this.renderPill("Actual", this.props.filter_confusion)}
         </div>
       );
@@ -101,12 +101,12 @@ class TCEvaluationFooter extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationFooter"
+      <div className={styles.TCEvaluationFooter}
            style={this.cssOpenStyleContainer()}>
-        <div className="TCEvaluationFooterContainer">
-          <div className="TCEvaluationFooterText">
+        <div className={styles.TCEvaluationFooterContainer}>
+          <div className={styles.TCEvaluationFooterText}>
             <div>
-              <div className="TCEvaluationErrorsPill">
+              <div className={styles.TCEvaluationErrorsPill}>
                 {d3.sum(this.props.considerations
                                   .filter(this.filterErrorData)
                                   .map((element) => element.count))
@@ -115,14 +115,14 @@ class TCEvaluationFooter extends Component {
               Errors
             </div>
             {this.renderLabel()}
-            <div className="TCEvaluationFooterLabel">
+            <div className={styles.TCEvaluationFooterLabel}>
               {(this.props.selected_prediction != null)?this.renderPredictedPill("Predicted", this.props.considerations.filter(this.filterData)[0].predicted):[]}
             </div>
           </div>
-          <div className="TCEvaluationFooterCarret"
+          <div className={styles.TCEvaluationFooterCarret}
                onClick={this.props.updateFooterOpen.bind(this)}>
             <img src={down_arrow}
-                 className="TCEvaluationFooterCarretImage"
+                 className={styles.TCEvaluationFooterCarretImage}
                  style={this.cssOpenStyleIcon()}/>
           </div>
         </div>

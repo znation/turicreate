@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
-import { isRegExp } from 'util';
+var style = require('json!./index.module.scss.json');
 import { LabelType } from '../../utils';
 
 class ImageContainer extends Component {

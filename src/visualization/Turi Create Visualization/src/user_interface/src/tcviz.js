@@ -2,15 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import TcPlot from './elements/Plot/Chart/index.js';
-import TcSummary from './elements/Plot/Summary/index.js';
 import TcTable from './elements/Explore/Table/index.js';
 import TCEvaluation from './elements/Explore/Evaluation/index.js';
 
-import messageFormat from './format/message';
+var messageFormat = require('json!./format/message.json');
 
-import { load, Root } from 'protobufjs';
+import { load, Root } from 'protobuf';
 
-import TCAnnotate from './elements/Annotate';
+import TCAnnotate from './elements/Annotate/index.js';
 
 var command_down = 0;
 var body_zoom = 100;

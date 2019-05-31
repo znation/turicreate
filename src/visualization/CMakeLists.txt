@@ -36,6 +36,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/ImageLabeler/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/index.module.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/SimilarImage/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/NavigationBar/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/ErrorBar/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/index.module.scss"
@@ -70,6 +71,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   "Turi Create Visualization/src/user_interface/src/elements/Annotate/index.js"
   "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/index.js"
   "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/ImageLabeler/index.js"
+  "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/SimilarImage/index.js"
   "Turi Create Visualization/src/user_interface/src/elements/Annotate/NavigationBar/index.js"
   "Turi Create Visualization/src/user_interface/src/elements/Annotate/ErrorBar/index.js"
   "Turi Create Visualization/src/user_interface/src/elements/Annotate/utils.js"
@@ -149,6 +151,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets

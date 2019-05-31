@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
+var styles = require('json!./index.module.scss.json');
 
-import { Root } from 'protobufjs';
-import messageFormat from '../../format/message';
+import { Root } from 'protobuf';
+var messageFormat = require('json!../../format/message.json');
 
-import InfiniteScroll from './InfiniteScroll';
-import StatusBar from './StatusBar';
-import SingleImage from './SingleImage';
-import LabelContainer from './LabelContainer';
-import LabelModal from './LabelModal';
-import ErrorBar from './ErrorBar';
-import NavigationBar from './NavigationBar';
+import InfiniteScroll from './InfiniteScroll/index';
+import StatusBar from './StatusBar/index';
+import SingleImage from './SingleImage/index';
+import LabelContainer from './LabelContainer/index';
+import LabelModal from './LabelModal/index';
+import ErrorBar from './ErrorBar/index';
+import NavigationBar from './NavigationBar/index';
 import { LabelType } from './utils';
 
 const DEFAULT_NUM_EXPECTED = 10;
@@ -454,7 +454,7 @@ class Annotate extends Component {
 
   render() {
     return (
-      <div className={style.Annotate}>
+      <div className={styles.Annotate}>
         {this.renderModal()}
         {this.renderError()}
         <div>
@@ -477,7 +477,7 @@ class Annotate extends Component {
                        getSimilar={this.getSimilar.bind(this)}
                        percentage={this.state.percent}/>
         </div>
-        <div className={style.leftBar}>
+        <div className={styles.leftBar}>
         <LabelContainer labels={this.state.labels}
                         incrementalCurrentIndex={this.state.incrementalCurrentIndex}
                         infiniteScroll={this.state.infiniteScroll}

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
+var style = require('json!./index.module.scss.json');
 
-import error from './assets/error.svg';
+var error = require('image!./assets/error.svg');
 
 /* TODO: Design Better Error Message Compornent */
 class ErrorBar extends Component {

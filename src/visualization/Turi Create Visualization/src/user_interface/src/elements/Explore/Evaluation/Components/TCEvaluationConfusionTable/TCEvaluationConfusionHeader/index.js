@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import TCEvaluationConfusionHeaderCell from './TCEvaluationConfusionHeaderCells';
+import TCEvaluationConfusionHeaderCell from './TCEvaluationConfusionHeaderCells/index.js';
 
 class TCEvaluationConfusionHeader extends Component {
 
@@ -19,7 +19,7 @@ class TCEvaluationConfusionHeader extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationConfusionHeader">
+      <div className={styles.TCEvaluationConfusionHeader}>
         <TCEvaluationConfusionHeaderCell name="ACTUAL CLASS"
                                          onclick={this.clickActual.bind(this)}
                                          enabled={(this.props.sort_by_confusions == "actual")}

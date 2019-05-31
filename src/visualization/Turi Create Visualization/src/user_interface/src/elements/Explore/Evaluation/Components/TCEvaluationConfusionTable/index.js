@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import TCEvaluationConfusionRow from './TCEvaluationConfusionRow';
-import TCEvaluationConfusionHeader from './TCEvaluationConfusionHeader';
+import TCEvaluationConfusionRow from './TCEvaluationConfusionRow/index.js';
+import TCEvaluationConfusionHeader from './TCEvaluationConfusionHeader/index.js';
 
 class TCEvaluationConfusionTable extends Component {
   
@@ -73,8 +73,8 @@ class TCEvaluationConfusionTable extends Component {
   render() {
     const max_value = this.maxCount();
     return (
-      <div className="TCEvaluationConfusionTable">
-        <div className="TCEvaluationConfusionTableContainer">
+      <div className={styles.TCEvaluationConfusionTable}>
+        <div className={styles.TCEvaluationConfusionTableContainer}>
           <TCEvaluationConfusionHeader updateSortByConfusion={this.props.updateSortByConfusion.bind(this)}
                                        sort_by_confusions={this.props.sort_by_confusions}
                                        sort_direction_confusions={this.props.sort_direction_confusions}/>

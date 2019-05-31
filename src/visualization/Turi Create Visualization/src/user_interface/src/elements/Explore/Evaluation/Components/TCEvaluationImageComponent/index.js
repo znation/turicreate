@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import export_img from './assets/export.png';
+var export_img = require('image!./assets/export.png');
 
 class TCEvaluationImageComponent extends Component {
   constructor(props){
@@ -26,14 +26,14 @@ class TCEvaluationImageComponent extends Component {
   render() {
 
     return (
-      <div className="TCEvaluationImageComponent">
+      <div className={styles.TCEvaluationImageComponent}>
         <img src={"data:image/"+this.props.src.format+";base64,"+this.props.src.data}
-             className="TCEvaluationImageComponentImage"
+             className={styles.TCEvaluationImageComponentImage}
              ref={this.imgEl}
              width={this.state.width}
              height={this.state.height}
              onLoad={this.setHeight.bind(this)} />
-        <div className="TCEvaluationImageComponentExport">
+        <div className={styles.TCEvaluationImageComponentExport}>
           <img src={export_img}
                width={10}
                height={10} />

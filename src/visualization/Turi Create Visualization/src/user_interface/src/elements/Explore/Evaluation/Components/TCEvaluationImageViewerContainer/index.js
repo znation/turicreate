@@ -1,19 +1,17 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import right_arrow from './assets/right.svg';
-
-import TCEvaluationImageComponent from '../TCEvaluationImageComponent';
+import TCEvaluationImageComponent from '../TCEvaluationImageComponent/index.js';
 
 class TCEvaluationImageViewerContainer extends Component {
   render() {
     return (
-      <div className="TCEvaluationImageViewerContainer">
-        <div className="TCEvaluationImageViewerContainerImages">
+      <div className={styles.TCEvaluationImageViewerContainer}>
+        <div className={styles.TCEvaluationImageViewerContainerImages}>
           { 
             this.props.data.images.map((data, index) => {
               return(
-                <div className="TCEvaluationImageComponentWrapper">
+                <div className={styles.TCEvaluationImageComponentWrapper}>
                   <TCEvaluationImageComponent src={data} />
                 </div>
               )
