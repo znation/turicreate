@@ -12,8 +12,10 @@ from turicreate.toolkits._model import PythonProxy as _PythonProxy
 from turicreate.toolkits import evaluation as _evaluation
 import turicreate.toolkits._internal_utils as _tkutl
 from turicreate.toolkits._main import ToolkitError as _ToolkitError
+from ..image_classifier._evaluation import Evaluation as _Evaluation
 from turicreate import extensions as _extensions
 from .. import _pre_trained_models
+from six.moves import reduce as _reduce
 
 BITMAP_WIDTH = 28
 BITMAP_HEIGHT = 28
@@ -43,6 +45,14 @@ def _raise_error_if_not_drawing_classifier_input_sframe(
             + " labels for drawings.")
     if len(dataset) == 0:
         raise _ToolkitError("Input Dataset is empty!")
+
+def _drop_missing_values(dataset, feature, is_train):
+    original_dataset_size = len(dataset)
+    dataset = dataset.dropna(columns=feature)
+    if original_dataset_size != len(dataset):
+        dataset_type = "train" if is_train else "validation"
+        print("Dropping " + str(original_dataset_size - len(dataset)) + " rows for missing features in the " + dataset_type + " dataset.")
+    return dataset
 
 def create(input_dataset, target, feature=None, validation_set='auto',
             warm_start='auto', batch_size=256, 
@@ -159,10 +169,14 @@ def create(input_dataset, target, feature=None, validation_set='auto',
     dataset = _extensions._drawing_classifier_prepare_data(
         input_dataset, feature) if is_stroke_input else input_dataset
 
-    iteration = 0
+    iteration = -1
 
     classes = dataset[target].unique()
     classes = sorted(classes)
+
+    if len(classes) == 1:
+        _ToolkitError("The number of classes has to be greater than one")
+
     class_to_index = {name: index for index, name in enumerate(classes)}
 
     validation_set_corrective_string = ("'validation_set' parameter must be "
@@ -192,6 +206,9 @@ def create(input_dataset, target, feature=None, validation_set='auto',
     else:
         raise TypeError("Unrecognized type for 'validation_set'."
             + validation_set_corrective_string)
+
+    dataset = _drop_missing_values(dataset, feature, is_train =True)
+    validation_dataset = _drop_missing_values(validation_dataset, feature, is_train=False)
 
     train_loader = _SFrameClassifierIter(dataset, batch_size,
                  feature_column=feature,
@@ -240,7 +257,7 @@ def create(input_dataset, target, feature=None, validation_set='auto',
     model.hybridize()
     trainer = _mx.gluon.Trainer(model.collect_params(), 'adam')
 
-    if verbose and iteration == 0:
+    if verbose and iteration == -1:
         column_names = ['iteration', 'train_loss', 'train_accuracy', 'time']
         column_titles = ['Iteration', 'Training Loss', 'Training Accuracy', 'Elapsed Time (seconds)']
         if validation_set is not None:
@@ -293,9 +310,9 @@ def create(input_dataset, target, feature=None, validation_set='auto',
         trainer.step(train_batch.data[0].shape[0])
         # calculate training metrics
         train_loss = loss.mean().asscalar()
-        train_time = _time.time() - start_time
 
         if train_batch.iteration > iteration:
+
             # Compute training accuracy
             compute_accuracy(train_accuracy, train_loader_to_compute_accuracy)
             # Compute validation accuracy
@@ -303,10 +320,10 @@ def create(input_dataset, target, feature=None, validation_set='auto',
                 compute_accuracy(validation_accuracy, validation_loader)
             iteration = train_batch.iteration
             if verbose:
-                kwargs = {  "iteration": iteration,
+                kwargs = {  "iteration": iteration + 1,
                             "train_loss": float(train_loss),
                             "train_accuracy": train_accuracy.get()[1],
-                            "time": train_time}
+                            "time": _time.time() - start_time}
                 if validation_set is not None:
                     kwargs["validation_accuracy"] = validation_accuracy.get()[1]
                 table_printer.print_row(**kwargs)
@@ -317,12 +334,11 @@ def create(input_dataset, target, feature=None, validation_set='auto',
         'num_classes': len(classes),
         'classes': classes,
         'input_image_shape': (1, BITMAP_WIDTH, BITMAP_HEIGHT),
-        'batch_size': batch_size,
         'training_loss': train_loss,
         'training_accuracy': train_accuracy.get()[1],
-        'training_time': train_time,
-        'validation_accuracy': validation_accuracy.get()[1], 
-        # nan if validation_set=None
+        'training_time': _time.time() - start_time,
+        'validation_accuracy': validation_accuracy.get()[1] if validation_set else None, 
+        # None if validation_set=None
         'max_iterations': max_iterations,
         'target': target,
         'feature': feature,
@@ -363,7 +379,7 @@ class DrawingClassifier(_CustomModel):
         from ._model_architecture import Model as _Model
         from .._mxnet import _mxnet_utils
         net = _Model(num_classes = len(state['classes']), prefix = 'drawing_')
-        ctx = _mxnet_utils.get_mxnet_context(max_devices=state['batch_size'])
+        ctx = _mxnet_utils.get_mxnet_context()
         net_params = net.collect_params()
         _mxnet_utils.load_net_params_from_state(
             net_params, state['_model'], ctx=ctx 
@@ -427,7 +443,6 @@ class DrawingClassifier(_CustomModel):
             ('Validation Accuracy', 'validation_accuracy'),
             ('Training Time', 'training_time'),
             ('Number of Examples', 'num_examples'),
-            ('Batch Size', 'batch_size'),
             ('Final Loss (specific to model)', 'training_loss')
         ]
 
@@ -521,7 +536,7 @@ class DrawingClassifier(_CustomModel):
         _save_spec(spec, filename)
 
 
-    def _predict_with_probabilities(self, input_dataset, batch_size=None, 
+    def _predict_with_probabilities(self, input_dataset, batch_size=64, 
         verbose=True):
         """
         Predict with probabilities. The core prediction part that both 
@@ -556,9 +571,8 @@ class DrawingClassifier(_CustomModel):
         dataset_size = len(dataset)
         ctx = _mxnet_utils.get_mxnet_context()
 
-        index = 0
+        num_processed = 0
         last_time = 0
-        done = False
 
         from turicreate import SArrayBuilder
         from array import array
@@ -590,16 +604,14 @@ class DrawingClassifier(_CustomModel):
                 split_length = z.shape[0]
                 all_predicted_builder.append_multiple(predicted)
                 all_probabilities_builder.append_multiple(z.tolist())
-                index += split_length
-                if index == dataset_size - 1:
-                    done = True
+                num_processed += split_length 
 
                 cur_time = _time.time()
                 # Do not print progress if only a few samples are predicted
                 if verbose and (dataset_size >= 5
-                    and cur_time > last_time + 10 or done):
+                    and cur_time > last_time + 30 or num_processed >= dataset_size ):
                     print('Predicting {cur_n:{width}d}/{max_n:{width}d}'.format(
-                        cur_n = index + 1,
+                        cur_n = num_processed,
                         max_n = dataset_size,
                         width = len(str(dataset_size))))
                     last_time = cur_time
@@ -607,7 +619,7 @@ class DrawingClassifier(_CustomModel):
         return (_tc.SFrame({self.target: all_predicted_builder.close(),
                             'probability': all_probabilities_builder.close()}))
 
-    def evaluate(self, dataset, metric='auto', batch_size=None, verbose=True):
+    def evaluate(self, dataset, metric='auto', batch_size=256, verbose=True):
         """
         Evaluate the model by making predictions of target values and comparing
         these to actual values.
@@ -628,11 +640,17 @@ class DrawingClassifier(_CustomModel):
             - 'precision'        : Precision score (macro average)
             - 'recall'           : Recall score (macro average)
             - 'f1_score'         : F1 score (macro average)
+            - 'log_loss'         : Log loss
             - 'confusion_matrix' : An SFrame with counts of possible 
                                    prediction/true label combinations.
             - 'roc_curve'        : An SFrame containing information needed for an
                                    ROC curve
-        
+
+        batch_size : int, optional
+            If you are getting memory errors, try decreasing this value. If you
+            have a powerful computer, increasing this value may improve
+            performance.
+
         verbose : bool, optional
             If True, prints prediction progress.
 
@@ -654,6 +672,7 @@ class DrawingClassifier(_CustomModel):
           >>> results = model.evaluate(data)
           >>> print(results['accuracy'])
         """
+        import os, json, math
 
         if self.target not in dataset.column_names():
             raise _ToolkitError("Must provide ground truth column, '" 
@@ -662,12 +681,14 @@ class DrawingClassifier(_CustomModel):
         predicted = self._predict_with_probabilities(dataset, batch_size, verbose)
 
         avail_metrics = ['accuracy', 'auc', 'precision', 'recall',
-                         'f1_score', 'confusion_matrix', 'roc_curve']
+                         'f1_score', 'confusion_matrix', 'roc_curve', 'log_loss']
 
         _tkutl._check_categorical_option_type(
                         'metric', metric, avail_metrics + ['auto'])
 
         metrics = avail_metrics if metric == 'auto' else [metric]
+
+        labels = self.classes
         
         ret = {}
         if 'accuracy' in metrics:
@@ -693,11 +714,71 @@ class DrawingClassifier(_CustomModel):
             ret['roc_curve'] = _evaluation.roc_curve(
                 dataset[self.target], predicted['probability'], 
                 index_map=self._class_to_index)
+        if 'log_loss' in metrics:
+            ret['log_loss'] = _evaluation.log_loss(
+                dataset[self.target], predicted['probability'],
+                index_map=self._class_to_index)
+
+        from .._evaluate_utils import  (
+            entropy,
+            confidence,
+            relative_confidence,
+            get_confusion_matrix,
+            hclusterSort,
+            l2Dist
+        )
+
+        evaluation_result = {k: ret[k] for k in ['accuracy', 'f1_score', 'precision',
+                                                 'recall', 'auc', 'roc_curve', 'confusion_matrix']}
+        evaluation_result['num_test_examples'] = len(dataset)
+        for k in ['num_classes', 'num_examples', 'training_loss', 'training_time', 'max_iterations']:
+            evaluation_result[k] = getattr(self, k)
+
+        #evaluation_result['input_image_shape'] = getattr(self, 'input_image_shape')
+
+        evaluation_result["model_name"] = "Drawing Classifier"
+        extended_test = dataset.add_column(predicted["probability"], 'probs')
+        extended_test['label'] = dataset[self.target]
+
+        extended_test = extended_test.add_columns( [extended_test.apply(lambda d: labels[d['probs'].index(confidence(d['probs']))]),
+            extended_test.apply(lambda d: entropy(d['probs'])),
+            extended_test.apply(lambda d: confidence(d['probs'])),
+            extended_test.apply(lambda d: relative_confidence(d['probs']))],
+            ['predicted_label', 'entropy', 'confidence', 'relative_confidence'])
+
+        extended_test = extended_test.add_column(extended_test.apply(lambda d: d['label'] == d['predicted_label']), 'correct')
+
+        sf_conf_mat = get_confusion_matrix(extended_test, labels)
+        confidence_threshold = 0.5
+        hesitant_threshold = 0.2
+        evaluation_result['confidence_threshold'] = confidence_threshold
+        evaluation_result['hesitant_threshold'] = hesitant_threshold
+        evaluation_result['confidence_metric_for_threshold'] = 'relative_confidence'
+
+        evaluation_result['conf_mat'] = list(sf_conf_mat)
+
+        vectors = map(lambda l: {'name': l, 'pos':list(sf_conf_mat[sf_conf_mat['target_label']==l].sort('predicted_label')['norm_prob'])},
+                    labels)
+        evaluation_result['sorted_labels'] = hclusterSort(vectors, l2Dist)[0]['name'].split("|")
+
+        per_l = extended_test.groupby(['label'], {'count': _tc.aggregate.COUNT, 'correct_count': _tc.aggregate.SUM('correct') })
+        per_l['recall'] = per_l.apply(lambda l: l['correct_count']*1.0 / l['count'])
+
+        per_pl = extended_test.groupby(['predicted_label'], {'predicted_count': _tc.aggregate.COUNT, 'correct_count': _tc.aggregate.SUM('correct') })
+        per_pl['precision'] = per_pl.apply(lambda l: l['correct_count']*1.0 / l['predicted_count'])
+        per_pl = per_pl.rename({'predicted_label': 'label'})
+        evaluation_result['label_metrics'] = list(per_l.join(per_pl, on='label', how='outer').select_columns(['label', 'count', 'correct_count', 'predicted_count', 'recall', 'precision']))
+        evaluation_result['labels'] = labels
         
-        return ret
+        extended_test = extended_test.add_row_number('__idx').rename({'label': 'target_label'})
+
+        evaluation_result['test_data'] = extended_test
+        evaluation_result['feature'] = self.feature
+
+        return _Evaluation(evaluation_result)
 
     def predict_topk(self, dataset, output_type="probability", k=3,
-        batch_size=None):
+        batch_size=256):
         """
         Return top-k predictions for the ``dataset``, using the trained model.
         Predictions are returned as an SFrame with three columns: `id`,
@@ -706,7 +787,7 @@ class DrawingClassifier(_CustomModel):
 
         Parameters
         ----------
-        dataset : SFrame | SArray | turicreate.Image | list
+        dataset : SFrame | SArray | turicreate.Image 
             Drawings to be classified.
             If dataset is an SFrame, it must include columns with the same
             names as the features used for model training, but does not require
@@ -739,7 +820,7 @@ class DrawingClassifier(_CustomModel):
         Examples
         --------
         >>> pred = m.predict_topk(validation_data, k=3)
-        >>> pred
+        >>> print(pred)
         +----+-------+-------------------+
         | id | class |   probability     |
         +----+-------+-------------------+
@@ -792,13 +873,13 @@ class DrawingClassifier(_CustomModel):
         return results
         
 
-    def predict(self, data, output_type='class', batch_size=None, verbose=True):
+    def predict(self, data, output_type='class', batch_size=256, verbose=True):
         """
         Predict on an SFrame or SArray of drawings, or on a single drawing.
 
         Parameters
         ----------
-        data : SFrame | SArray | tc.Image | list
+        data : SFrame | SArray | tc.Image 
             The drawing(s) on which to perform drawing classification.
             If dataset is an SFrame, it must have a column with the same name
             as the feature column during training. Additional columns are
@@ -877,10 +958,13 @@ class DrawingClassifier(_CustomModel):
         if output_type == "class":
             return predicted[self.target]
         elif output_type == "probability":
-            _class_to_index = self._class_to_index
-            target = self.target
-            return predicted.apply(
-                lambda row: row["probability"][_class_to_index[row[target]]])
+            if len(self.classes) <= 2:
+                _class_to_index = self._class_to_index
+                target = self.target
+                return predicted.apply(
+                    lambda row: row["probability"][_class_to_index[row[target]]])
+            else:
+                raise _ToolkitError("Use probability vector in case of multi-class classification")
         else:
             assert (output_type == "probability_vector")
             return predicted["probability"]
