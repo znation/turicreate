@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
-import TCEvaluationHeaderCell from './TCEvaluationHeaderCell';
+import TCEvaluationHeaderCell from './TCEvaluationHeaderCell/index.js';
 
 class TCEvaluationHeader extends Component {
 
@@ -92,8 +92,8 @@ class TCEvaluationHeader extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationHeader">
-        <div className="TCEvaluationHeaderContainer">
+      <div className={styles.TCEvaluationHeader}>
+        <div className={styles.TCEvaluationHeaderContainer}>
           <TCEvaluationHeaderCell name="CLASS NAME"
                                   onclick={this.clickedCell.bind(this)}
                                   enabled={(this.props.sort_by == "class")}

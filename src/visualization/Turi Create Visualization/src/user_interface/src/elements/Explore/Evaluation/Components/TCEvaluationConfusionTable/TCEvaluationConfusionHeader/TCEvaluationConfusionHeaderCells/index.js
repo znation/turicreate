@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './index.scss.json';
 
-import down from './assets/down.svg';
-import caret_down from './assets/caret-down.svg';
+var down = require('image!./assets/down.svg');
+var caret_down = require('image!./assets/caret-down.svg');
 
 class TCEvaluationConfusionHeaderCell extends Component {
 

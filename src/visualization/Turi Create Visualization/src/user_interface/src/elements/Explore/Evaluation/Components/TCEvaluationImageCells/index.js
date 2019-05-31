@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './index.scss.json';
+var styles = require('json!./index.scss.json');
 
 import TCEvaluationImageCellsHover from './TCEvaluationImageCellsHover/index';
 
@@ -29,10 +29,10 @@ class TCEvaluationImageCells extends Component {
 
   render() {
     return (
-      <div className="TCEvaluationImageCellsWrapper"
+      <div className={styles.TCEvaluationImageCellsWrapper}
            onMouseEnter={this.onHoverState.bind(this)}
            onMouseLeave={this.offHoverState.bind(this)}>
-        <div className="TCEvaluationImageCells">
+        <div className={styles.TCEvaluationImageCells}>
           <img width={30}
                src={"data:image/"+this.props.value.format+";base64,"+this.props.value.data} />
         </div>
