@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-var styles = require('json!./index.module.scss.json');
+import styles from 'json!./index.module.scss.json';
 
 import { Root } from 'protobuf';
-var messageFormat = require('json!../../format/message.json');
+import messageFormat from 'json!../../format/message.json';
 
 import InfiniteScroll from './InfiniteScroll/index';
 import StatusBar from './StatusBar/index';

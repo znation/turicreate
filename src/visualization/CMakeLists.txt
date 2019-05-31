@@ -58,51 +58,51 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
   )
   set(JAVASCRIPT_SOURCES
-  "Turi Create Visualization/src/user_interface/src/tcviz.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/ToggleButton/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/ProgressBar/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/ImageLabeler/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/SimilarImage/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/NavigationBar/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/ErrorBar/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/utils.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelModal/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/fontawesome.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettings/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/TCEvaluationImageCellsHover/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationOverview/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.js"
-  "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.js"
+    "Turi Create Visualization/src/user_interface/src/tcviz.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/ToggleButton/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/Labels/ProgressBar/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelContainer/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/ImageLabeler/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/SingleImage/SimilarImage/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/NavigationBar/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/ErrorBar/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/utils.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Annotate/LabelModal/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/fontawesome.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettings/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageCells/TCEvaluationImageCellsHover/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationOverview/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationSettingsSelection/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.js"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.js"
   )
   set(JAVASCRIPT_TARGETS)
   foreach(JS_SOURCE ${JAVASCRIPT_SOURCES})
@@ -111,6 +111,8 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   endforeach()
 
   # Build JavaScript (client app code) with typescript
+  # Includes any external dependencies that are distributed in source form
+  # (i.e. need to be converted to AMD module format, and/or compiled down to ES5)
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
@@ -123,9 +125,15 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             --removeComments
             --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
             "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
+            "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
     COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
-    BUILD_BYPRODUCTS ${JAVASCRIPT_TARGETS}
-    DEPENDS node ${JAVASCRIPT_SOURCES}
+    BUILD_BYPRODUCTS
+      ${JAVASCRIPT_TARGETS} 
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/react-json-pretty.js"
+    DEPENDS
+      node
+      ${JAVASCRIPT_SOURCES}
+      "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
     COMMENT "Building tcviz.js using TypeScript 3.4.5"
     VERBATIM
   )
@@ -144,14 +152,24 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/*.*" "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend assets from public/"
   )
+
+  # Includes CSS and JS deps that don't need to be compiled
   add_custom_target(tcviz_frontend_deps
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/image.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/json.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/lib/text.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-4.3.0/vega.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.css" "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets

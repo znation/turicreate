@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-var styles = require('json!./index.module.scss.json');
+import styles from 'json!./index.module.scss.json';
 
 import ImageContainer from './ImageContainer/index';
 
-var imgProperties = require('json!./ImageContainer/index.module.scss.json');
+import imgProperties from 'json!./ImageContainer/index.module.scss.json';
 
 // has to be a multiple of 3 to work properly
 const CELL_PADDING = 3;

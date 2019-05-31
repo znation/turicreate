@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-var styles = require('json!./index.scss.json');
+import styles from 'json!./index.scss.json';
 
-var down_arrow = require('image!./assets/down.svg');
-var cancel = require('image!./assets/cancel.svg');
+import down_arrow from 'image!./assets/down.svg';
+import cancel from 'image!./assets/cancel.svg';
 import TCEvaluationConfusionTable from '../TCEvaluationConfusionTable/index.js';
 import TCEvaluationImageViewerContainer from '../TCEvaluationImageViewerContainer/index.js';
 

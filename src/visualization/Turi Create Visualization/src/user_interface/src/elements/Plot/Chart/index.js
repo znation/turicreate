@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 
-var css = require('json!./index.css.json');
+import * as css from 'json!./index.css.json';
 
-var vega = require('vega');
-var vegaTooltip = require('vega-tooltip');
+import vega from 'vega';
+import vegaTooltip from 'vega-tooltip';
 
 class TcPlot extends Component {
 

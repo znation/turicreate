@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-var styles = require('json!./index.scss.json');
+import styles from 'json!./index.scss.json';
 
-var down = require('image!./assets/down.svg');
-var caret_down = require('image!./assets/caret-down.svg');
+import down from 'image!./assets/down.svg';
+import caret_down from 'image!./assets/caret-down.svg';
 
 class TCEvaluationHeaderCell extends Component {
 

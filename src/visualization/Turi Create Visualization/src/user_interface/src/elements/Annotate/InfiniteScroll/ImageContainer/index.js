@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-var style = require('json!./index.module.scss.json');
+import style from 'json!./index.module.scss.json';
 import { LabelType } from '../../utils';
 
 class ImageContainer extends Component {

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-var css = require('json!./index.css.json');
+import * as css from 'json!./index.css.json';
 
 import TCEvaluationTooltip from '../TCEvaluationTooltip/index';
 
-var info = require('image!./assets/info.svg');
+import info from 'image!./assets/info.svg';
 
 class TCEvaluationMetrics extends Component {
   

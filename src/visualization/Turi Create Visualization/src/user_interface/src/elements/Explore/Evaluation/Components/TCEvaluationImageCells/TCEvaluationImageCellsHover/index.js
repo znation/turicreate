@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-var css = require('json!./index.scss.json');
+import * as css from 'json!./index.scss.json';
 
 class TCEvaluationImageCellsHover extends Component {
   render() {

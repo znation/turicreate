@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-var style = require('json!./index.module.scss.json');
+import style from 'json!./index.module.scss.json';
 
-var swap = require('image!./assets/swap.svg');
+import swap from 'image!./assets/swap.svg';
 
 class StatusBar extends Component {
   swapInfiniteScroll = () => {

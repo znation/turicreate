@@ -4,8 +4,8 @@ import Table from './Table/index';
 import Row from './Row/index';
 import Cell from './Cell/index';
 
-var JSONPretty = require('react-json-pretty');
-var elementResizeEvent = require('element-resize-event');
+import JSONPretty from 'react-json-pretty';
+import elementResizeEvent from 'element-resize-event';
 
 class StickyTable extends PureComponent {
   static propTypes = {

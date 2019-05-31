@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-var css = require('json!./index.css.json');
+import css from 'json!./index.css.json';
 
-var warning = require('image!./assets/warning.svg');
+import warning from 'image!./assets/warning.svg';
 import TCEvaluationImageCells from '../../../TCEvaluationImageCells/index';
 
 import * as d3 from "d3";

@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
-var css = require('json!./index.css.json');
+import css from 'json!./index.css.json';
 
 class TCEvaluationSettingsSelection extends Component {
   render() {
     return (
-      <div className="TCEvaluationSettingsSelection">
-        <div className="TCEvaluationSettingsSelectionTitle">
+      <div className={css.TCEvaluationSettingsSelection}>
+        <div className={css.TCEvaluationSettingsSelectionTitle}>
           Metrics
         </div>
-        <div className="TCEvaluationSettingsSelectionCont">
+        <div className={css.TCEvaluationSettingsSelectionCont}>
           <input type="checkbox"
                  name="accuracy_checkbox"
                  checked={this.props.accuracy}
                  onChange={this.props.changeAccuracy.bind(this)} />
-          <span className="TCEvaluationSettingsSelectionContText">
+          <span className={css.TCEvaluationSettingsSelectionContText}>
            Accuracy
           </span>
           <br/>
@@ -22,7 +22,7 @@ class TCEvaluationSettingsSelection extends Component {
                  name="f1_score_checkbox"
                  checked={this.props.f1_score}
                  onChange={this.props.changeF1Score.bind(this)} />
-          <span className="TCEvaluationSettingsSelectionContText">
+          <span className={css.TCEvaluationSettingsSelectionContText}>
            F1 Score
           </span>
           <br/>
@@ -31,7 +31,7 @@ class TCEvaluationSettingsSelection extends Component {
                  name="precision_checkbox"
                  checked={this.props.precision}
                  onChange={this.props.changePrecision.bind(this)} />
-          <span className="TCEvaluationSettingsSelectionContText">
+          <span className={css.TCEvaluationSettingsSelectionContText}>
            Precision
           </span>
           <br/>
@@ -40,7 +40,7 @@ class TCEvaluationSettingsSelection extends Component {
                  name="recall_checkbox"
                  checked={this.props.recall}
                  onChange={this.props.changeRecall.bind(this)} />
-          <span className="TCEvaluationSettingsSelectionContText">
+          <span className={css.TCEvaluationSettingsSelectionContText}>
            Recall
           </span>
         </div>

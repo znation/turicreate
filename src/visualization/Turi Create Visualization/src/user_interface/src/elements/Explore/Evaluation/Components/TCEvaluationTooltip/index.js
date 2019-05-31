@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-var css = require('json!./index.scss.json');
+import css from 'json!./index.scss.json';
 
-var carret = require('image!./assets/carret.svg');
+import carret from 'image!./assets/carret.svg';
 
 class TCEvaluationTooltip extends Component {
   render() {

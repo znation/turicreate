@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import styles from './index.module.scss.json';
+import styles from 'json!./index.module.scss.json';
 	
-import Labels from './Labels';
+import Labels from './Labels/index';
 	
 class LabelContainer extends Component {
 

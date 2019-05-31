@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-var css = require('json!./index.css.json');
+import * as css from 'json!./index.css.json';
 
 export default class Table extends Component {
   render() {

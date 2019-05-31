@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
-import ErrorBar from '../ErrorBar';
+import style from 'json!./index.module.scss.json';
 import * as d3 from "d3";
 
 class NavigationBar extends Component{

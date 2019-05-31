@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import styles from './index.module.scss.json';
-import ProgressBar from './ProgressBar';
+import styles from 'json!./index.module.scss.json';
+import ProgressBar from './ProgressBar/index';
   
 class Label extends Component {
   renderApply = () => {

@@ -5,7 +5,7 @@ import TcPlot from './elements/Plot/Chart/index.js';
 import TcTable from './elements/Explore/Table/index.js';
 import TCEvaluation from './elements/Explore/Evaluation/index.js';
 
-var messageFormat = require('json!./format/message.json');
+import messageFormat from 'json!./format/message.json';
 
 import { load, Root } from 'protobuf';
 

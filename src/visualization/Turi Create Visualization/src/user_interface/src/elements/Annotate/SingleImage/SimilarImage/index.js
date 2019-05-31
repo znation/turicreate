@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-var style = require('json!./index.module.scss');
+import style from 'json!./index.module.scss';
 
 class SimilarImage extends Component {
   constructor(props) {

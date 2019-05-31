@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-var styles = require('json!./index.scss.json');
+import * as styles from 'json!./index.scss.json';
 
 import TCEvaluationConfusionCell from './TCEvaluationConfusionCell/index.js';
 

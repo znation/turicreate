@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-var style = require('json!./index.module.scss.json');
+import style from 'json!./index.module.scss.json';
 
-var leftArrow = require('image!./assets/left_arrow.svg');
-var rightArrow = require('image!./assets/right_arrow.svg');
+import leftArrow from 'image!./assets/left_arrow.svg';
+import rightArrow from 'image!./assets/right_arrow.svg';
 import ImageLabeler from './ImageLabeler/index'
 
 import SimilarImage from './SimilarImage/index';

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { StickyTable, Row, Cell } from './sticky-table/index'
-var css = require('json!./index.css.json');
+import css from 'json!./index.css.json';
 
 import { FontAwesomeIcon } from '../../fontawesome'
 
-var d3 = require("d3");
+import * as d3 from "d3";
 
-var numberWithCommas = d3.format(",");
+const numberWithCommas = d3.format(",");
 
 class TcTable extends Component {
 

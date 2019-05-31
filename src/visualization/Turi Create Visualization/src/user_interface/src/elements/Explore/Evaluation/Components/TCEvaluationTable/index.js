@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-var css = require('json!./index.scss.json');
+import css from 'json!./index.scss.json';
 
 import TCEvaluationRows from './TCEvaluationRows/index';
 import TCEvaluationHeader from './TCEvaluationHeader/index';

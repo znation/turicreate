@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import style from './index.module.scss.json';
+import style from 'json!./index.module.scss.json';
 
 class LabelModal extends Component {
   constructor(props) {

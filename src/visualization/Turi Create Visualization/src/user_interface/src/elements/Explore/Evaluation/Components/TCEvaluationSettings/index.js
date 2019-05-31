@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-var css = require('json!./index.scss.json');
-var filter = require('image!./assets/filter.svg');
+import css from 'json!./index.scss.json';
+import filter from 'image!./assets/filter.svg';
 
 import TCEvaluationSettingsSelection from '../TCEvaluationSettingsSelection/index';
 
