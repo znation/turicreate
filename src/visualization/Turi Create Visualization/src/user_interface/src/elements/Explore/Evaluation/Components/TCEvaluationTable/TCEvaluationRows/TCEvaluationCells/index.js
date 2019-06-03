@@ -71,7 +71,7 @@ class TCEvaluationCells extends Component {
       return (
         <div className={css.TCEvaluationCellsImages}>
           <div className={css.TCEvaluationCellsImagesContainer}>
-           {this.props.value.map((data, index) => {
+           {this.props.value.slice(0, 20).map((data, index) => {
             return(
               <TCEvaluationImageCells value={data}/>
             )
