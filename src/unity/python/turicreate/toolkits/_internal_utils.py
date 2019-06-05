@@ -359,7 +359,7 @@ def _make_repr_table_from_sframe(X):
     return ['  '.join(row) for row in out_data]
 
 
-def _toolkit_repr_print(model, fields, section_titles, width = None):
+def _toolkit_repr_print(model, fields, section_titles, width = None, class_name = 'auto'):
     """
     Display a toolkit repr according to some simple rules.
 
@@ -406,7 +406,10 @@ def _toolkit_repr_print(model, fields, section_titles, width = None):
         "The number of section titles ({0}) ".format(len(section_titles)) +\
         "doesn't match the number of groups of fields, {0}.".format(len(fields))
 
-    out_fields = [ ("Class", model.__class__.__name__), ""]
+    if class_name == 'auto':
+        out_fields = [ ("Class", model.__class__.__name__), ""]
+    else:
+        out_fields = [ ("Class", class_name), ""]
 
     # Record the max_width so that if width is not provided, we calculate it.
     max_width = len("Class")
@@ -721,7 +724,7 @@ def _print_neural_compute_device(cuda_gpus, use_mps, cuda_mem_req=None, has_mps_
         from ._mps_utils import mps_device_name
         print('Using GPU to create model ({})'.format(mps_device_name()))
     elif num_cuda_gpus >= 1:
-        from . import _mxnet_utils
+        from ._mxnet import _mxnet_utils
         plural = 's' if num_cuda_gpus >= 2 else ''
         print('Using GPU{} to create model ({})'.format(plural, gpu_names))
         if cuda_mem_req is not None:

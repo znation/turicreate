@@ -17,12 +17,12 @@
 
 #include <image/image_util_impl.hpp>
 
+#include <unity/lib/image_util.hpp>
 #include <unity/toolkits/object_detection/object_detector.hpp>
 #include <unity/toolkits/object_detection/one_shot_object_detection/one_shot_object_detector.hpp>
 #include <unity/toolkits/object_detection/one_shot_object_detection/util/color_convert.hpp>
 #include <unity/toolkits/object_detection/one_shot_object_detection/util/mapping_function.hpp>
 #include <unity/toolkits/object_detection/one_shot_object_detection/util/parameter_sampler.hpp>
-#include <unity/toolkits/object_detection/one_shot_object_detection/util/quadrilateral_geometry.hpp>
 #include <unity/toolkits/object_detection/one_shot_object_detection/util/superposition.hpp>
 
 namespace turi {
@@ -30,6 +30,7 @@ namespace one_shot_object_detection {
 namespace data_augmentation {
 
 flex_dict build_annotation( ParameterSampler &parameter_sampler,
+                            std::string label,
                             size_t object_width,
                             size_t object_height,
                             long seed) {
@@ -90,7 +91,7 @@ flex_dict build_annotation( ParameterSampler &parameter_sampler,
                            std::make_pair("height", bounding_box_height)
                           };
   flex_dict annotation = {std::make_pair("coordinates", coordinates),
-                          std::make_pair("label", "placeholder")
+                          std::make_pair("label", label)
                          };
   return annotation;
 }
@@ -104,15 +105,44 @@ static std::map<std::string,size_t> generate_column_index_map(
     return index_map;
 }
 
+boost::gil::rgba8_image_t::view_t create_starter_image_view(flex_image &object_input) {
+  DASSERT_TRUE(object_input.is_decoded());
+  flex_image object = image_util::resize_image(object_input,
+                                               object_input.m_width,
+                                               object_input.m_height,
+                                               4,
+                                               true).to<flex_image>();
+  DASSERT_TRUE(object.is_decoded());
+  DASSERT_EQ(object.m_channels, 4);
+  boost::gil::rgba8_image_t::view_t starter_image_view = interleaved_view(
+    object.m_width,
+    object.m_height,
+    (boost::gil::rgba8_pixel_t*) (object.get_image_data()),
+    object.m_channels * object.m_width // row length in bytes
+  );
+  return starter_image_view;
+}
+
 gl_sframe augment_data(const gl_sframe &data,
                        const std::string& image_column_name,
                        const std::string& target_column_name,
                        const gl_sarray &backgrounds,
-                       long long seed) {
+                       long long seed,
+                       bool verbose) {
+  size_t backgrounds_size = backgrounds.size();
+  size_t total_augmented_rows = data.size() * backgrounds_size;
+  table_printer table( { {"Images Augmented", 0}, {"Elapsed Time", 0}, {"Percent Complete", 0} } );
+  if (verbose) {
+    logprogress_stream << "Augmenting input images using " << backgrounds.size() << " background images." << std::endl;
+    table.print_header();
+  }
+
   auto column_index_map = generate_column_index_map(data.column_names());
   std::vector<flexible_type> annotations;
   std::vector<flexible_type> images;
+  int input_row_index = -1;
   for (const auto& row: data.range_iterator()) {
+    input_row_index++;
     flex_image object = row[column_index_map[image_column_name]].to<flex_image>();
     std::string label = row[column_index_map[target_column_name]].to<flex_string>();
     if (!(object.is_decoded())) {
@@ -135,13 +165,15 @@ gl_sframe augment_data(const gl_sframe &data,
                                               (background_width-object.m_width)/2,
                                               (background_height-object.m_height)/2);
 
-      flex_dict annotation = build_annotation(parameter_sampler, 
-                                              object.m_width, object.m_height, 
+      flex_dict annotation = build_annotation(parameter_sampler, label,
+                                              object.m_width, object.m_height,
                                               seed+row_number);
 
       DASSERT_TRUE(flex_background.get_image_data() != nullptr);
       DASSERT_TRUE(object.is_decoded());
       DASSERT_TRUE(flex_background.is_decoded());
+
+      boost::gil::rgba8_image_t::view_t starter_image_view = create_starter_image_view(object);
 
       boost::gil::rgb8_image_t::view_t background_view = interleaved_view(
         background_width,
@@ -150,23 +182,33 @@ gl_sframe augment_data(const gl_sframe &data,
         background_channels * background_width // row length in bytes
         );
 
-      if (object.m_channels == 4) {
-        images.push_back(
-          create_synthetic_image_from_rgba_object(background_view, parameter_sampler, object)
-          );
-      } else {
-        images.push_back(
-          create_synthetic_image_from_rgb_object(background_view, parameter_sampler, object)
-          );
-      }
+      images.push_back(
+        create_synthetic_image(starter_image_view, background_view, parameter_sampler, object)
+      );
       annotations.push_back(annotation);
+
+      if (verbose) {
+        std::ostringstream d;
+        // For pretty printing, floor percent done
+        // resolution to the nearest .25% interval.  Do this by multiplying by
+        // 400, then do integer division by the total size, then float divide
+        // by 4.0
+        int augmented_rows_completed = (input_row_index * backgrounds_size) + row_number;
+        d << augmented_rows_completed * 400 / total_augmented_rows / 4.0 << '%';
+        table.print_progress_row(augmented_rows_completed,
+                                  augmented_rows_completed,
+                                  progress_time(), d.str());
+      }
     }
+  }
+  if (verbose) {
+    table.print_footer();
   }
 
 
   const std::map<std::string, std::vector<flexible_type> >& augmented_data = {
-    {"annotation", annotations},
-    {"image", images}
+    {target_column_name, annotations},
+    {image_column_name, images}
   };
   gl_sframe augmented_data_out = gl_sframe(augmented_data);
   return augmented_data_out;
@@ -179,18 +221,19 @@ one_shot_object_detector::one_shot_object_detector() {
 }
 
 gl_sframe one_shot_object_detector::augment(const gl_sframe &data,
+                                            const std::string& image_column_name,
                                             const std::string& target_column_name,
                                             const gl_sarray &backgrounds,
                                             std::map<std::string, flexible_type> &options){
   
   // TODO: Automatically infer the image column name, or throw error if you can't
   // This should just happen on the Python side.
-  std::string image_column_name = "image";
   gl_sframe augmented_data = data_augmentation::augment_data(data,
                                                              image_column_name,
                                                              target_column_name,
                                                              backgrounds,
-                                                             options["seed"]);
+                                                             options["seed"],
+                                                             options["verbose"]);
   // TODO: Call object_detector::train from here once we incorporate mxnet into
   // the C++ Object Detector.
   return augmented_data;
