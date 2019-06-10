@@ -1,3 +1,5 @@
+///<amd-module name="tcviz"/>
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
