@@ -1,4 +1,11 @@
+///<amd-module name="react-json-pretty"/>
+
 'use strict';
+
+import * as crcStuff from 'create-react-class';
+import { createReactClass } from 'create-react-class';
+console.log('DEBUG: ', crcStuff, "END DEBUG");
+console.log('DEBUG2: ', createReactClass, "END DEBUG2");
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -9,7 +16,7 @@ import React from 'react';
 /* eslint-enable no-unused-vars */
 import createReactClass from 'create-react-class';
 
-module.exports = createReactClass({
+export default createReactClass({
   displayName: 'exports',
 
   // 格式化函数

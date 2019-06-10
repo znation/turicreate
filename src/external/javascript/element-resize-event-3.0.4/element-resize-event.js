@@ -1,3 +1,5 @@
+///<amd-module name="element-resize-event"/>
+
 function resizeListener(e) {
   var win = e.target || e.srcElement
   if (win.__resizeRAF__) {
@@ -14,7 +16,7 @@ function resizeListener(e) {
   })
 }
 
-var exports = function exports(element, fn) {
+export default function _exports(element, fn) {
   var window = this
   var document = window.document
   var isIE
@@ -67,9 +69,7 @@ var exports = function exports(element, fn) {
   element.__resizeListeners__.push(fn)
 }
 
-module.exports = typeof window === 'undefined' ? exports : exports.bind(window)
-
-module.exports.unbind = function (element, fn) {
+_exports.unbind = function (element, fn) {
   var attachEvent = document.attachEvent
   var listeners = element.__resizeListeners__ || []
   if (fn) {

@@ -4,6 +4,32 @@ if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
 
+function(compile_javascript SOURCE OUTFILE WORKDIR DEPENDENCIES)
+  # Build JavaScript (client app code) with typescript
+  # Includes any external dependencies that are distributed in source form
+  # (i.e. need to be converted to AMD module format, and/or compiled down to ES5)
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_${SOURCE}
+    COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
+            "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
+            --module amd
+            --target ES5
+            --allowJs
+            --jsx react
+            --sourceMap
+            --removeComments
+            --outFile ${OUTFILE}
+            ${SOURCE}
+    COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_${SOURCE}
+    DEPENDS
+      node
+      ${DEPENDENCIES}
+    WORKING_DIRECTORY "${WORKDIR}"
+    COMMENT "Building ${SOURCE} using TypeScript 3.4.5"
+    VERBATIM
+  )
+endfunction()
+
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
   set(TC_FRONTEND_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
@@ -110,32 +136,26 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     list(APPEND JAVASCRIPT_TARGETS "${JS_TARGET}")
   endforeach()
 
-  # Build JavaScript (client app code) with typescript
-  # Includes any external dependencies that are distributed in source form
-  # (i.e. need to be converted to AMD module format, and/or compiled down to ES5)
-  add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
-    COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
-            "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
-            --module amd
-            --target ES5
-            --allowJs
-            --jsx react
-            --sourceMap
-            --removeComments
-            --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
-            "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
-    COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
-    BUILD_BYPRODUCTS
-      ${JAVASCRIPT_TARGETS} 
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/react-json-pretty.js"
-    DEPENDS
-      node
-      ${JAVASCRIPT_SOURCES}
-      "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
-    COMMENT "Building tcviz.js using TypeScript 3.4.5"
-    VERBATIM
+  # Build JavaScript source
+  compile_javascript(
+    "tcviz.js"
+    "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
+    "${TC_FRONTEND_SOURCE_DIR}"
+    "${JAVASCRIPT_SOURCES}"
+  )
+
+  # Build some JavaScript deps into AMD modules (others that get copied are already in AMD module format)
+  compile_javascript(
+    "react-json-pretty.js"
+    "${TC_FRONTEND_BUILD_DIR}/react-json-pretty.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
+  )
+  compile_javascript(
+    "element-resize-event.js"
+    "${TC_FRONTEND_BUILD_DIR}/element-resize-event.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js"
   )
 
   # Build CSS Modules with css_module_compiler.js
@@ -158,7 +178,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/long-4.0.0/long.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js" "${TC_FRONTEND_BUILD_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_BUILD_DIR}"
@@ -173,7 +193,9 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tcviz_javascript_build_sentinel
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_tcviz.js
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_element-resize-event.js
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_react-json-pretty.js
     DEPENDS tcviz_css
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
