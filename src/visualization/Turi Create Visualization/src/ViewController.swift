@@ -14,6 +14,7 @@ class ViewController: NSViewController, NSWindowDelegate, WKUIDelegate {
         customWebView = CustomWebKitView(frame: .zero, configuration: webConfiguration)
         customWebView.uiDelegate = self
         customWebView.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        customWebView.configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
         view = customWebView
     }
     
