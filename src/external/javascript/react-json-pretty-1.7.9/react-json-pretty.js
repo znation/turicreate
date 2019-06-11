@@ -1,8 +1,6 @@
-define("react-json-pretty", ["require", "exports", "create-react-class", "create-react-class", "react"], function (require, exports, crcStuff, create_react_class_1, react_1) {
+define("react-json-pretty", ["require", "exports", "react", "create-react-class"], function (require, exports, react_1, create_react_class_1) {
     'use strict';
-    Object.defineProperty(exports, "__esModule", { value: true });
-    console.log('DEBUG: ', crcStuff, "END DEBUG");
-    console.log('DEBUG2: ', create_react_class_1.createReactClass, "END DEBUG2");
+    exports.__esModule = true;
     var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) {
         var source = arguments[i];
         for (var key in source) {
@@ -18,8 +16,9 @@ define("react-json-pretty", ["require", "exports", "create-react-class", "create
             continue;
         target[i] = obj[i];
     } return target; }
-    exports.default = create_react_class_1.createReactClass({
+    module.exports = create_react_class_1["default"]({
         displayName: 'exports',
+        // 格式化函数
         _replace: function _replace(match, ind, key, val, tra) {
             var spanEnd = '</span>';
             var keySpan = '<span class=json-key>';
@@ -40,7 +39,9 @@ define("react-json-pretty", ["require", "exports", "create-react-class", "create
             }
             return sps + (tra || '');
         },
+        // JSON =》 HTML转换器
         _pretty: function _pretty(obj, replacer, space) {
+            // 逐行匹配，列举：“key”: "value" | "key": value | "key": [ | "key": { | "key": [],| "Key": {},
             var regLine = /^( *)("[^"]+": )?("[^"]*"|[\w.+-]*)?([,[{]|\[\s*\],?|\{\s*\},?)?$/mg;
             var text = JSON.stringify(obj, typeof replacer === 'function' ? replacer : null, isNaN(space) ? 2 : space);
             if (!text) {
@@ -49,6 +50,7 @@ define("react-json-pretty", ["require", "exports", "create-react-class", "create
             return text.replace(/&/g, '&amp;').replace(/\\"([^,])/g, '\\&quot;$1').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(regLine, this._replace);
         },
         render: function render() {
+            // See https://facebook.github.io/react/warnings/unknown-prop.html
             var _props = this.props, json = _props.json, replacer = _props.replacer, space = _props.space, className = _props.className, themeClassName = _props.themeClassName, rest = _objectWithoutProperties(_props, ['json', 'replacer', 'space', 'className', 'themeClassName']);
             themeClassName = themeClassName ? themeClassName.trim() : themeClassName;
             className = className ? className.trim() : className;
@@ -60,11 +62,10 @@ define("react-json-pretty", ["require", "exports", "create-react-class", "create
                 }
                 catch (e) {
                     console.error('The string is not a valid json data!', e);
-                    return react_1.default.createElement('pre', _extends({}, rest, { className: classNameFinal || 'json-pretty', dangerouslySetInnerHTML: { __html: json } }));
+                    return react_1["default"].createElement('pre', _extends({}, rest, { className: classNameFinal || 'json-pretty', dangerouslySetInnerHTML: { __html: json } }));
                 }
             }
-            return react_1.default.createElement('pre', _extends({}, rest, { className: classNameFinal || 'json-pretty', dangerouslySetInnerHTML: { __html: this._pretty(json, replacer, +space) } }));
+            return react_1["default"].createElement('pre', _extends({}, rest, { className: classNameFinal || 'json-pretty', dangerouslySetInnerHTML: { __html: this._pretty(json, replacer, +space) } }));
         }
     });
 });
-//# sourceMappingURL=react-json-pretty.js.map
