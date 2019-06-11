@@ -6,8 +6,8 @@ endif()
 
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
-  set(TC_FRONTEND_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
-  set(TC_FRONTEND_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/")
+  set(TC_FRONTEND_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build")
+  set(TC_FRONTEND_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src")
   file(MAKE_DIRECTORY ${TC_FRONTEND_BUILD_DIR})
   set(CSS_SOURCES
     # CSS files
@@ -104,11 +104,42 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.js"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.js"
   )
-  set(JAVASCRIPT_TARGETS)
-  foreach(JS_SOURCE ${JAVASCRIPT_SOURCES})
-    string(REPLACE "Turi Create Visualization/src/user_interface/src/" "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/" JS_TARGET "${JS_SOURCE}")
-    list(APPEND JAVASCRIPT_TARGETS "${JS_TARGET}")
-  endforeach()
+
+  add_custom_target(tcviz_frontend_assets
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/format"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/StatusBar/assets"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/SingleImage/assets"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/ErrorBar/assets"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationFooter/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationMetrics/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationSettings/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/assets/"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTooltip/assets/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/format/message.json" "${TC_FRONTEND_BUILD_DIR}/format/message.json"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Annotate/StatusBar/assets/swap.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/StatusBar/assets/swap.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Annotate/SingleImage/assets/right_arrow.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/SingleImage/assets/right_arrow.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Annotate/SingleImage/assets/left_arrow.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/SingleImage/assets/left_arrow.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Annotate/ErrorBar/assets/error.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Annotate/ErrorBar/assets/error.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/assets/caret-down.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/assets/caret-down.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/assets/down.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionHeader/TCEvaluationConfusionHeaderCells/assets/down.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationFooter/assets/cancel.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationFooter/assets/cancel.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationFooter/assets/down.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationFooter/assets/down.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/assets/export.png" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/assets/export.png"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/assets/right.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationImageViewerContainer/assets/right.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationMetrics/assets/info.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationMetrics/assets/info.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationSettings/assets/filter.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationSettings/assets/filter.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/assets/caret-down.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/assets/caret-down.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/assets/down.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationHeader/TCEvaluationHeaderCell/assets/down.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/assets/warning.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTable/TCEvaluationRows/TCEvaluationCells/assets/warning.svg"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TC_FRONTEND_SOURCE_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTooltip/assets/carret.svg" "${TC_FRONTEND_BUILD_DIR}/elements/Explore/Evaluation/Components/TCEvaluationTooltip/assets/carret.svg"
+    COMMENT "Copying visualization frontend assets from src/"
+  )
 
   # Build JavaScript (client app code) with typescript
   # Includes any external dependencies that are distributed in source form
@@ -151,26 +182,30 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
 
   # Includes CSS and JS deps that don't need to be compiled
   add_custom_target(tcviz_frontend_deps
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/long-4.0.0/long.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/image.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/json.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/lib/text.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-4.3.0/vega.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.js" "${TC_FRONTEND_BUILD_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.css" "${TC_FRONTEND_BUILD_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/long-4.0.0/long.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/image.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/json.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/lib/text.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-4.3.0/vega.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.css"
+        "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
-  add_custom_target(tcviz_frontend_assets
+  add_custom_target(tcviz_frontend_all
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
     DEPENDS tcviz_css
+    DEPENDS tcviz_frontend_assets
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
   )
@@ -182,7 +217,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       # I'm hoping it reliably changes every build.
     )
     set(VISUALIZATION_XCODE_DEPENDENCIES
-      tcviz_frontend_assets
+      tcviz_frontend_all
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/project.pbxproj"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Info.plist"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/Debugging.swift"

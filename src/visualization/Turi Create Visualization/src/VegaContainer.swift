@@ -114,7 +114,6 @@ class VegaContainer: NSObject, WKScriptMessageHandler {
                 
             case "error":
                 log(logMessage)
-                assert(false, "Encountered an unhandled JavaScript error.")
                 break
                 
             default:

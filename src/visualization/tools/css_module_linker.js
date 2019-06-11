@@ -40,9 +40,6 @@ for (const objectFile of objectFiles) {
     const parsed = object.css;
     outputCSS.push(css.stringify(parsed, { compress: true }));
 
-    const classNameMap = object.json;
-    const outputJSON = JSON.stringify(classNameMap);
-
     const sourceFile = object.css.stylesheet.source;
     const outputPath = appendExt(path.join(baseBuildDir, path.relative(baseSourceDir, sourceFile)), "json");
     fs.mkdirSync(path.dirname(outputPath), {recursive: true});
