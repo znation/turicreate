@@ -169,9 +169,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_assets
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_tcviz.js
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_element-resize-event.js
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_react-json-pretty.js
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
     DEPENDS tcviz_css
     DEPENDS tcviz_frontend_copy
     DEPENDS tcviz_frontend_deps
