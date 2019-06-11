@@ -32,11 +32,12 @@ namespace turi {
                                               m_size_array(size_array),
                                               m_transformer(transformer){}
         void show(const std::string& path_to_client, tc_plot_variation variation = tc_plot_variation_default);
-        void materialize();
+        void materialize() const;
+        std::string get_url() const;
 
         // vega specification
         std::string get_spec(tc_plot_variation variation=tc_plot_variation_default,
-                             bool include_data=false);
+                             bool include_data=false) const;
 
         // streaming data aggregation
         double get_percent_complete() const; // out of 1.0

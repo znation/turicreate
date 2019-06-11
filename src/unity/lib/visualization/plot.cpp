@@ -72,7 +72,7 @@ namespace turi{
     }
 
     std::string Plot::get_spec(tc_plot_variation variation,
-                               bool include_data) {
+                               bool include_data) const {
       // Replace config from predefined config (maintained separately so we don't
       // have to repeat the same config in each file, and we can make sure it stays
       // consistent across the different plots)
