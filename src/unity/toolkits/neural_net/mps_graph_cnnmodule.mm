@@ -1,5 +1,7 @@
 #include "mps_graph_cnnmodule.h"
 
+#include <logger/logger.hpp>
+
 #import "mps_device_manager.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -46,6 +48,16 @@ mps_graph_cnn_module::mps_graph_cnn_module() {
     NSLog(@"Selected dev: %@", dev_.name);
 #endif
   }
+}
+
+mps_graph_cnn_module::mps_graph_cnn_module(
+    const mps_command_queue& command_queue) {
+  @autoreleasepool {
+
+  cmd_queue_ = command_queue.impl;
+  dev_ = cmd_queue_.device;
+
+  }  // @autoreleasepool
 }
 
 void mps_graph_cnn_module::init(
@@ -99,8 +111,7 @@ void mps_graph_cnn_module::init(
   }
 }
 
-deferred_float_array mps_graph_cnn_module::train(
-      const float_array& input_batch, const float_array& label_batch) {
+float_array_map mps_graph_cnn_module::train(const float_array_map& inputs) {
 
   @autoreleasepool {
 
@@ -108,6 +119,18 @@ deferred_float_array mps_graph_cnn_module::train(
 
   id<MTLCommandBuffer> cb = [cmd_queue_ commandBuffer];
   TCMPSGraphModuleBatch *batch = [[TCMPSGraphModuleBatch alloc] initWithCommandBuffer:cb];
+
+  // TODO: The names should somehow be a parameter of this class.
+  auto input_iter = inputs.find("input");
+  auto labels_iter = inputs.find("labels");
+  if (input_iter == inputs.end()) {
+    log_and_throw("Cannot train without argument named \"input\".");
+  }
+  if (labels_iter == inputs.end()) {
+    log_and_throw("Cannot train without argument named \"labels\".");
+  }
+  const shared_float_array& input_batch = input_iter->second;
+  const shared_float_array& label_batch = labels_iter->second;
 
   // Copy from raw C inputs to MPS images and loss labels.
   batch.input = copy_input(input_batch);
@@ -127,7 +150,13 @@ deferred_float_array mps_graph_cnn_module::train(
   auto loss_promise = std::make_shared<std::promise<shared_float_array>>();
   NSMutableArray<MPSImageBatch *> *recycled_inputs = recycled_inputs_;
   [cb addCompletedHandler:^(id <MTLCommandBuffer> cmdBuf) {
-      // TODO: Add error checking!
+
+      // Propagate Metal errors as C++ exceptions.
+      if (cmdBuf.status == MTLCommandBufferStatusError) {
+        loss_promise->set_exception(std::make_exception_ptr(std::runtime_error(
+            cmdBuf.error.localizedDescription.UTF8String)));
+        return;
+      }
 
       // Copy out the loss data and compute the scalar loss for each training
       // instance.
@@ -152,19 +181,29 @@ deferred_float_array mps_graph_cnn_module::train(
   [cb commit];
 
   // Return the wrapped future from the promise.
-  return deferred_float_array(loss_promise->get_future(), {loss_size});
+  // TODO: The names should somehow be a parameter of this class.
+  shared_float_array loss(std::make_shared<deferred_float_array>(
+      loss_promise->get_future(), std::vector<size_t>({loss_size})));
+  return { { "loss", loss } };
 
   }  // @autoreleasepool
 }
 
-deferred_float_array
-mps_graph_cnn_module::predict(const float_array& input_batch) const {
+float_array_map
+mps_graph_cnn_module::predict(const float_array_map& inputs) const {
   @autoreleasepool {
 
   assert(mode_ == kGraphModeInference);
 
   id<MTLCommandBuffer> cb = [cmd_queue_ commandBuffer];
   TCMPSGraphModuleBatch *batch = [[TCMPSGraphModuleBatch alloc] initWithCommandBuffer:cb];
+
+  // TODO: The names should somehow be a parameter of this class.
+  auto input_iter = inputs.find("input");
+  if (input_iter == inputs.end()) {
+    log_and_throw("Cannot train without argument named \"input\".");
+  }
+  const shared_float_array& input_batch = input_iter->second;
 
   // Copy from raw C inputs to MPS images. Encode the forward pass.
   batch.input = copy_input(input_batch);
@@ -181,7 +220,13 @@ mps_graph_cnn_module::predict(const float_array& input_batch) const {
   auto result_promise = std::make_shared<std::promise<shared_float_array>>();
   NSMutableArray<MPSImageBatch *> *recycled_inputs = recycled_inputs_;
   [cb addCompletedHandler:^(id <MTLCommandBuffer> cmdBuf) {
-      // TODO: Add error checking!
+
+      // Propagate Metal errors as C++ exceptions.
+      if (cmdBuf.status == MTLCommandBufferStatusError) {
+        result_promise->set_exception(std::make_exception_ptr(
+            std::runtime_error(cmdBuf.error.localizedDescription.UTF8String)));
+        return;
+      }
 
       // Copy out the results.
       shared_float_array result = copy_image_batch_float16(result_shape,
@@ -199,7 +244,10 @@ mps_graph_cnn_module::predict(const float_array& input_batch) const {
   [cb commit];
 
   // Return the wrapped future from the promise.
-  return deferred_float_array(result_promise->get_future(), result_shape_);
+  // TODO: The names should somehow be a parameter of this class.
+  shared_float_array output(std::make_shared<deferred_float_array>(
+      result_promise->get_future(), result_shape_));
+  return { { "output", output } };
 
   }  // @autoreleasepool
 }
@@ -232,7 +280,13 @@ deferred_float_array mps_graph_cnn_module::train_return_grad(
   NSMutableArray<MPSImageBatch *> *recycled_inputs = recycled_inputs_;
   NSMutableArray<MPSImageBatch *> *recycled_grads = recycled_grads_;
   [cb addCompletedHandler:^(id <MTLCommandBuffer> cmdBuf) {
-      // TODO: Add error checking!
+
+      // Propagate Metal errors as C++ exceptions.
+      if (cmdBuf.status == MTLCommandBufferStatusError) {
+        result_promise->set_exception(std::make_exception_ptr(
+            std::runtime_error(cmdBuf.error.localizedDescription.UTF8String)));
+        return;
+      }
 
       // Copy out the results.
       shared_float_array result = copy_image_batch_float16(result_shape,
@@ -266,7 +320,7 @@ float_array_map mps_graph_cnn_module::export_weights() const {
 
 void mps_graph_cnn_module::set_learning_rate(float lr) {
   @autoreleasepool {
-    for (int i = 0; i < network_->layers.size(); ++i) {
+    for (size_t i = 0; i < network_->layers.size(); ++i) {
       network_->layers[i]->SetLearningRate(lr);
     }
   }

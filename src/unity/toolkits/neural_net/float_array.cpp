@@ -10,6 +10,8 @@
 #include <cassert>
 #include <numeric>
 
+#include <logger/assertions.hpp>
+
 namespace turi {
 namespace neural_net {
 
@@ -69,6 +71,53 @@ shared_float_array::shared_float_array(
   // The provided shape array must be a view into the impl's shape array.
   assert(impl_->shape() <= shape_);
   assert(shape_ + dim_ <= impl_->shape() + impl_->dim());
+}
+
+shared_float_array shared_float_array::operator[](size_t idx) const {
+
+  ASSERT_GT(dim_, 0);
+  ASSERT_LT(idx, shape_[0]);
+
+  size_t stride = size_ / shape_[0];
+  size_t offset = stride * idx;
+  return shared_float_array(impl_, offset_ + offset, shape_ + 1, dim_ - 1);
+}
+
+std::ostream &operator<<(std::ostream &os, const float_array &arr) {
+  const size_t *sh = arr.shape();
+  os << "[";
+  for (size_t i = 0; i < arr.dim(); i++) {
+    os << sh[i] << " ";
+  }
+  os << "]";
+
+  const float *ptr = arr.data();
+  for (size_t i = 0; i < arr.size(); i++) {
+    os << ptr[i] << " ";
+  }
+  os << "\n";
+  return os;
+}
+
+void shared_float_array::save(oarchive& oarc) const {
+  // Write shape.
+  serialize_iterator(oarc, shape(), shape() + dim(), dim());
+
+  // Write data.
+  serialize_iterator(oarc, data(), data() + size(), size());
+}
+
+void shared_float_array::load(iarchive& iarc) {
+  // Read shape.
+  std::vector<size_t> shape;
+  iarc >> shape;
+
+  // Read data.
+  std::vector<float> data;
+  iarc >> data;
+
+  // Overwrite self with a new float_array wrapping the deserialized data.
+  *this = wrap(std::move(data), std::move(shape));
 }
 
 // static

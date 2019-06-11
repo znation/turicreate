@@ -1,6 +1,10 @@
 Quick Links: [Installation](#supported-platforms) | [Documentation](#documentation) | [WWDC 2018 Talk](https://developer.apple.com/videos/play/wwdc2018/712/)
 
-<img align="right" src="https://docs-assets.developer.apple.com/turicreate/turi-dog.svg" alt="Turi Create" width="100">
+[![Build Status](https://travis-ci.com/apple/turicreate.svg?branch=master)](#)
+[![PyPI Release](https://img.shields.io/pypi/v/turicreate.svg)](#)
+[![Python Versions](https://img.shields.io/pypi/pyversions/turicreate.svg)](#)
+
+[<img align="right" src="https://docs-assets.developer.apple.com/turicreate/turi-dog.svg" alt="Turi Create" width="100">](#)
 
 # Turi Create 
 
@@ -23,6 +27,8 @@ With Turi Create, you can accomplish many common ML tasks:
 |:------------------------:|:--------------------------------:|
 | [Recommender](https://apple.github.io/turicreate/docs/userguide/recommender/)             | Personalize choices for users    |
 | [Image Classification](https://apple.github.io/turicreate/docs/userguide/image_classifier/)    | Label images                     |
+| [Drawing Classification](https://apple.github.io/turicreate/docs/userguide/drawing_classifier)  | Recognize Pencil/Touch Drawings and Gestures                     |
+| [Sound Classification](https://apple.github.io/turicreate/docs/userguide/sound_classifier)  | Classify sounds                     |
 | [Object Detection](https://apple.github.io/turicreate/docs/userguide/object_detection/)        | Recognize objects within images  |
 | [Style Transfer](https://apple.github.io/turicreate/docs/userguide/style_transfer/)        | Stylize images |
 | [Activity Classification](https://apple.github.io/turicreate/docs/userguide/activity_classifier/) | Detect an activity using sensors |
@@ -64,7 +70,7 @@ Supported Platforms
 Turi Create supports:
 
 * macOS 10.12+
-* Linux (with glibc 2.12+)
+* Linux (with glibc 2.10+)
 * Windows 10 (via WSL)
 
 System Requirements
@@ -155,3 +161,5 @@ Contributing
 Prior to contributing, please review [CONTRIBUTING.md](CONTRIBUTING.md) and do
 not provide any contributions unless you agree with the terms and conditions
 set forth in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+We want the Turi Create community to be as welcoming and inclusive as possible, and have adopted a [Code of Conduct](CODE_OF_CONDUCT.md) that we expect all community members, including contributors, to read and observe.

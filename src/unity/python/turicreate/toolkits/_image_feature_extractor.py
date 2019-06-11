@@ -7,14 +7,12 @@ from __future__ import print_function as _
 from __future__ import division as _
 from __future__ import absolute_import as _
 
-from . import _mxnet_utils
-
 
 def _create_feature_extractor(model_name):
     import os
     from platform import system
     from ._internal_utils import _mac_ver
-    from ._pre_trained_models import MODELS, _get_model_cache_dir
+    from ._pre_trained_models import MODELS, _get_cache_dir
     from turicreate.config import get_runtime_config
     from turicreate import extensions
 
@@ -23,7 +21,7 @@ def _create_feature_extractor(model_name):
         ptModel = MODELS[model_name]()
         return MXFeatureExtractor(ptModel)
 
-    download_path = _get_model_cache_dir()
+    download_path = _get_cache_dir()
 
     if(model_name == 'resnet-50'):
         mlmodel_resnet_save_path = download_path + "/Resnet50.mlmodel"
@@ -77,6 +75,9 @@ class MXFeatureExtractor(ImageFeatureExtractor):
         ptModel: ImageClassifierPreTrainedModel
             An instance of a pre-trained model.
         """
+
+        from ._mxnet import _mxnet_utils
+
         self.ptModel = ptModel
         self.data_layer = ptModel.data_layer
         self.feature_layer = ptModel.feature_layer
@@ -109,7 +110,7 @@ class MXFeatureExtractor(ImageFeatureExtractor):
         dataset: SFrame
             SFrame of images
         """
-        from ..mx import SFrameImageIter as _SFrameImageIter
+        from ._mxnet._mx_sframe_iter import SFrameImageIter as _SFrameImageIter
         from six.moves.queue import Queue as _Queue
         from threading import Thread as _Thread
         import turicreate as _tc
@@ -195,8 +196,9 @@ class MXFeatureExtractor(ImageFeatureExtractor):
         model: MLModel
             Return the underlying model.
         """
-        from ._mxnet_to_coreml import _mxnet_converter
         import mxnet as _mx
+        from ._mxnet import _mxnet_utils
+        from ._mxnet._mxnet_to_coreml import _mxnet_converter
 
         (sym, arg_params, aux_params) = self.ptModel.mxmodel
         fe_mxmodel = self.ptModel.mxmodel

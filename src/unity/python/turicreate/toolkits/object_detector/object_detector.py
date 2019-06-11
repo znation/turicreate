@@ -26,7 +26,6 @@ from turicreate.toolkits._model import PythonProxy as _PythonProxy
 from turicreate.toolkits._internal_utils import (_raise_error_if_not_sframe,
                                                  _numeric_param_check_range)
 from turicreate import config as _tc_config
-from .. import _mxnet_utils
 from turicreate.toolkits._main import ToolkitError as _ToolkitError
 from .. import _pre_trained_models
 from ._evaluation import average_precision as _average_precision
@@ -182,6 +181,8 @@ def create(dataset, annotations=None, feature=None, model='darknet-yolo',
     from ._sframe_loader import SFrameDetectionIter as _SFrameDetectionIter
     from ._manual_scheduler import ManualScheduler as _ManualScheduler
     import mxnet as _mx
+    from .._mxnet import _mxnet_utils
+
     if len(dataset) == 0:
         raise _ToolkitError('Unable to train on empty dataset')
 
@@ -639,6 +640,7 @@ class ObjectDetector(_CustomModel):
         return "object_detector"
 
     def _get_native_state(self):
+        from .._mxnet import _mxnet_utils
         state = self.__proxy__.get_state()
         mxnet_params = state['_model'].collect_params()
         state['_model'] = _mxnet_utils.get_gluon_net_params_state(mxnet_params)
@@ -651,6 +653,7 @@ class ObjectDetector(_CustomModel):
     def _load_version(cls, state, version):
         _tkutl._model_version_check(version, cls._PYTHON_OBJECT_DETECTOR_VERSION)
         from ._model import tiny_darknet as _tiny_darknet
+        from .._mxnet import _mxnet_utils
 
         num_anchors = len(state['anchors'])
         num_classes = state['num_classes']
@@ -726,6 +729,7 @@ class ObjectDetector(_CustomModel):
 
     def _predict_with_options(self, dataset, with_ground_truth,
                               postprocess=True, confidence_threshold=0.001,
+                              iou_threshold=None,
                               verbose=True):
         """
         Predict with options for what kind of SFrame should be returned.
@@ -733,12 +737,15 @@ class ObjectDetector(_CustomModel):
         If postprocess is False, a single numpy array with raw unprocessed
         results will be returned.
         """
+        if iou_threshold is None: iou_threshold = self.non_maximum_suppression_threshold
         _raise_error_if_not_detection_sframe(dataset, self.feature, self.annotations,
                                              require_annotations=with_ground_truth)
         from ._sframe_loader import SFrameDetectionIter as _SFrameDetectionIter
         from ._detection import (yolo_map_to_bounding_boxes as _yolo_map_to_bounding_boxes,
                                  non_maximum_suppression as _non_maximum_suppression,
                                  bbox_to_ybox as _bbox_to_ybox)
+
+        from .._mxnet import _mxnet_utils
         import mxnet as _mx
         loader = _SFrameDetectionIter(dataset,
                                       batch_size=self.batch_size,
@@ -861,7 +868,7 @@ class ObjectDetector(_CustomModel):
                     # image, inspired by the evaluation in COCO)
                     x_boxes0, x_classes, x_scores = _non_maximum_suppression(
                             x_boxes0, x_classes, x_scores,
-                            num_classes=self.num_classes, threshold=self.non_maximum_suppression_threshold,
+                            num_classes=self.num_classes, threshold=iou_threshold,
                             limit=100)
 
                     for bbox, cls, s in zip(x_boxes0, x_classes, x_scores):
@@ -924,9 +931,9 @@ class ObjectDetector(_CustomModel):
             unpack = lambda x: x[0]
         return dataset, unpack
 
-    def predict(self, dataset, confidence_threshold=0.25, verbose=True):
+    def predict(self, dataset, confidence_threshold=0.25, iou_threshold=None, verbose=True):
         """
-        Predict object instances in an sframe of images.
+        Predict object instances in an SFrame of images.
 
         Parameters
         ----------
@@ -939,6 +946,14 @@ class ObjectDetector(_CustomModel):
         confidence_threshold : float
             Only return predictions above this level of confidence. The
             threshold can range from 0 to 1.
+
+        iou_threshold : float
+            Threshold value for non-maximum suppression. Non-maximum suppression
+            prevents multiple bounding boxes appearing over a single object. 
+            This threshold, set between 0 and 1, controls how aggressive this 
+            suppression is. A value of 1 means no maximum suppression will 
+            occur, while a value of 0 will maximally suppress neighboring 
+            boxes around a prediction.
 
         verbose : bool
             If True, prints prediction progress.
@@ -982,12 +997,15 @@ class ObjectDetector(_CustomModel):
         dataset, unpack = self._canonize_input(dataset)
         stacked_pred = self._predict_with_options(dataset, with_ground_truth=False,
                                                   confidence_threshold=confidence_threshold,
+                                                  iou_threshold=iou_threshold,
                                                   verbose=verbose)
 
         from . import util
         return unpack(util.unstack_annotations(stacked_pred, num_rows=len(dataset)))
 
-    def evaluate(self, dataset, metric='auto', output_type='dict', verbose=True):
+    def evaluate(self, dataset, metric='auto',
+            output_type='dict', iou_threshold=None, 
+            confidence_threshold=None, verbose=True):
         """
         Evaluate the model by making predictions and comparing these to ground
         truth bounding box annotations.
@@ -1028,6 +1046,18 @@ class ObjectDetector(_CustomModel):
                             However, these are easily computed from the `SFrame` (e.g.
                             ``results['average_precision'].mean()``).
 
+        iou_threshold : float
+            Threshold value for non-maximum suppression. Non-maximum suppression
+            prevents multiple bounding boxes appearing over a single object. 
+            This threshold, set between 0 and 1, controls how aggressive this 
+            suppression is. A value of 1 means no maximum suppression will 
+            occur, while a value of 0 will maximally suppress neighboring 
+            boxes around a prediction.
+
+        confidence_threshold : float
+            Only return predictions above this level of confidence. The
+            threshold can range from 0 to 1. 
+
         verbose : bool
             If True, prints evaluation progress.
 
@@ -1046,6 +1076,9 @@ class ObjectDetector(_CustomModel):
         >>> print('mAP: {:.1%}'.format(results['mean_average_precision']))
         mAP: 43.2%
         """
+        if iou_threshold is None: iou_threshold = self.non_maximum_suppression_threshold
+        if confidence_threshold is None: confidence_threshold = 0.001
+
         AP = 'average_precision'
         MAP = 'mean_average_precision'
         AP50 = 'average_precision_50'
@@ -1063,6 +1096,8 @@ class ObjectDetector(_CustomModel):
             raise _ToolkitError("Metric '{}' not supported".format(metric))
 
         pred, gt = self._predict_with_options(dataset, with_ground_truth=True,
+                                              confidence_threshold=confidence_threshold,
+                                              iou_threshold=iou_threshold,
                                               verbose=verbose)
 
         pred_df = pred.to_dataframe()
@@ -1098,75 +1133,15 @@ class ObjectDetector(_CustomModel):
 
         return ret
 
-    def export_coreml(self, filename, 
-            include_non_maximum_suppression = True,
-            iou_threshold = None,
-            confidence_threshold = None):
-        """
-        Save the model in Core ML format. The Core ML model takes an image of
-        fixed size as input and produces two output arrays: `confidence` and
-        `coordinates`.
-
-        The first one, `confidence` is an `N`-by-`C` array, where `N` is the
-        number of instances predicted and `C` is the number of classes. The
-        number `N` is fixed and will include many low-confidence predictions.
-        The instances are not sorted by confidence, so the first one will
-        generally not have the highest confidence (unlike in `predict`). Also
-        unlike the `predict` function, the instances have not undergone
-        what is called `non-maximum suppression`, which means there could be
-        several instances close in location and size that have all discovered
-        the same object instance. Confidences do not need to sum to 1 over the
-        classes; any remaining probability is implied as confidence there is no
-        object instance present at all at the given coordinates. The classes
-        appear in the array alphabetically sorted.
-
-        The second array `coordinates` is of size `N`-by-4, where the first
-        dimension `N` again represents instances and corresponds to the
-        `confidence` array. The second dimension represents `x`, `y`, `width`,
-        `height`, in that order.  The values are represented in relative
-        coordinates, so (0.5, 0.5) represents the center of the image and (1,
-        1) the bottom right corner. You will need to multiply the relative
-        values with the original image size before you resized it to the fixed
-        input size to get pixel-value coordinates similar to `predict`.
-
-        See Also
-        --------
-        save
-
-        Parameters
-        ----------
-        filename : string
-            The path of the file where we want to save the Core ML model.
-       
-        include_non_maximum_suppression : bool
-            Non-maximum suppression is only available in iOS 12+.
-            A boolean parameter to indicate whether the Core ML model should be
-            saved with built-in non-maximum suppression or not. 
-            This parameter is set to True by default.
-
-        iou_threshold : float
-            Threshold value for non-maximum suppression. Non-maximum suppression
-            prevents multiple bounding boxes appearing over a single object. 
-            This threshold, set between 0 and 1, controls how aggressive this 
-            suppression is. A value of 1 means no maximum suppression will 
-            occur, while a value of 0 will maximally suppress neighboring 
-            boxes around a prediction.
-
-        confidence_threshold : float
-            Only return predictions above this level of confidence. The
-            threshold can range from 0 to 1. 
-
-        Examples
-        --------
-        >>> model.export_coreml('detector.mlmodel')
-        """
+    def _create_coreml_model(self, include_non_maximum_suppression,
+            iou_threshold, confidence_threshold):
         import mxnet as _mx
-        from .._mxnet_to_coreml import _mxnet_converter
+        from .._mxnet._mxnet_to_coreml import _mxnet_converter
         import coremltools
         from coremltools.models import datatypes, neural_network
 
-        if not iou_threshold: iou_threshold = self.non_maximum_suppression_threshold
-        if not confidence_threshold: confidence_threshold = 0.25
+        if iou_threshold is None: iou_threshold = self.non_maximum_suppression_threshold
+        if confidence_threshold is None: confidence_threshold = 0.25
 
         preds_per_box = 5 + self.num_classes
         num_anchors = len(self.anchors)
@@ -1592,5 +1567,71 @@ class ObjectDetector(_CustomModel):
             partial_user_defined_metadata,
             version)
         model.description.metadata.userDefined.update(user_defined_metadata)
+        return model
+
+    def export_coreml(self, filename, 
+            include_non_maximum_suppression = True,
+            iou_threshold = None,
+            confidence_threshold = None):
+        """
+        Save the model in Core ML format. The Core ML model takes an image of
+        fixed size as input and produces two output arrays: `confidence` and
+        `coordinates`.
+
+        The first one, `confidence` is an `N`-by-`C` array, where `N` is the
+        number of instances predicted and `C` is the number of classes. The
+        number `N` is fixed and will include many low-confidence predictions.
+        The instances are not sorted by confidence, so the first one will
+        generally not have the highest confidence (unlike in `predict`). Also
+        unlike the `predict` function, the instances have not undergone
+        what is called `non-maximum suppression`, which means there could be
+        several instances close in location and size that have all discovered
+        the same object instance. Confidences do not need to sum to 1 over the
+        classes; any remaining probability is implied as confidence there is no
+        object instance present at all at the given coordinates. The classes
+        appear in the array alphabetically sorted.
+
+        The second array `coordinates` is of size `N`-by-4, where the first
+        dimension `N` again represents instances and corresponds to the
+        `confidence` array. The second dimension represents `x`, `y`, `width`,
+        `height`, in that order.  The values are represented in relative
+        coordinates, so (0.5, 0.5) represents the center of the image and (1,
+        1) the bottom right corner. You will need to multiply the relative
+        values with the original image size before you resized it to the fixed
+        input size to get pixel-value coordinates similar to `predict`.
+
+        See Also
+        --------
+        save
+
+        Parameters
+        ----------
+        filename : string
+            The path of the file where we want to save the Core ML model.
+       
+        include_non_maximum_suppression : bool
+            Non-maximum suppression is only available in iOS 12+.
+            A boolean parameter to indicate whether the Core ML model should be
+            saved with built-in non-maximum suppression or not. 
+            This parameter is set to True by default.
+
+        iou_threshold : float
+            Threshold value for non-maximum suppression. Non-maximum suppression
+            prevents multiple bounding boxes appearing over a single object. 
+            This threshold, set between 0 and 1, controls how aggressive this 
+            suppression is. A value of 1 means no maximum suppression will 
+            occur, while a value of 0 will maximally suppress neighboring 
+            boxes around a prediction.
+
+        confidence_threshold : float
+            Only return predictions above this level of confidence. The
+            threshold can range from 0 to 1. 
+
+        Examples
+        --------
+        >>> model.export_coreml('detector.mlmodel')
+        """
         from coremltools.models.utils import save_spec as _save_spec
+        model = self._create_coreml_model(include_non_maximum_suppression=include_non_maximum_suppression, 
+            iou_threshold=iou_threshold, confidence_threshold=confidence_threshold)
         _save_spec(model, filename)

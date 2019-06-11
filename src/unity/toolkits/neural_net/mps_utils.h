@@ -1,11 +1,8 @@
-//
-//  mps_utils.h
-//  tcmps
-//
-//  Created by Gustav Larsson on 5/9/18.
-//  Copyright © 2018 Turi. All rights reserved.
-//
-
+/* Copyright © 2017 Apple Inc. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-3-clause license that can
+ * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
+ */
 #ifndef mps_utils_h
 #define mps_utils_h
 
@@ -75,15 +72,16 @@ shared_float_array copy_image_batch_float16(std::vector<size_t> shape,
                                         MPSImageBatch * _Nonnull batch);
 
 API_AVAILABLE(macos(10.14))
+shared_float_array copy_image_batch(std::vector<size_t> shape,
+                                    MPSImageBatch * _Nonnull batch);
+
+API_AVAILABLE(macos(10.14))
 void fill_image_batch(const float_array& data, MPSImageBatch * _Nonnull batch);
 
 void convert_chw_to_hwc(const float_array& image, float* out_first,
                         float* out_last);
 void convert_hwc_to_chw(const float_array& image, float* out_first,
                         float* out_last);
-
-float_array_map make_array_map(char **names, void **arrays,
-                               int64_t *sizes, int len);
 
 // This version assumes that each void* is actually a float_array*. This casting
 // from plain C should go away once we remove the original Python frontend.

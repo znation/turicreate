@@ -263,7 +263,7 @@ extern void __print_back_trace();
     const double _CHECK_OP_v2_ = val2;                                        \
     const double _CHECK_OP_delta_ = delta;                                    \
     if (__builtin_expect(                                                     \
-            !(abs((_CHECK_OP_v1_) - (_CHECK_OP_v2_)) <= _CHECK_OP_delta_),    \
+            !(std::abs((_CHECK_OP_v1_) - (_CHECK_OP_v2_)) <= _CHECK_OP_delta_),\
             0)) {                                                             \
       auto throw_error = [&]() GL_GCC_ONLY(GL_COLD_NOINLINE_ERROR) {          \
         std::ostringstream ss;                                                \
@@ -311,6 +311,9 @@ extern void __print_back_trace();
 #define ASSERT_STREQ(a, b)    EXPECT_STREQ(a, b)
 
 #define ASSERT_UNREACHABLE()  { EXPECT_TRUE(false); assert(false); TURI_BUILTIN_UNREACHABLE(); }
+
+// Convenience wrapper since this is a very common case.
+#define AU() { ASSERT_UNREACHABLE(); }
 
 #define ASSERT_MSG(condition, fmt, ...)                                  \
   do {                                                                   \
@@ -381,6 +384,26 @@ extern void __print_back_trace();
 #ifdef ERROR
 #undef ERROR      // may conflict with ERROR macro on windows
 #endif
+
+#define BOOST_ENABLE_ASSERT_HANDLER
+
+namespace boost {
+  inline void assertion_failed(
+    char const * expr, char const * function, char const * file, long line) {
+
+    std::cerr << "Boost assertion failed: " << expr << std::endl;
+    ASSERT_UNREACHABLE();
+  }
+
+  inline void assertion_failed_msg(
+    char const * expr, char const * msg, char const * function,
+    char const * file, long line) {
+
+    std::cerr << "Boost assertion failed: " << expr << std::endl;
+    std::cerr << "Boost assertion message: " << msg << std::endl;
+    ASSERT_UNREACHABLE();
+  }
+}
 
 #endif // _LOGGING_H_
 

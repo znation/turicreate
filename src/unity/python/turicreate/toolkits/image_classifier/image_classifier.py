@@ -21,15 +21,34 @@ from turicreate.toolkits._main import ToolkitError as _ToolkitError
 from turicreate.toolkits._model import PythonProxy as _PythonProxy
 from turicreate import config as _tc_config
 from .._internal_utils import _mac_ver
-from .. import _mxnet_utils
 from .. import _pre_trained_models
 from .. import _image_feature_extractor
+from ._evaluation import Evaluation as _Evaluation
 from turicreate.toolkits._internal_utils import (_raise_error_if_not_sframe,
                                                  _numeric_param_check_range)
 
-def create(dataset, target, feature = None, model = 'resnet-50',
-           validation_set='auto', max_iterations = 10, verbose = True,
-           seed = None, batch_size=64):
+_DEFAULT_SOLVER_OPTIONS = {
+'convergence_threshold': 1e-2,
+'step_size': 1.0,
+'lbfgs_memory_level': 11,
+'max_iterations': 10}
+
+from six.moves import reduce as _reduce
+
+def create(dataset, target, feature=None, model = 'resnet-50',
+    l2_penalty=0.01, 
+    l1_penalty=0.0,
+    solver='auto', feature_rescaling=True,
+    convergence_threshold = _DEFAULT_SOLVER_OPTIONS['convergence_threshold'],
+    step_size = _DEFAULT_SOLVER_OPTIONS['step_size'],
+    lbfgs_memory_level = _DEFAULT_SOLVER_OPTIONS['lbfgs_memory_level'],
+    max_iterations = _DEFAULT_SOLVER_OPTIONS['max_iterations'],
+    class_weights = None,
+    validation_set = 'auto',
+    verbose=True,
+    seed=None,
+    batch_size=64):
+
     """
     Create a :class:`ImageClassifier` model.
 
@@ -53,6 +72,75 @@ def create(dataset, target, feature = None, model = 'resnet-50',
         Name of the column containing the input images. 'None' (the default)
         indicates the only image column in `dataset` should be used as the
         feature.
+        
+    l2_penalty : float, optional
+        Weight on l2 regularization of the model. The larger this weight, the
+        more the model coefficients shrink toward 0. This introduces bias into
+        the model but decreases variance, potentially leading to better
+        predictions. The default value is 0.01; setting this parameter to 0
+        corresponds to unregularized logistic regression. See the ridge
+        regression reference for more detail.
+
+    l1_penalty : float, optional
+        Weight on l1 regularization of the model. Like the l2 penalty, the
+        higher the l1 penalty, the more the estimated coefficients shrink toward
+        0. The l1 penalty, however, completely zeros out sufficiently small
+        coefficients, automatically indicating features that are not useful
+        for the model. The default weight of 0 prevents any features from
+        being discarded. See the LASSO regression reference for more detail.
+
+    solver : string, optional
+        Name of the solver to be used to solve the regression. See the
+        references for more detail on each solver. Available solvers are:
+
+        - *auto (default)*: automatically chooses the best solver for the data
+          and model parameters.
+        - *newton*: Newton-Raphson
+        - *lbfgs*: limited memory BFGS
+        - *fista*: accelerated gradient descent
+
+        For this model, the Newton-Raphson method is equivalent to the
+        iteratively re-weighted least squares algorithm. If the l1_penalty is
+        greater than 0, use the 'fista' solver.
+
+        The model is trained using a carefully engineered collection of methods
+        that are automatically picked based on the input data. The ``newton``
+        method  works best for datasets with plenty of examples and few features
+        (long datasets). Limited memory BFGS (``lbfgs``) is a robust solver for
+        wide datasets (i.e datasets with many coefficients).  ``fista`` is the
+        default solver for l1-regularized linear regression. The solvers are all
+        automatically tuned and the default options should function well. See
+        the solver options guide for setting additional parameters for each of
+        the solvers.
+
+        See the user guide for additional details on how the solver is chosen.
+        (see `here
+        <https://apple.github.io/turicreate/docs/userguide/supervised-learning/linear-regression.html>`_)
+
+    feature_rescaling : boolean, optional
+        Feature rescaling is an important pre-processing step that ensures that
+        all features are on the same scale. An l2-norm rescaling is performed
+        to make sure that all features are of the same norm. Categorical
+        features are also rescaled by rescaling the dummy variables that are
+        used to represent them. The coefficients are returned in original scale
+        of the problem. This process is particularly useful when features
+        vary widely in their ranges.
+
+    convergence_threshold : float, optional
+        Convergence is tested using variation in the training objective. The
+        variation in the training objective is calculated using the difference
+        between the objective values between two steps. Consider reducing this
+        below the default value (0.01) for a more accurately trained model.
+        Beware of overfitting (i.e a model that works well only on the training
+        data) if this parameter is set to a very low value.
+
+    lbfgs_memory_level : float, optional
+        The L-BFGS algorithm keeps track of gradient information from the
+        previous ``lbfgs_memory_level`` iterations. The storage requirement for
+        each of these gradients is the ``num_coefficients`` in the problem.
+        Increasing the ``lbfgs_memory_level ``can help improve the quality of
+        the model trained. Setting this to more than ``max_iterations`` has the
+        same effect as setting it to ``max_iterations``.
 
     model : string optional
         Uses a pretrained model to bootstrap an image classifier:
@@ -63,13 +151,25 @@ def create(dataset, target, feature = None, model = 'resnet-50',
            - "squeezenet_v1.1" : Uses a pretrained squeezenet model.
                                  Exported Core ML model will be ~4.7M.
 
-           - "VisionFeaturePrint_Screen": Uses an OS internal feature extractor.
+           - "VisionFeaturePrint_Scene": Uses an OS internal feature extractor.
                                           Only on available on iOS 12.0+,
                                           macOS 10.14+ and tvOS 12.0+.
                                           Exported Core ML model will be ~41K.
 
         Models are downloaded from the internet if not available locally. Once
         downloaded, the models are cached for future use.
+        
+    step_size : float, optional
+        The starting step size to use for the ``fista`` solver. The default is
+        set to 1.0, this is an aggressive setting. If the first iteration takes
+        a considerable amount of time, reducing this parameter may speed up
+        model training.
+
+    class_weights : {dict, `auto`}, optional
+        Weights the examples in the training data according to the given class
+        weights. If set to `None`, all classes are supposed to have weight one. The
+        `auto` mode set the class weight to be inversely proportional to number of
+        examples in the training data with the given class.
 
     validation_set : SFrame, optional
         A dataset for monitoring the model's generalization performance.
@@ -79,7 +179,7 @@ def create(dataset, target, feature = None, model = 'resnet-50',
         validation_set is set to None, then no additional metrics
         are computed. The default value is 'auto'.
 
-    max_iterations : float, optional
+    max_iterations : int, optional
         The maximum number of allowed passes through the data. More passes over
         the data can result in a more accurately trained model. Consider
         increasing this (the default value is 10) if the training accuracy is
@@ -124,7 +224,14 @@ def create(dataset, target, feature = None, model = 'resnet-50',
     # Check model parameter
     allowed_models = list(_pre_trained_models.MODELS.keys())
     if _mac_ver() >= (10,14):
-        allowed_models.append('VisionFeaturePrint_Screen')
+        allowed_models.append('VisionFeaturePrint_Scene')
+
+        # Also, to make sure existing code doesn't break, replace incorrect name
+        # with the correct name version
+        if model == "VisionFeaturePrint_Screen":
+            print("WARNING: Correct spelling of model name is VisionFeaturePrint_Scene; VisionFeaturePrint_Screen will be removed in subsequent versions.")
+            model = "VisionFeaturePrint_Scene"
+
     _tkutl._check_categorical_option_type('model', model, allowed_models)
 
     # Check dataset parameter
@@ -167,12 +274,18 @@ def create(dataset, target, feature = None, model = 'resnet-50',
                                               max_iterations=max_iterations,
                                               validation_set=extracted_features_validation,
                                               seed=seed,
-                                              verbose=verbose)
+                                              verbose=verbose, l2_penalty=l2_penalty, l1_penalty=l1_penalty,
+                                              solver=solver, feature_rescaling=feature_rescaling,
+                                              convergence_threshold=convergence_threshold, 
+                                              step_size=step_size,
+                                              lbfgs_memory_level=lbfgs_memory_level,
+                                              class_weights=class_weights)
+    
 
     # set input image shape
     if model in _pre_trained_models.MODELS:
         input_image_shape = _pre_trained_models.MODELS[model].input_image_shape
-    else:    # model == VisionFeaturePrint_Screen
+    else:    # model == VisionFeaturePrint_Scene
         input_image_shape = (3, 299, 299)
 
     # Save the model
@@ -196,8 +309,7 @@ def create(dataset, target, feature = None, model = 'resnet-50',
 
 class ImageClassifier(_CustomModel):
     """
-    An trained model that is ready to use for classification, exported to
-    CoreML, or for feature extraction.
+    A trained model that is ready to use for classification or export to CoreML.
 
     This model should not be constructed directly.
     """
@@ -236,10 +348,14 @@ class ImageClassifier(_CustomModel):
         state['classifier'] = LogisticClassifier(state['classifier'])
         state['classes'] = state['classifier'].classes
 
+        # Correct models saved with a previous typo
+        if state['model'] == "VisionFeaturePrint_Screen":
+            state['model'] = "VisionFeaturePrint_Scene"
+ 
         # Load pre-trained model & feature extractor
         model_name = state['model']
-        if model_name == "VisionFeaturePrint_Screen" and _mac_ver() < (10,14):
-            raise ToolkitError("Can not load model on this operating system. This model uses VisionFeaturePrint_Screen, "
+        if model_name == "VisionFeaturePrint_Scene" and _mac_ver() < (10,14):
+            raise ToolkitError("Can not load model on this operating system. This model uses VisionFeaturePrint_Scene, "
                                "which is only supported on macOS 10.14 and higher.")
         state['feature_extractor'] = _image_feature_extractor._create_feature_extractor(model_name)
         state['input_image_shape'] = tuple([int(i) for i in state['input_image_shape']])
@@ -545,12 +661,78 @@ class ImageClassifier(_CustomModel):
           >>> results = model.evaluate(data)
           >>> print results['accuracy']
         """
+
+        import os, json, math
+
         if(batch_size < 1):
             raise ValueError("'batch_size' must be greater than or equal to 1")
 
         extracted_features = self._extract_features(dataset, verbose=verbose, batch_size=batch_size)
         extracted_features[self.target] = dataset[self.target]
-        return self.classifier.evaluate(extracted_features, metric = metric)
+        
+        metrics = self.classifier.evaluate(extracted_features, metric=metric, with_predictions=True)
+
+        predictions = metrics["predictions"]["probs"]
+        state = self.__proxy__.get_state()
+        labels = state["classes"]
+
+        from .._evaluate_utils import  (
+            entropy,
+            confidence, 
+            relative_confidence, 
+            get_confusion_matrix, 
+            hclusterSort, 
+            l2Dist
+        )
+
+        evaluation_result = {k: metrics[k] for k in ['accuracy', 'f1_score', 'log_loss', 'precision',
+                                                     'recall', 'auc', 'roc_curve', 'confusion_matrix']}
+        evaluation_result['num_test_examples'] = len(dataset)
+        for k in ['num_classes', 'num_features', 'input_image_shape', 'num_examples', 'training_loss', 'training_time', 'model', 'max_iterations']:
+            evaluation_result[k] = getattr(self, k)
+        
+        # Extend the given test data
+        extended_test = dataset.add_column(predictions, 'probs')
+        extended_test['label'] = dataset[self.target]
+        extended_test = extended_test.add_columns( [extended_test.apply(lambda d: labels[d['probs'].index(confidence(d['probs']))]),
+            extended_test.apply(lambda d: entropy(d['probs'])),
+            extended_test.apply(lambda d: confidence(d['probs'])),
+            extended_test.apply(lambda d: relative_confidence(d['probs']))],
+            ['predicted_label', 'entropy', 'confidence', 'relative_confidence'])
+        extended_test = extended_test.add_column(extended_test.apply(lambda d: d['label'] == d['predicted_label']), 'correct')
+
+        evaluation_result['model_name'] = state['model']
+        # Calculate the confusion matrix
+        sf_conf_mat = get_confusion_matrix(extended_test, labels)
+        confidence_threshold = 0.5
+        hesitant_threshold = 0.2
+        evaluation_result['confidence_threshold'] = confidence_threshold
+        evaluation_result['hesitant_threshold'] = hesitant_threshold
+        evaluation_result['confidence_metric_for_threshold'] = 'relative_confidence'
+
+        evaluation_result['conf_mat'] = list(sf_conf_mat)
+        
+        # Get sorted labels (sorted by hCluster)
+        vectors = map(lambda l: {'name': l, 'pos':list(sf_conf_mat[sf_conf_mat['target_label']==l].sort('predicted_label')['norm_prob'])},
+                    labels)
+        evaluation_result['sorted_labels'] = hclusterSort(vectors, l2Dist)[0]['name'].split("|")
+
+        # Get recall and precision per label
+        per_l = extended_test.groupby(['label'], {'count': _tc.aggregate.COUNT, 'correct_count': _tc.aggregate.SUM('correct') })
+        per_l['recall'] = per_l.apply(lambda l: l['correct_count']*1.0 / l['count'])
+
+        per_pl = extended_test.groupby(['predicted_label'], {'predicted_count': _tc.aggregate.COUNT, 'correct_count': _tc.aggregate.SUM('correct') })
+        per_pl['precision'] = per_pl.apply(lambda l: l['correct_count']*1.0 / l['predicted_count'])
+        per_pl = per_pl.rename({'predicted_label': 'label'})
+        evaluation_result['label_metrics'] = list(per_l.join(per_pl, on='label', how='outer').select_columns(['label', 'count', 'correct_count', 'predicted_count', 'recall', 'precision']))
+        evaluation_result['labels'] = labels
+        
+        extended_test = extended_test.add_row_number('__idx').rename({'label': 'target_label'})
+
+        evaluation_result['test_data'] = extended_test
+        evaluation_result['feature'] = self.feature
+        
+        return _Evaluation(evaluation_result)
 
     def _extract_features(self, dataset, verbose=False, batch_size=64):
         return _tc.SFrame({
@@ -574,7 +756,7 @@ class ImageClassifier(_CustomModel):
 
 
         # Internal helper function
-        def _create_vision_feature_print_screen():
+        def _create_vision_feature_print_scene():
             prob_name = self.target + 'Probability'
 
             #
@@ -748,12 +930,10 @@ class ImageClassifier(_CustomModel):
             coreml_model = feature_extractor.get_coreml_model()
             spec = coreml_model.get_spec()
             nn_spec = spec.neuralNetworkClassifier
-        else:     # model == VisionFeaturePrint_Screen
-            spec = _create_vision_feature_print_screen()
+        else:     # model == VisionFeaturePrint_Scene
+            spec = _create_vision_feature_print_scene()
             nn_spec = spec.pipelineClassifier.pipeline.models[1].neuralNetworkClassifier
 
         _update_last_two_layers(nn_spec)
         mlmodel = _set_inputs_outputs_and_metadata(spec, nn_spec)
         mlmodel.save(filename)
-
-

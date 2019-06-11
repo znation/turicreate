@@ -7,11 +7,6 @@ endif()
 
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
-  find_program(NPM npm)
-  if(NOT NPM)
-    message(FATAL_ERROR "npm not found. Node.js 6.x or later with npm is required to build Turi Create.")
-  endif()
-
   if(APPLE)
     set(VISUALIZATION_XCODE_OUTPUT
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Turi Create Visualization.app/Contents/_CodeSignature/CodeResources"
@@ -20,12 +15,12 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     )
     set(VISUALIZATION_XCODE_INPUT
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/project.pbxproj"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Base.lproj/Main.storyboard"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Info.plist"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/Debugging.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/Pipe.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/AppDelegate.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/JSON.swift"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/CustomWebKitView.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/VegaContainer.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/ViewController.swift"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/NSWindowWorkaround.swift"
@@ -72,7 +67,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
         DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/deps
         SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/deps/cef/src/cef
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} .
+        CONFIGURE_COMMAND ${CMAKE_COMMAND} . -DCEF_C_COMPILER_FLAGS=-w -DCEF_CXX_COMPILER_FLAGS=-w
         BUILD_COMMAND "make"
         INSTALL_COMMAND ""
         BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/deps/cef/src/cef/libcef_dll_wrapper/libcef_dll_wrapper.a
@@ -129,20 +124,6 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     )
 
     add_dependencies(visualization_client cef)
-
-    add_custom_command(
-            TARGET visualization_client PRE_LINK
-
-            COMMAND npm install
-
-            COMMAND npm run build
-
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface"
-
-            COMMENT "Building NPM Package for Turi Create Visualization"
-
-            VERBATIM
-    )
 
     add_custom_command(
             TARGET visualization_client POST_BUILD

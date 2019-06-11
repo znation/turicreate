@@ -143,6 +143,7 @@ std::map<std::string, std::shared_ptr<unity_sarray_base>> unity_sframe::construc
     std::string url,
     std::map<std::string, flexible_type> csv_parsing_config,
     std::map<std::string, flex_type_enum> column_type_hints) {
+
   logstream(LOG_INFO) << "Construct sframe from csvs at "
                       << sanitize_url(url) << std::endl;
   std::stringstream ss;
@@ -164,6 +165,7 @@ std::map<std::string, std::shared_ptr<unity_sarray_base>> unity_sframe::construc
   tokenizer.delimiter = ",";
   tokenizer.has_comment_char = false;
   tokenizer.escape_char = '\\';
+  tokenizer.use_escape_char = true;
   tokenizer.double_quote = true;
   tokenizer.quote_char = '\"';
   tokenizer.skip_initial_space = true;
@@ -197,6 +199,9 @@ std::map<std::string, std::shared_ptr<unity_sarray_base>> unity_sframe::construc
       tokenizer.has_comment_char = true;
     }
   }
+  if (csv_parsing_config.count("use_escape_char")) {
+    tokenizer.skip_initial_space = !csv_parsing_config["use_escape_char"].is_zero();
+  }
   if (csv_parsing_config["escape_char"].get_type() == flex_type_enum::STRING) {
     std::string tmp = (flex_string)csv_parsing_config["escape_char"];
     if (tmp.length() > 0) tokenizer.escape_char = tmp[0];
@@ -207,9 +212,14 @@ std::map<std::string, std::shared_ptr<unity_sarray_base>> unity_sframe::construc
   if (csv_parsing_config["quote_char"].get_type() == flex_type_enum::STRING) {
     std::string tmp = (flex_string)csv_parsing_config["quote_char"];
     if (tmp.length() > 0) tokenizer.quote_char = tmp[0];
+  } else if (csv_parsing_config["quote_char"].get_type() == flex_type_enum::UNDEFINED) {
+    tokenizer.quote_char = NULL;
   }
   if (csv_parsing_config.count("skip_initial_space")) {
     tokenizer.skip_initial_space = !csv_parsing_config["skip_initial_space"].is_zero();
+  }
+  if (csv_parsing_config.count("only_raw_string_substitutions")) {
+    tokenizer.only_raw_string_substitutions = !csv_parsing_config["only_raw_string_substitutions"].is_zero();
   }
   if (csv_parsing_config["na_values"].get_type() == flex_type_enum::LIST) {
     flex_list rec = csv_parsing_config["na_values"];
@@ -235,7 +245,27 @@ std::map<std::string, std::shared_ptr<unity_sarray_base>> unity_sframe::construc
       }
     }
   }
+  if (csv_parsing_config["true_values"].get_type() == flex_type_enum::LIST) {
+    flex_list rec = csv_parsing_config["true_values"];
+    std::unordered_set<std::string> true_values;
+    tokenizer.true_values.clear();
+    for (size_t i = 0;i < rec.size(); ++i) {
+      if (rec[i].get_type() == flex_type_enum::STRING) {
+        tokenizer.true_values.insert((std::string)rec[i]);
+      }
+    }
+  }
 
+  if (csv_parsing_config["false_values"].get_type() == flex_type_enum::LIST) {
+    flex_list rec = csv_parsing_config["false_values"];
+    std::unordered_set<std::string> false_values;
+    tokenizer.false_values.clear();
+    for (size_t i = 0;i < rec.size(); ++i) {
+      if (rec[i].get_type() == flex_type_enum::STRING) {
+        tokenizer.false_values.insert((std::string)rec[i]);
+      }
+    }
+  }
   tokenizer.init();
 
   auto sframe_ptr = std::make_shared<sframe>();
@@ -333,6 +363,7 @@ void unity_sframe::load(iarchive& iarc) {
 void unity_sframe::clear() {
   m_planner_node.reset();
   m_column_names.clear();
+  m_cached_sframe.reset();
 }
 
 size_t unity_sframe::size() {
@@ -501,6 +532,7 @@ void unity_sframe::add_columns(
       throw;
     }
   }
+  m_cached_sframe.reset();
 }
 
 void unity_sframe::set_column_name(size_t i, std::string name) {
@@ -516,6 +548,7 @@ void unity_sframe::set_column_name(size_t i, std::string name) {
     }
   }
   m_column_names[i] = name;
+  m_cached_sframe.reset();
 }
 
 void unity_sframe::remove_column(size_t i) {
@@ -576,21 +609,28 @@ void unity_sframe::swap_columns(size_t i, size_t j) {
 
 std::shared_ptr<sframe> unity_sframe::get_underlying_sframe() {
   Dlog_func_entry();
-  if (!is_materialized()) {
-    materialize();
+
+  if (!m_cached_sframe) {
+    if (!is_materialized()) {
+      materialize();
+    }
+    m_cached_sframe = std::make_shared<sframe>(
+        planner().materialize(this->get_planner_node()));
+
+    // make sure the physical sframe has consistant column names
+    for (size_t i = 0; i < num_columns(); ++i) {
+      m_cached_sframe->set_column_name(i, m_column_names[i]);
+    }
   }
-  auto ret = std::make_shared<sframe>(planner().materialize(this->get_planner_node()));
-  // make sure the physical sframe has consistant column names
-  for (size_t i = 0; i < num_columns(); ++i) {
-    ret->set_column_name(i, m_column_names[i]);
-  }
-  return ret;
+
+  return m_cached_sframe;
 }
 
 void unity_sframe::set_sframe(const std::shared_ptr<sframe>& sf_ptr) {
   Dlog_func_entry();
   m_planner_node = op_sframe_source::make_planner_node(*sf_ptr);
   m_column_names = sf_ptr->column_names();
+  m_cached_sframe = sf_ptr;
 }
 
 

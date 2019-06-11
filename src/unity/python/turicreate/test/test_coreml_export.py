@@ -22,8 +22,12 @@ import coremltools
 import sys
 import platform
 import array
+import os
 
 import pytest
+
+dirname = os.path.dirname(__file__)
+mushroom_dataset = os.path.join(dirname, 'mushroom.csv')
 
 class CoreMLExportTest(unittest.TestCase):
 
@@ -97,7 +101,7 @@ class CoreMLExportTest(unittest.TestCase):
                 tc_prediction = model.predict(row)[0]
 
                 if (is_regression == False) and (type(model.classes[0]) == str):
-                    if not is_has_probability:
+                    if not has_probability:
                         self.assertEqual(coreml_prediction["target"], tc_prediction)
                 else:
                     self.assertAlmostEqual(coreml_prediction["target"], tc_prediction, delta = 1e-5)
@@ -114,6 +118,8 @@ class CoreMLExportTest(unittest.TestCase):
     # Regression 
 
     def test_linear_regression(self):
+        if _mac_ver() < (10, 14):
+            pytest.xfail("See https://github.com/apple/turicreate/issues/1332")
         for code_string in ["b"*40, "nnnn", "v", "d", "A", "bnsCvAd"]:
             train, test = self.generate_data("regression", 100, code_string)
             model = tc.linear_regression.create(train, "target", validation_set = None)
@@ -176,6 +182,8 @@ class CoreMLExportTest(unittest.TestCase):
     # Classification 
 
     def test_logistic_classifier(self):
+        if _mac_ver() < (10, 14):
+            pytest.xfail("See https://github.com/apple/turicreate/issues/1332")
         for code_string in ["b"*40, "nnnn", "v", "d", "A", "bnsCvAd"]:
             train, test = self.generate_data("classification", 100, code_string)
             model = tc.logistic_classifier.create(train, "target", validation_set = None)
@@ -183,6 +191,8 @@ class CoreMLExportTest(unittest.TestCase):
             self._test_coreml_export(model, test, False)
 
     def test_svm_classifier(self):
+        if _mac_ver() < (10, 14):
+            pytest.xfail("See https://github.com/apple/turicreate/issues/1332")
         for code_string in ["b"*40, "nnnn", "v", "d", "A", "bnsCvAd"]:
             train, test = self.generate_data("classification", 100, code_string)
             model = tc.svm_classifier.create(train, "target", validation_set = None)
@@ -244,6 +254,8 @@ class CoreMLExportTest(unittest.TestCase):
     #  Muliclass 
 
     def test_logistic_multiclass(self):
+        if _mac_ver() < (10, 14):
+            pytest.xfail("See https://github.com/apple/turicreate/issues/1332")
         for code_string in ["b"*40, "nnnn", "v", "d", "A", "bnsCvAd"]:
             train, test = self.generate_data("multiclass", 100, code_string)
             model = tc.logistic_classifier.create(train, "target", validation_set = None, max_iterations = 5)
@@ -309,6 +321,8 @@ class CoreMLExportTest(unittest.TestCase):
 
 
     def test_logistic_multiclass_tiny(self):
+        if _mac_ver() < (10, 14):
+            pytest.xfail("See https://github.com/apple/turicreate/issues/1332")
         for code_string in ["b"*40, "nnnn", "v", "d", "A", "bnsCvAd"]:
             train, test = self.generate_data("multiclass", 8, code_string)
             model = tc.logistic_classifier.create(train, "target", validation_set = None)
@@ -349,7 +363,6 @@ class CoreMLExportTest(unittest.TestCase):
             self._test_coreml_export(model, test, False)
 
 
-    @pytest.mark.xfail()
     def test_random_forest_multiclass_simple_tiny(self):
         for code_string in ["nnnn", "bns", "sss"]:
             train, test = self.generate_data("multiclass", 8, code_string)
@@ -365,4 +378,14 @@ class CoreMLExportTest(unittest.TestCase):
             model = tc.random_forest_classifier.create(train, "target", validation_set = None, max_depth=3, max_iterations = 5)
             model.evaluate(test)  # Previous classifier -- this caused errors.  
             self._test_coreml_export(model, test, False)
+
+    def test_tree_export_issue_1831(self):
+        SEED = 42
+        data = tc.SFrame.read_csv(mushroom_dataset)
+        data['target'] = data['label']
+        train_data, test_data = data.random_split(0.8,seed=SEED)
+        model = tc.boosted_trees_classifier.create(train_data, target='target',
+                                                   max_iterations=2,
+                                                   max_depth = 3)
+        self._test_coreml_export(model, test_data, False)
 

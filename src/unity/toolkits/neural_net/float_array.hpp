@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include <serialization/serialization_includes.hpp>
+
 namespace turi {
 namespace neural_net {
 
@@ -153,7 +155,14 @@ public:
   const size_t* shape() const override { return shape_; }
   size_t dim() const override { return dim_; }
 
+  // Returns the sub-array at the specified index in the first dimension.
+  shared_float_array operator[](size_t idx) const;
+
   // TODO: Operations such as reshape, slice, etc.?
+
+  // Serialization.
+  void save(oarchive& oarc) const;
+  void load(iarchive& iarc);
 
 protected:
   shared_float_array(std::shared_ptr<float_array> impl, size_t offset,
@@ -197,6 +206,8 @@ private:
 
 // Convenient typedef for data structure used to pass configuration and weights.
 using float_array_map = std::map<std::string, shared_float_array>;
+
+std::ostream &operator<<(std::ostream &out, const float_array &arr);
 
 }  // namespace neural_net
 }  // namespace turi

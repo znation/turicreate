@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <initializer_list>
 #include <memory>
 #include <vector>
 
@@ -23,11 +22,12 @@ namespace {
 
 using CoreML::Specification::BatchnormLayerParams;
 using CoreML::Specification::ConvolutionLayerParams;
+using CoreML::Specification::InnerProductLayerParams;
 using CoreML::Specification::Model;
 using CoreML::Specification::NeuralNetwork;
 using CoreML::Specification::NeuralNetworkLayer;
-using CoreML::Specification::Pipeline;
 using CoreML::Specification::SamePadding;
+using CoreML::Specification::UniDirectionalLSTMLayerParams;
 using CoreML::Specification::WeightParams;
 
 size_t multiply(size_t a, size_t b) { return a * b; }
@@ -37,7 +37,7 @@ public:
 
   // Convenience function to help the compiler convert initializer lists to
   // std::vector first, before trying to resolve the std::make_shared template.
-  static shared_float_array create_shared(
+  static shared_float_array create_view(
       std::vector<size_t> shape, const WeightParams& weights) {
 
     return shared_float_array(
@@ -101,12 +101,12 @@ void wrap_network_params(const std::string& name,
   const size_t h = convolution.kernelsize(0);
   const size_t w = convolution.kernelsize(1);
 
-  shared_float_array weights = weight_params_float_array::create_shared(
+  shared_float_array weights = weight_params_float_array::create_view(
       {n, c, h, w}, convolution.weights());
   params_out->emplace(name + "_weight", std::move(weights));
 
   if (convolution.has_bias()) {
-    shared_float_array bias = weight_params_float_array::create_shared(
+    shared_float_array bias = weight_params_float_array::create_view(
         {n}, convolution.bias());
     params_out->emplace(name + "_bias", std::move(bias));
   }
@@ -132,24 +132,61 @@ void update_network_params(const std::string& name,
 }
 
 void wrap_network_params(const std::string& name,
+                         const InnerProductLayerParams& inner_product,
+                         float_array_map* params_out) {
+
+  const size_t n = inner_product.outputchannels();
+  const size_t c = inner_product.inputchannels();
+
+  shared_float_array weights = weight_params_float_array::create_view(
+      {n, c, 1, 1}, inner_product.weights());
+  params_out->emplace(name + "_weight", std::move(weights));
+
+  if (inner_product.has_bias()) {
+    shared_float_array bias = weight_params_float_array::create_view(
+        {n}, inner_product.bias());
+    params_out->emplace(name + "_bias", std::move(bias));
+  }
+}
+
+void update_network_params(const std::string& name,
+                           const float_array_map& params,
+                           InnerProductLayerParams* inner_product) {
+
+  std::string key = name + "_weight";
+  auto it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second, inner_product->mutable_weights());
+  }
+
+  if (inner_product->has_bias()) {
+    key = name + "_bias";
+    it = params.find(key);
+    if (it != params.end()) {
+      update_weight_params(key, it->second, inner_product->mutable_bias());
+    }
+  }
+}
+
+void wrap_network_params(const std::string& name,
                          const BatchnormLayerParams& batch_norm,
                          float_array_map* params_out) {
 
   const size_t n = batch_norm.channels();
 
-  shared_float_array gamma = weight_params_float_array::create_shared(
+  shared_float_array gamma = weight_params_float_array::create_view(
       {n}, batch_norm.gamma());
   params_out->emplace(name + "_gamma", std::move(gamma));
 
-  shared_float_array beta = weight_params_float_array::create_shared(
+  shared_float_array beta = weight_params_float_array::create_view(
       {n}, batch_norm.beta());
   params_out->emplace(name + "_beta", std::move(beta));
 
-  shared_float_array mean = weight_params_float_array::create_shared(
+  shared_float_array mean = weight_params_float_array::create_view(
       {n}, batch_norm.mean());
   params_out->emplace(name + "_running_mean", std::move(mean));
 
-  shared_float_array variance = weight_params_float_array::create_shared(
+  shared_float_array variance = weight_params_float_array::create_view(
       {n}, batch_norm.variance());
   params_out->emplace(name + "_running_var", std::move(variance));
 }
@@ -183,6 +220,153 @@ void update_network_params(const std::string& name,
   }
 }
 
+void wrap_network_params(const std::string& name,
+                         const UniDirectionalLSTMLayerParams& lstm,
+                         float_array_map* params_out) {
+
+  const size_t n = lstm.outputvectorsize();
+  const size_t c = lstm.inputvectorsize();
+
+  shared_float_array i2h_i_weight = weight_params_float_array::create_view(
+      {n, c}, lstm.weightparams().inputgateweightmatrix());
+  params_out->emplace(name + "_i2h_i_weight", std::move(i2h_i_weight));
+
+  shared_float_array i2h_f_weight = weight_params_float_array::create_view(
+      {n, c}, lstm.weightparams().forgetgateweightmatrix());
+  params_out->emplace(name + "_i2h_f_weight", std::move(i2h_f_weight));
+
+  shared_float_array i2h_c_weight = weight_params_float_array::create_view(
+      {n, c}, lstm.weightparams().blockinputweightmatrix());
+  params_out->emplace(name + "_i2h_c_weight", std::move(i2h_c_weight));
+
+  shared_float_array i2h_o_weight = weight_params_float_array::create_view(
+      {n, c}, lstm.weightparams().outputgateweightmatrix());
+  params_out->emplace(name + "_i2h_o_weight", std::move(i2h_o_weight));
+
+  shared_float_array h2h_i_weight = weight_params_float_array::create_view(
+      {n, n}, lstm.weightparams().inputgaterecursionmatrix());
+  params_out->emplace(name + "_h2h_i_weight", std::move(h2h_i_weight));
+
+  shared_float_array h2h_f_weight = weight_params_float_array::create_view(
+      {n, n}, lstm.weightparams().forgetgaterecursionmatrix());
+  params_out->emplace(name + "_h2h_f_weight", std::move(h2h_f_weight));
+
+  shared_float_array h2h_c_weight = weight_params_float_array::create_view(
+      {n, n}, lstm.weightparams().blockinputrecursionmatrix());
+  params_out->emplace(name + "_h2h_c_weight", std::move(h2h_c_weight));
+
+  shared_float_array h2h_o_weight = weight_params_float_array::create_view(
+      {n, n}, lstm.weightparams().outputgaterecursionmatrix());
+  params_out->emplace(name + "_h2h_o_weight", std::move(h2h_o_weight));
+
+  shared_float_array h2h_i_bias = weight_params_float_array::create_view(
+      {n}, lstm.weightparams().inputgatebiasvector());
+  params_out->emplace(name + "_h2h_i_bias", std::move(h2h_i_bias));
+
+  shared_float_array h2h_f_bias = weight_params_float_array::create_view(
+      {n}, lstm.weightparams().forgetgatebiasvector());
+  params_out->emplace(name + "_h2h_f_bias", std::move(h2h_f_bias));
+
+  shared_float_array h2h_c_bias = weight_params_float_array::create_view(
+      {n}, lstm.weightparams().blockinputbiasvector());
+  params_out->emplace(name + "_h2h_c_bias", std::move(h2h_c_bias));
+
+  shared_float_array h2h_o_bias = weight_params_float_array::create_view(
+      {n}, lstm.weightparams().outputgatebiasvector());
+  params_out->emplace(name + "_h2h_o_bias", std::move(h2h_o_bias));
+}
+
+void update_network_params(const std::string& name,
+                           const float_array_map& params,
+                           UniDirectionalLSTMLayerParams* lstm) {
+
+  auto* lstm_params = lstm->mutable_weightparams();
+
+  std::string key = name + "_i2h_i_weight";
+  auto it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_inputgateweightmatrix());
+  }
+
+  key = name + "_i2h_f_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_forgetgateweightmatrix());
+  }
+
+  key = name + "_i2h_c_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_blockinputweightmatrix());
+  }
+
+  key = name + "_i2h_o_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_outputgateweightmatrix());
+  }
+
+  key = name + "_h2h_i_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_inputgaterecursionmatrix());
+  }
+
+  key = name + "_h2h_f_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_forgetgaterecursionmatrix());
+  }
+
+  key = name + "_h2h_c_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_blockinputrecursionmatrix());
+  }
+
+  key = name + "_h2h_o_weight";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_outputgaterecursionmatrix());
+  }
+
+  key = name + "_h2h_i_bias";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_inputgatebiasvector());
+  }
+
+  key = name + "_h2h_f_bias";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_forgetgatebiasvector());
+  }
+
+  key = name + "_h2h_c_bias";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_blockinputbiasvector());
+  }
+
+  key = name + "_h2h_o_bias";
+  it = params.find(key);
+  if (it != params.end()) {
+    update_weight_params(key, it->second,
+                         lstm_params->mutable_outputgatebiasvector());
+  }
+}
+
 void wrap_network_params(const NeuralNetworkLayer& neural_net_layer,
                          float_array_map* params_out) {
 
@@ -191,9 +375,17 @@ void wrap_network_params(const NeuralNetworkLayer& neural_net_layer,
     wrap_network_params(neural_net_layer.name(),
                         neural_net_layer.convolution(), params_out);
     break;
+  case NeuralNetworkLayer::kInnerProduct:
+    wrap_network_params(neural_net_layer.name(),
+                        neural_net_layer.innerproduct(), params_out);
+    break;
   case NeuralNetworkLayer::kBatchnorm:
     wrap_network_params(neural_net_layer.name(),
                         neural_net_layer.batchnorm(), params_out);
+    break;
+  case NeuralNetworkLayer::kUniDirectionalLSTM:
+    wrap_network_params(neural_net_layer.name(),
+                        neural_net_layer.unidirectionallstm(), params_out);
     break;
   default:
     break;
@@ -208,9 +400,17 @@ void update_network_params(const float_array_map& params,
     update_network_params(neural_net_layer->name(), params,
                           neural_net_layer->mutable_convolution());
     break;
+  case NeuralNetworkLayer::kInnerProduct:
+    update_network_params(neural_net_layer->name(), params,
+                          neural_net_layer->mutable_innerproduct());
+    break;
   case NeuralNetworkLayer::kBatchnorm:
     update_network_params(neural_net_layer->name(), params,
                           neural_net_layer->mutable_batchnorm());
+    break;
+  case NeuralNetworkLayer::kUniDirectionalLSTM:
+    update_network_params(neural_net_layer->name(), params,
+                          neural_net_layer->mutable_unidirectionallstm());
     break;
   default:
     break;
@@ -253,6 +453,14 @@ std::vector<char> load_file(const std::string& path) {
   return buffer;
 }
 
+void init_weight_params(WeightParams* params, size_t size,
+                        const weight_initializer& weight_init_fn) {
+
+  params->mutable_floatvalue()->Resize(static_cast<int>(size), 0.f);
+  float* weights = params->mutable_floatvalue()->mutable_data();
+  weight_init_fn(weights, weights + size);
+}
+
 }  // namespace
 
 model_spec::model_spec(): impl_(new NeuralNetwork) {}
@@ -284,6 +492,10 @@ model_spec::model_spec(const std::string& mlmodel_path)
 
 model_spec::~model_spec() = default;
 
+std::unique_ptr<NeuralNetwork> model_spec::move_coreml_spec() && {
+  return std::move(impl_);
+}
+
 float_array_map model_spec::export_params_view() const {
   float_array_map result;
   wrap_network_params(*impl_, &result);
@@ -307,10 +519,43 @@ bool model_spec::has_layer_output(const std::string& layer_name) const {
   return false;
 }
 
+void model_spec::add_relu(const std::string& name, const std::string& input) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  layer->mutable_activation()->mutable_relu();
+}
+
+void model_spec::add_leakyrelu(const std::string& name,
+                               const std::string& input, float alpha) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  layer->mutable_activation()->mutable_leakyrelu()->set_alpha(alpha);
+}
+
+void model_spec::add_sigmoid(const std::string& name,
+                             const std::string& input) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  layer->mutable_activation()->mutable_sigmoid();
+}
+
 void model_spec::add_convolution(
     const std::string& name, const std::string& input,
-    size_t num_output_channels, size_t num_kernel_channels, size_t kernel_size,
-    weight_initializer weight_initializer_fn,
+    size_t num_output_channels, size_t num_kernel_channels,
+    size_t kernel_height, size_t kernel_width, size_t stride_h, size_t stride_w,
+    padding_type padding, weight_initializer weight_initializer_fn,
     weight_initializer bias_initializer_fn) {
 
   NeuralNetworkLayer* layer = impl_->add_layers();
@@ -322,28 +567,56 @@ void model_spec::add_convolution(
   params->set_outputchannels(num_output_channels);
   params->set_kernelchannels(num_kernel_channels);
   params->set_ngroups(1);
-  params->add_kernelsize(kernel_size);
-  params->add_kernelsize(kernel_size);
-  params->add_stride(1);
-  params->add_stride(1);
+  params->add_kernelsize(kernel_height);
+  params->add_kernelsize(kernel_width);
+  params->add_stride(stride_h);
+  params->add_stride(stride_w);
   params->add_dilationfactor(1);
   params->add_dilationfactor(1);
-  params->mutable_same()->set_asymmetrymode(SamePadding::TOP_LEFT_HEAVY);
+  switch (padding) {
+  case padding_type::VALID:
+    params->mutable_valid()->mutable_paddingamounts()->add_borderamounts();
+    params->mutable_valid()->mutable_paddingamounts()->add_borderamounts();
+    break;
+  case padding_type::SAME:
+    params->mutable_same()->set_asymmetrymode(SamePadding::TOP_LEFT_HEAVY);
+    break;
+  }
 
   size_t weights_size =
-      num_output_channels * num_kernel_channels * kernel_size * kernel_size;
-  params->mutable_weights()->mutable_floatvalue()->Resize(
-      static_cast<int>(weights_size), 0.f);
-  float* weights =
-      params->mutable_weights()->mutable_floatvalue()->mutable_data();
-  weight_initializer_fn(weights, weights + weights_size);
+      num_output_channels * num_kernel_channels * kernel_height * kernel_width;
+  init_weight_params(params->mutable_weights(), weights_size,
+                     weight_initializer_fn);
 
   if (bias_initializer_fn) {
     params->set_hasbias(true);
-    params->mutable_bias()->mutable_floatvalue()->Resize(
-        static_cast<int>(num_output_channels), 0.f);
-    float* bias = params->mutable_bias()->mutable_floatvalue()->mutable_data();
-    bias_initializer_fn(bias, bias + num_output_channels);
+    init_weight_params(params->mutable_bias(), num_output_channels,
+                       bias_initializer_fn);
+  }
+}
+
+void model_spec::add_inner_product(
+    const std::string& name, const std::string& input,
+    size_t num_output_channels, size_t num_input_channels,
+    weight_initializer weight_initializer_fn,
+    weight_initializer bias_initializer_fn) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  InnerProductLayerParams* params = layer->mutable_innerproduct();
+  params->set_outputchannels(num_output_channels);
+  params->set_inputchannels(num_input_channels);
+  size_t weights_size = num_output_channels * num_input_channels;
+  init_weight_params(params->mutable_weights(), weights_size,
+                     weight_initializer_fn);
+
+  if (bias_initializer_fn) {
+    params->set_hasbias(true);
+    init_weight_params(params->mutable_bias(), num_output_channels,
+                       bias_initializer_fn);
   }
 }
 
@@ -367,15 +640,215 @@ void model_spec::add_batchnorm(
   params->mutable_variance()->mutable_floatvalue()->Resize(size, 1.f);
 }
 
-void model_spec::add_leakyrelu(const std::string& name,
-                               const std::string& input, float alpha) {
+void model_spec::add_channel_concat(const std::string& name,
+                                    const std::vector<std::string>& inputs) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  for (const std::string& input : inputs) {
+    layer->add_input(input);
+  }
+  layer->add_output(name);
+
+  layer->mutable_concat();
+}
+
+void model_spec::add_softmax(const std::string& name,
+                             const std::string& input) {
 
   NeuralNetworkLayer* layer = impl_->add_layers();
   layer->set_name(name);
   layer->add_input(input);
   layer->add_output(name);
 
-  layer->mutable_activation()->mutable_leakyrelu()->set_alpha(alpha);
+  layer->mutable_softmax();
+}
+
+void model_spec::add_addition(const std::string& name,
+                              const std::vector<std::string>& inputs) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  for (const std::string& input : inputs) {
+    layer->add_input(input);
+  }
+  layer->add_output(name);
+
+  layer->mutable_add();
+}
+
+void model_spec::add_multiplication(const std::string& name,
+                                    const std::vector<std::string>& inputs) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  for (const std::string& input : inputs) {
+    layer->add_input(input);
+  }
+  layer->add_output(name);
+
+  layer->mutable_multiply();
+}
+
+void model_spec::add_exp(const std::string& name, const std::string& input) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  layer->mutable_unary()->set_type(
+      CoreML::Specification::UnaryFunctionLayerParams::EXP);
+}
+
+void model_spec::add_scale(const std::string& name, const std::string& input,
+                           const std::array<size_t, 3>& shape_c_h_w,
+                           weight_initializer scale_initializer_fn) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  CoreML::Specification::ScaleLayerParams* params = layer->mutable_scale();
+  size_t size = 1;
+  for (size_t i = 0; i < 3; ++i) {
+    params->add_shapescale(shape_c_h_w[i]);
+    size *= shape_c_h_w[i];
+  }
+
+  init_weight_params(params->mutable_scale(), size, scale_initializer_fn);
+}
+
+void model_spec::add_constant(const std::string& name,
+                              const std::array<size_t, 3>& shape_c_h_w,
+                              weight_initializer weight_initializer_fn) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_output(name);
+
+  CoreML::Specification::LoadConstantLayerParams* params =
+      layer->mutable_loadconstant();
+  size_t size = 1;
+  for (size_t i = 0; i < 3; ++i) {
+    params->add_shape(shape_c_h_w[i]);
+    size *= shape_c_h_w[i];
+  }
+
+  init_weight_params(params->mutable_data(), size, weight_initializer_fn);
+}
+
+void model_spec::add_reshape(const std::string& name, const std::string& input,
+                             const std::array<size_t, 4>& seq_c_h_w) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  CoreML::Specification::ReshapeLayerParams* params = layer->mutable_reshape();
+  for (size_t i = 0; i < 4; ++i) {
+    params->add_targetshape(seq_c_h_w[i]);
+  }
+}
+
+void model_spec::add_permute(const std::string& name, const std::string& input,
+                             const std::array<size_t, 4>& axis_permutation) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  CoreML::Specification::PermuteLayerParams* params = layer->mutable_permute();
+  for (size_t i = 0; i < 4; ++i) {
+    params->add_axis(axis_permutation[i]);
+  }
+}
+
+void model_spec::add_channel_slice(
+    const std::string& name, const std::string& input, int start_index,
+    int end_index, size_t stride) {
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_output(name);
+
+  CoreML::Specification::SliceLayerParams* params = layer->mutable_slice();
+  params->set_startindex(start_index);
+  params->set_endindex(end_index);
+  params->set_stride(stride);
+  params->set_axis(CoreML::Specification::SliceLayerParams::CHANNEL_AXIS);
+}
+
+void model_spec::add_lstm(
+    const std::string& name, const std::string& input,
+    const std::string& hidden_input, const std::string& cell_input,
+    const std::string& hidden_output, const std::string& cell_output,
+    size_t input_vector_size, size_t output_vector_size,
+    float cell_clip_threshold, const lstm_weight_initializers& initializers) {
+
+  const bool has_bias_vectors = initializers.input_gate_bias_fn
+    && initializers.forget_gate_bias_fn
+    && initializers.block_input_bias_fn
+    && initializers.output_gate_bias_fn;
+
+  NeuralNetworkLayer* layer = impl_->add_layers();
+  layer->set_name(name);
+  layer->add_input(input);
+  layer->add_input(hidden_input);
+  layer->add_input(cell_input);
+  layer->add_output(name);
+  layer->add_output(hidden_output);
+  layer->add_output(cell_output);
+
+  UniDirectionalLSTMLayerParams* params = layer->mutable_unidirectionallstm();
+  params->set_inputvectorsize(input_vector_size);
+  params->set_outputvectorsize(output_vector_size);
+  params->add_activations()->mutable_sigmoid();
+  params->add_activations()->mutable_tanh();
+  params->add_activations()->mutable_tanh();
+
+  CoreML::Specification::LSTMParams* lstm_params = params->mutable_params();
+  lstm_params->set_hasbiasvectors(has_bias_vectors);
+  lstm_params->set_cellclipthreshold(cell_clip_threshold);
+
+  CoreML::Specification::LSTMWeightParams* lstm_weights =
+      params->mutable_weightparams();
+  init_weight_params(lstm_weights->mutable_inputgateweightmatrix(),
+                     input_vector_size * output_vector_size,
+                     initializers.input_gate_weight_fn);
+  init_weight_params(lstm_weights->mutable_forgetgateweightmatrix(),
+                     input_vector_size * output_vector_size,
+                     initializers.forget_gate_weight_fn);
+  init_weight_params(lstm_weights->mutable_blockinputweightmatrix(),
+                     input_vector_size * output_vector_size,
+                     initializers.block_input_weight_fn);
+  init_weight_params(lstm_weights->mutable_outputgateweightmatrix(),
+                     input_vector_size * output_vector_size,
+                     initializers.output_gate_weight_fn);
+  init_weight_params(lstm_weights->mutable_inputgaterecursionmatrix(),
+                     output_vector_size * output_vector_size,
+                     initializers.input_gate_recursion_fn);
+  init_weight_params(lstm_weights->mutable_forgetgaterecursionmatrix(),
+                     output_vector_size * output_vector_size,
+                     initializers.forget_gate_recursion_fn);
+  init_weight_params(lstm_weights->mutable_blockinputrecursionmatrix(),
+                     output_vector_size * output_vector_size,
+                     initializers.block_input_recursion_fn);
+  init_weight_params(lstm_weights->mutable_outputgaterecursionmatrix(),
+                     output_vector_size * output_vector_size,
+                     initializers.output_gate_recursion_fn);
+  init_weight_params(lstm_weights->mutable_inputgatebiasvector(),
+                     output_vector_size, initializers.input_gate_bias_fn);
+  init_weight_params(lstm_weights->mutable_forgetgatebiasvector(),
+                     output_vector_size, initializers.forget_gate_bias_fn);
+  init_weight_params(lstm_weights->mutable_blockinputbiasvector(),
+                     output_vector_size, initializers.block_input_bias_fn);
+  init_weight_params(lstm_weights->mutable_outputgatebiasvector(),
+                     output_vector_size, initializers.output_gate_bias_fn);
 }
 
 }  // neural_net

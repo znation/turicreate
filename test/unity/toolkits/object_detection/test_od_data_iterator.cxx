@@ -9,6 +9,7 @@
 #include <unity/toolkits/object_detection/od_data_iterator.hpp>
 
 #include <boost/test/unit_test.hpp>
+#include <unity/lib/image_util.hpp>
 #include <util/test_macros.hpp>
 
 namespace turi {
@@ -32,7 +33,7 @@ data_iterator::parameters create_data(size_t num_rows) {
   std::vector<unsigned char> buffer(IMAGE_HEIGHT * IMAGE_WIDTH * 3);
   for (size_t i = 0; i < num_rows; ++i) {
 
-    // Each pixel has R, G, and B value qual to the row index (modulo 256).
+    // Each pixel has R, G, and B value equal to the row index (modulo 256).
     std::fill(buffer.begin(), buffer.end(),
               static_cast<unsigned char>(i % 256));
     images[i] = flex_image(reinterpret_cast<char*>(buffer.data()), IMAGE_HEIGHT,
@@ -59,6 +60,7 @@ data_iterator::parameters create_data(size_t num_rows) {
       {"test_image", gl_sarray(images)},
       {"test_annotations", gl_sarray(annotations)},
   });
+  result.shuffle = false;
 
   return result;
 }
@@ -90,7 +92,9 @@ BOOST_AUTO_TEST_CASE(test_simple_data_iterator) {
       TS_ASSERT_EQUALS(example.image.m_width, IMAGE_WIDTH);
       TS_ASSERT_EQUALS(example.image.m_channels, 3);
 
-      TS_ASSERT_EQUALS(static_cast<size_t>(*example.image.get_image_data()),
+      // The first byte of the first pixel should contain the row index.
+      flex_image image = image_util::decode_image(example.image);
+      TS_ASSERT_EQUALS(static_cast<size_t>(image.get_image_data()[0]),
                        row % 256);
 
       TS_ASSERT_EQUALS(example.annotations.size(), 1);
@@ -113,6 +117,41 @@ BOOST_AUTO_TEST_CASE(test_simple_data_iterator) {
   batch = data_source.next_batch(BATCH_SIZE);
   TS_ASSERT_EQUALS(batch.size(), BATCH_SIZE);
   assert_batch(batch, 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_simple_data_iterator_with_expected_classes) {
+
+  static constexpr size_t NUM_ROWS = 1;
+  static constexpr size_t BATCH_SIZE = 1;
+
+  data_iterator::parameters params = create_data(NUM_ROWS);
+
+  std::vector<std::string> class_labels = { "bar", "foo" };
+  params.class_labels = class_labels;
+
+  simple_data_iterator data_source(params);
+  TS_ASSERT_EQUALS(data_source.class_labels(), class_labels);
+  TS_ASSERT_EQUALS(data_source.num_instances(), 1);
+
+  std::vector<labeled_image> batch = data_source.next_batch(BATCH_SIZE);
+  TS_ASSERT_EQUALS(batch.size(), BATCH_SIZE);
+
+  // Even though the data only contained one label, "foo", it should receive
+  // identifier 1 because we specified the class labels upfront.
+  TS_ASSERT_EQUALS(batch[0].annotations.size(), 1);
+  TS_ASSERT_EQUALS(batch[0].annotations[0].identifier, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_simple_data_iterator_with_unexpected_classes) {
+
+  static constexpr size_t NUM_ROWS = 1;
+
+  data_iterator::parameters params = create_data(NUM_ROWS);
+  params.class_labels = { "bar" };
+
+  // The data contains the label "foo", which is not among the expected class
+  // labels.
+  TS_ASSERT_THROWS_ANYTHING(simple_data_iterator unused_var(params));
 }
 
 }  // namespace

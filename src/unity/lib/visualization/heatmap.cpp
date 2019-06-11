@@ -11,6 +11,7 @@
 #include "vega_spec.hpp"
 
 #include <parallel/lambda_omp.hpp>
+#include <unity/lib/visualization/batch_size.hpp>
 #include <unity/lib/visualization/transformation.hpp>
 
 #include <cmath>
@@ -54,7 +55,7 @@ std::shared_ptr<Plot> turi::visualization::plot_heatmap(
   temp_sf[x_name] = x;
   temp_sf[y_name] = y;
 
-  hm.init(temp_sf, 5000000 /* batch_size */);
+  hm.init(temp_sf, batch_size(x, y));
 
   std::shared_ptr<transformation_base> shared_unity_transformer = std::make_shared<heatmap>(hm);
   return std::make_shared<Plot>(heatmap_specification, shared_unity_transformer, size_array);
@@ -297,7 +298,7 @@ flexible_type heatmap_result::emit() const {
       flex_dict value;
       size_t count = row[j];
       double yScale = static_cast<double>(j) / static_cast<double>(row_size);
-      double y1 = yScale * yWidth;
+      double y1 = (yScale * yWidth) + extrema.y.get_min();
       double y2 = y1 + yBinWidth;
       value.push_back(std::make_pair("x_left", x1));
       value.push_back(std::make_pair("x_right", x2));

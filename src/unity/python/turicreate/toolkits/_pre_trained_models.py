@@ -15,10 +15,12 @@ from six.moves.urllib import parse as _urlparse
 
 MODELS_URL_ROOT = 'https://docs-assets.developer.apple.com/turicreate/models/'
 
-
-def _get_model_cache_dir():
+def _get_cache_dir(_type="model"):
     cache_dir = _tc.config.get_runtime_config()['TURI_CACHE_FILE_LOCATIONS']
-    download_path = _os.path.join(cache_dir, 'model_cache')
+    if _type == "model":
+        download_path = _os.path.join(cache_dir, 'model_cache')
+    else:
+        download_path = _os.path.join(cache_dir, 'data_cache')
 
     if not _os.path.exists(download_path):
         try:
@@ -30,7 +32,6 @@ def _get_model_cache_dir():
                                "Where <path> is a writable file path that exists.".format(cache_dir=cache_dir))
 
     return download_path
-
 
 def _download_and_checksum_files(urls, dirname, delete=False):
     def url_sha_pair(url_or_pair):
@@ -102,7 +103,7 @@ class ResNetImageClassifier(ImageClassifierPreTrainedModel):
         self.symbols_md5 = '2989c88d1d6629b777949a3ae695a42e'
         self.params_url = _urlparse.urljoin(MODELS_URL_ROOT, '%s-%04d.params' % (self.name, epoch))
         self.params_md5 = '246423771006aaf77acf68c99852f5b5'
-        path = _get_model_cache_dir()
+        path = _get_cache_dir()
         _download_and_checksum_files([
             (self.symbols_url, self.symbols_md5),
             (self.params_url, self.params_md5),
@@ -127,7 +128,7 @@ class SqueezeNetImageClassifierV1_1(ImageClassifierPreTrainedModel):
         self.symbols_md5 = 'bab4d80f45e9285cf9f4a3f01f07022e'
         self.params_url = _urlparse.urljoin(MODELS_URL_ROOT, '%s-%04d.params' % (self.name, epoch))
         self.params_md5 = '05b1eb6acabdaaee37c9c9ff666c1b51'
-        path = _get_model_cache_dir()
+        path = _get_cache_dir()
         _download_and_checksum_files([
             (self.symbols_url, self.symbols_md5),
             (self.params_url, self.params_md5),
@@ -161,7 +162,7 @@ class DarkNetObjectDetectorBase(ObjectDetectorBasePreTrainedModel):
             ]
         self.model_path = _download_and_checksum_files([
             (self.source_url, self.source_md5)
-        ], _get_model_cache_dir())[0]
+        ], _get_cache_dir())[0]
 
     def available_parameters_subset(self, mx_params):
         """
@@ -190,7 +191,7 @@ class StyleTransferTransformer():
         self.source_md5 = 'ac232afa6d0ead93a8c75b6c455f6dd3'
         self.model_path = _download_and_checksum_files([
             (self.source_url, self.source_md5)
-        ], _get_model_cache_dir())[0]
+        ], _get_cache_dir())[0]
 
 
     def get_model_path(self):
@@ -205,7 +206,7 @@ class Vgg16():
         self.source_md5 = '52e75e03160e64e5aa9cfbbc62a92345'
         self.model_path = _download_and_checksum_files([
             (self.source_url, self.source_md5)
-        ], _get_model_cache_dir())[0]
+        ], _get_cache_dir())[0]
 
 
     def get_model_path(self):
@@ -216,3 +217,47 @@ STYLE_TRANSFER_BASE_MODELS = {
     'resnet-16': StyleTransferTransformer,
     'Vgg16': Vgg16
 }
+
+
+class VGGish():
+    def __init__(self):
+        self.name = 'VGGishFeatureEmbedding-v1'
+        self.source_md5 = {
+            'coreml': 'e8ae7d8cbcabb988b6ed6c0bf3f45571',
+            'mxnet': '13c040de982a51e4664705564be8ae8b'
+        }
+
+    def get_model_path(self, format):
+        assert(format in ('coreml', 'mxnet'))
+
+        if(format == 'coreml'):
+            filename = self.name + '.mlmodel'
+        else:
+            filename = self.name + '.params'
+        url = _urlparse.urljoin(MODELS_URL_ROOT, filename)
+
+        checksum = self.source_md5[format]
+        model_path = _download_and_checksum_files(
+            [(url, checksum)], _get_cache_dir()
+            )[0]
+
+        return model_path
+
+class DrawingClassifierPreTrainedModel(object):
+    def __init__(self, warm_start="auto"):
+        self.model_to_filename = {
+            "auto": "drawing_classifier_pre_trained_model_245_classes_v0.params",
+            "quickdraw_245_v0": "drawing_classifier_pre_trained_model_245_classes_v0.params"
+        }
+        self.source_url = _urlparse.urljoin(
+            MODELS_URL_ROOT, self.model_to_filename[warm_start])
+        # @TODO: Think about how to bypass the md5 checksum if the user wants to
+        # provide their own pretrained model.
+        self.source_md5 = "71ba78e48a852f35fb22999650f0a655"
+
+    def get_model_path(self):
+        model_path = _download_and_checksum_files(
+            [(self.source_url, self.source_md5)], _get_cache_dir()
+            )[0]
+        return model_path
+

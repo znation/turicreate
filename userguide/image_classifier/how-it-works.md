@@ -7,7 +7,7 @@ high-level concepts about data, frequently through models that have
 multiple layers of non-linear transformations.  Let's take a moment to
 analyze that last sentence. **Learning high-level concepts about data**
 means that deep learning models take data, for instance raw pixel values
-of an image, and learns abstract ideas like 'is animal' or 'is cat'
+of an image, and learn abstract ideas like 'is animal' or 'is cat'
 about that data.  OK, easy enough, but what does having 'multiple layers
 of non-linear transformations' mean.  Conceptually, all this means is
 that you have a composition of simple non-linear functions, forming a
@@ -112,68 +112,9 @@ of accuracy as AlexNet but with 50 times fewer parameters.
 * License: BSD License
 * Core ML exported models are usually less than 5MB
 
-#### VisionFeaturePrint_Screen
+#### VisionFeaturePrint_Scene
 
 Only available on macOS 10.14 and higher. This model is included in the
 operating system, so the exported model size is very small.
 
 * Core ML exported models are about 40KB
-
-
-## Performance
-
-It’s always important to make sure any machine learning technique is
-consistent in its usefulness, and that its success is not a fluke. In
-order to do that, we've tested it on several datasets. For each dataset,
-the experiment was identical. We trained a model on a dataset of just a
-small number of images, and then evaluated the accuracy on a completely
-different dataset of roughly 1800 images per category.
-
-Here is a short summary of results:
-
-#### Resnet
-
-Performance on 50 datasets with 5 categories, 25 training examples
-per category
-- Median accuracy: 0.994667
-- Max accuracy: 1.000000
-- Min accuracy: 0.978667
-
-Performance on 50 datasets with 5 categories, 50 training examples
-per category
-- Median accuracy: 0.996000
-- Max accuracy: 1.000000
-- Min accuracy: 0.980000
-
-#### Squeezenet
-
-Performance on 50 datasets with 5 categories, 25 training examples
-per category
-- Median accuracy: 0.961333
-- Max accuracy: 0.981333
-- Min accuracy: 0.912000
-
-Performance on 50 datasets with 5 categories, 50 training examples per
-category
-- Median accuracy: 0.970000
-- Max accuracy: 0.988000
-- Min accuracy: 0.876000
-
-#### VisionFeaturePrint_Screen
-
-Performance on 50 datasets with 5 categories, 25 training examples
-per category
-- Median accuracy: 0.970309
-- Max accuracy: 0.992788
-- Min accuracy: 0.846873
-
-Performance on 50 datasets with 5 categories, 50 training examples per
-category
-- Median accuracy: 0.976342
-- Max accuracy: 0.988342
-- Min accuracy: 0.944571
-
-To give you some perspective, a [user
-study](https://arxiv.org/abs/1409.0575) was made on a dataset with 1000
-classes and measured human performance is about 94%.
-

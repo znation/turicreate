@@ -14,8 +14,9 @@ import os
 from ..data_structures import image
 from .. import SArray
 from ..toolkits.image_analysis import image_analysis
+from ..toolkits._main import ToolkitError
 
-from ..deps import numpy as _np, HAS_NUMPY
+from .._deps import numpy as _np, HAS_NUMPY
 
 current_file_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -119,6 +120,17 @@ class ImageClassTest(unittest.TestCase):
                     elif (new_channels == 4):
                         pilimage = pilimage.convert('RGBA')
                     self.__check_raw_image_equals_pilimage(glimage_resized, pilimage)
+
+    def test_cmyk_not_supported(self):
+        for meta_info in test_image_info:
+            input_img = PIL_Image.open(meta_info.url)
+            input_img = input_img.convert('CMYK')
+
+            import tempfile 
+            with tempfile.NamedTemporaryFile() as t:
+                input_img.save(t, format='jpeg')
+                with self.assertRaises(ToolkitError):
+                    cmyk_image = image.Image(path=t.name, format='JPG')
 
     def test_batch_resize(self):
         image_url_dir = current_file_dir + '/images'

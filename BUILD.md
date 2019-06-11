@@ -16,7 +16,21 @@ overwritten on the next build. Make changes in the `src/` directory, and run bui
 * `src/external`: source drops of 3rd party source dependencies
 * `deps/`: build dependencies and environment
 * `debug/`, `release/`: build output directories for debug and release builds respectively
+* `scripts/`: Useful build, test, and repo maintenance scripts
 * `test/`: C++ unit tests for Turi Create
+
+Using Docker to build and test for Linux
+----------------------------------------
+
+Most of the commands in this repo, including `make_wheel.sh` and `test_wheel.sh`, have optional `--docker-python${VERSION}`
+flags to run the build in Docker. This process is fully automated, and uses Docker images created on the fly from the following
+docker files:
+
+* `scripts/Dockerfile-Ubuntu-10.04`: used for building (see comments in that file re: GLIBC/GLIBCXX compatibility).
+* `scripts/Dockerfile-Ubuntu-14.04`: used for testing Python 2.7 and Python 3.5 wheels.
+* `scripts/Dockerfile-Ubuntu-18.04`: used for testing Python 3.6 wheels.
+
+You can start with `./scripts/make_wheel.sh --help` to see available Docker build options.
 
 Build Dependencies
 ------------------
@@ -25,15 +39,19 @@ You will need:
 
 * On macOS, [Xcode](https://itunes.apple.com/us/app/xcode/id497799835) with command line tools (tested with Xcode 9 and later)
 * On Linux:
-  * A C++ compiler toolchain with C++11 support (provided by `build-essential` on Ubuntu)
+  * A C++ compiler toolchain with C++11 support (`gcc` >= 4.8 or `clang` >= 3.3)
+  * `git` (typically provided by the `git` package)
+  * `patch` (typically provided by `patch` package)
+  * `rsync` (typically provided by `rsync` package)
   * blas and lapack development libraries (typically provided by the `liblapack-dev` package)
   * `pyfpe.h` (typically provided by the `libpython2.7-dev` package for Python 2.7, or `libpython3.6-dev` for Python 3.6)
   * `gif_lib.h` (typically provided by the `libgif-dev` package)
   * `xxd` (typically provided by the `vim-common` package)
   * For visualization support, X11 libraries (typically provided by `libx11-dev` or `libX11-devel` packages)
 * On both macOS and Linux:
-  * [Node.js](https://nodejs.org) 6.x or later with `node` and `npm` in `$PATH`
   * The python `virtualenv` package
+* With Docker:
+  * All dependencies are satisfied for you automatically (see "Using Docker" section above).
 
 Optionally, you may want:
 

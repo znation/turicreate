@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 
-import vegaEmbed from 'vega-embed';
-
 import './index.css';
 
 var vega = require('vega');
@@ -47,7 +45,6 @@ class TcPlot extends Component {
             }
 
             changeSet = changeSet.insert(newData);
-            $this.vega_container.classList.remove("uninitialized");
             $this.vegaView.change("source_2", changeSet).runAfter(function(viewInstance) {
 
                                                                   });
@@ -69,12 +66,6 @@ class TcPlot extends Component {
         };
 
         this.vega_json = spec;
-
-        this.opt = {
-        mode: ('$schema' in this.vega_json && this.vega_json['$schema'].indexOf('vega-lite') === -1) ? "vega": "vega-lite",
-        renderer: "svg"
-        };
-
         this.vega_json.autosize = {"type": "fit", "resize": true, "contains": "padding"};
 
         if(this.vega_json["metadata"] != null){
@@ -84,11 +75,10 @@ class TcPlot extends Component {
         }
 
         this.vegaLoading = true;
-        this.vegaView = new vega.View(vega.parse(this.vega_json))
+        this.vegaView = new vega.View(vega.parse(this.vega_json), {'renderer': 'svg'})
                                 .initialize(this.vega_container)
                                 .hover()
                                 .run();
-        this.setState({ initializedVega: true });
         this.vegaLoading = false;
         vegaTooltip.vega(this.vegaView, this.bubbleOpts);
         
@@ -137,7 +127,7 @@ class TcPlot extends Component {
     render() {
         return (
                 <div>
-                <div className={["vega_container", "uninitialized"].join(' ')} ref={(vega_container) => { this.vega_container = vega_container; }}>
+                <div className={["vega_container"].join(' ')} ref={(vega_container) => { this.vega_container = vega_container; }}>
                 </div>
                 <div className={["hidden_cont"].join(' ')} ref={(hidden_container) => { this.hidden_container = hidden_container; }}>
                 </div>

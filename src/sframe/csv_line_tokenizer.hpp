@@ -47,6 +47,10 @@ struct csv_line_tokenizer {
   bool preserve_quoting = false;
 
   /**
+   * If escape_char is used.
+   */
+  bool use_escape_char = true;
+  /**
    * The character to use to identify the beginning of a C escape sequence 
    * (Defualt '\'). i.e. "\n" will be converted to the '\n' character, "\\"
    * will be converted to "\", etc. Note that only the single character 
@@ -118,6 +122,23 @@ struct csv_line_tokenizer {
    * (also see empty_string_in_na_values)
    */
   std::vector<std::string> na_values;
+
+  /**
+   * string values which map to numeric 1
+   */
+  std::unordered_set<std::string> true_values;
+
+  /**
+   * string values which map to numeric 0
+   */
+  std::unordered_set<std::string> false_values;
+
+  /**
+   * If this is set (defaults to false), then
+   * the true/false/na substitutions are only permitted on raw
+   * unparsed strings; that is strings before dequoting, de-escaping, etc.
+   */
+  bool only_raw_string_substitutions = false;
 
   /**
    * Constructor. Does nothing but set up internal buffers.
@@ -272,14 +293,29 @@ struct csv_line_tokenizer {
    * (the buffer itself is used to maintain the recursive parse state)
    */
   bool parse_as(char** buf, size_t len, 
+                const char* raw, size_t rawlen,
                 flexible_type& out, bool recursive_parse=false);
 
+  /**
+   * Returns a printable string describing the parse error.
+   * This is only filled when \ref tokenize_line fails.
+   * The string is *not* cleared when tokenize line succeeds so this should
+   * not be used for flagging parse errors.
+   */
+  const std::string& get_last_parse_error_diagnosis() const;
 
  private:
   // internal buffer
   std::string field_buffer;
   // current length of internal buffer
   size_t field_buffer_len = 0;
+
+  // the printable string describing the parse error
+  std::string parse_error;
+  // internal error. filled when tokenizer fails. This is appended to parse_error
+  // when appropriate
+  std::string tokenizer_impl_error;
+  ssize_t tokenizer_impl_fail_pos = -1;
 
   // the state of the tokenizer state machine
   enum class tokenizer_state {
@@ -320,6 +356,13 @@ struct csv_line_tokenizer {
   bool delimiter_is_not_empty = true;
   bool empty_string_in_na_values = false;
   bool is_regular_line_terminator = true;
+
+
+
+  /**
+   * Perform substitutions of true/false/na values
+   */
+  bool check_substitutions(const char* buf, size_t len, flexible_type& out);
 };
 /// \}
 } // namespace turi
@@ -328,6 +371,7 @@ namespace std {
 static inline ostream& operator<<(ostream& os, const turi::csv_line_tokenizer& t) {
   os << "Tokenizer("
      << "preseve_quoting=" << t.preserve_quoting << ", "
+     << "use_escape_char='" << t.use_escape_char << "', "
      << "escape_char='" << t.escape_char << "', "
      << "skip_initial_space=" << t.skip_initial_space << ", "
      << "delimiter=\"" << t.delimiter << "\", "

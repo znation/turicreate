@@ -1,8 +1,8 @@
-//
-//  Created by Shantanu Chhabra on 4/21/18.
-//  Copyright © 2018 Shantanu Chhabra. All rights reserved.
-//
-
+/* Copyright © 2017 Apple Inc. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-3-clause license that can
+ * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
+ */
 #import "TuriCreateObjC.h"
 
 #ifndef __has_feature         // Optional of course.
@@ -14,7 +14,7 @@
 
 // Returns true if a TC error was handled (in which case,
 // the NSError * will get populated if it's non-null).
-API_AVAILABLE(macos(10.13))
+API_AVAILABLE(macos(10.13),ios(11.0))
 static bool handleError(tc_error* error_ptr, NSError** error) {
     if (error_ptr) {
         if (error) {
@@ -46,7 +46,7 @@ static bool handleError(tc_error* error_ptr, NSError** error) {
 }
 
 - (nullable MLFeatureValue *)featureValueForName:(nonnull NSString *)featureName
-  API_AVAILABLE(macos(10.13)) {
+  API_AVAILABLE(macos(10.13),ios(11.0)) {
     tc_sarray *item_ids_array;
     tc_sarray *scores_array;
     tc_sarray *ranks_array;
