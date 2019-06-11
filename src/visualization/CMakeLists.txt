@@ -4,32 +4,6 @@ if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
 
-function(compile_javascript SOURCE OUTFILE WORKDIR DEPENDENCIES)
-  # Build JavaScript (client app code) with typescript
-  # Includes any external dependencies that are distributed in source form
-  # (i.e. need to be converted to AMD module format, and/or compiled down to ES5)
-  add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_${SOURCE}
-    COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
-            "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
-            --module amd
-            --target ES5
-            --allowJs
-            --jsx react
-            --sourceMap
-            --removeComments
-            --outFile ${OUTFILE}
-            ${SOURCE}
-    COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel_${SOURCE}
-    DEPENDS
-      node
-      ${DEPENDENCIES}
-    WORKING_DIRECTORY "${WORKDIR}"
-    COMMENT "Building ${SOURCE} using TypeScript 3.4.5"
-    VERBATIM
-  )
-endfunction()
-
 if(${TC_BUILD_VISUALIZATION_CLIENT})
 
   set(TC_FRONTEND_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/build/")
@@ -136,26 +110,28 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     list(APPEND JAVASCRIPT_TARGETS "${JS_TARGET}")
   endforeach()
 
-  # Build JavaScript source
-  compile_javascript(
-    "tcviz.js"
-    "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
-    "${TC_FRONTEND_SOURCE_DIR}"
-    "${JAVASCRIPT_SOURCES}"
-  )
-
-  # Build some JavaScript deps into AMD modules (others that get copied are already in AMD module format)
-  compile_javascript(
-    "react-json-pretty.js"
-    "${TC_FRONTEND_BUILD_DIR}/react-json-pretty.js"
-    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9"
-    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
-  )
-  compile_javascript(
-    "element-resize-event.js"
-    "${TC_FRONTEND_BUILD_DIR}/element-resize-event.js"
-    "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4"
-    "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js"
+  # Build JavaScript (client app code) with typescript
+  # Includes any external dependencies that are distributed in source form
+  # (i.e. need to be converted to AMD module format, and/or compiled down to ES5)
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
+    COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
+            "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
+            --module amd
+            --target ES5
+            --allowJs
+            --jsx react
+            --sourceMap
+            --removeComments
+            --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
+            "tcviz.js"
+    COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
+    DEPENDS
+      node
+      ${JAVASCRIPT_SOURCES}
+    WORKING_DIRECTORY "${TC_FRONTEND_SOURCE_DIR}"
+    COMMENT "Building ${SOURCE} using TypeScript 3.4.5"
+    VERBATIM
   )
 
   # Build CSS Modules with css_module_compiler.js
