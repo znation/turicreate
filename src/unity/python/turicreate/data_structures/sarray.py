@@ -2949,12 +2949,6 @@ class SArray(object):
         """
         Create a Plot object representing the SArray.
 
-        Notes
-        -----
-        - The plot will render either inline in a Jupyter Notebook, or in a
-          native GUI window, depending on the value provided in
-          `turicreate.visualization.set_target` (defaults to 'auto').
-
         Parameters
         ----------
         title : str

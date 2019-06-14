@@ -46,14 +46,15 @@ def _run_cmdline(command):
 
 def set_target(target='auto'):
     """
-    Sets the target for visualizations launched with the `show` or `explore`
-    methods. If unset, or if target is not provided, defaults to 'auto'.
+    Sets the target for visualizations launched with the `show`
+    method. If unset, or if target is not provided, defaults to 'auto'.
 
     Notes
     -----
     - When in 'auto' target, `show` will display plot output inline when in
-      Jupyter Notebook, and otherwise will open a native GUI window on macOS
-      and Linux.
+      Jupyter Notebook, and otherwise will open a native GUI window.
+    - Only `show` can render inline in Jupyter Notebook. `explore` and
+      `annotate` both open a GUI window.
 
     Parameters
     ----------
@@ -62,12 +63,13 @@ def set_target(target='auto'):
         Possible values are:
         * 'auto': display plot output inline when in Jupyter Notebook, and
           otherwise launch a native GUI window.
+        * 'browser': opens a web browser pointing to http://localhost.
         * 'gui': always launch a native GUI window.
         * 'none': prevent all visualizations from being displayed.
     """
     global _target
-    if target not in ['auto', 'gui', 'none']:
-        raise ValueError("Expected target to be one of: 'auto', 'gui', 'none'.")
+    if target not in ['auto', 'browser', 'gui', 'none']:
+        raise ValueError("Expected target to be one of: 'auto', 'browser', 'gui', 'none'.")
     _target = target
 
 
@@ -127,25 +129,31 @@ class Plot(object):
         if _target == 'none':
             return
 
-        display = False
         try:
             if _target == 'auto' and \
                get_ipython().__class__.__name__ == "ZMQInteractiveShell":
                 self._repr_javascript_()
-                display = True
+                return
         except NameError:
             pass
-        finally:
-            if not display:
-                if _sys.platform != 'darwin' and _sys.platform != 'linux2' and _sys.platform != 'linux':
-                     raise NotImplementedError('Visualization is currently supported only on macOS and Linux.')
 
-                path_to_client = _get_client_app_path()
+        if _target == 'browser':
+            import webbrowser
+            url = self.get_url()
+            webbrowser.open_new_tab(url)
+            return
 
-                # TODO: allow autodetection of light/dark mode.
-                # Disabled for now, since the GUI side needs some work (ie. background color).
-                plot_variation = 0x10 # force light mode
-                self.__proxy__.call_function('show', {'path_to_client': path_to_client, 'variation': plot_variation})
+        # _target can only be one of ['auto', 'browser', 'gui', 'none'].
+        # We have already returned early for auto (in Jupyter Notebook) and
+        # browser. At this point, we expect _target to be either "auto"
+        # (not in Jupyter Notebook) or "gui". This is enforced in set_target.
+        # Thus, proceed to launch the GUI.
+        path_to_client = _get_client_app_path()
+
+        # TODO: allow autodetection of light/dark mode.
+        # Disabled for now, since the GUI side needs some work (ie. background color).
+        plot_variation = 0x10 # force light mode
+        self.__proxy__.call_function('show', {'path_to_client': path_to_client, 'variation': plot_variation})
 
     def save(self, filepath):
         """

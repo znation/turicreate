@@ -4521,12 +4521,6 @@ class SFrame(object):
         Create a Plot object that contains a summary of each column 
         in an SFrame. 
 
-        Notes
-        -----
-        - The plot will render either inline in a Jupyter Notebook, or in a
-          native GUI window, depending on the value provided in
-          `turicreate.visualization.set_target` (defaults to 'auto').
-
         Returns
         -------
         out : Plot
