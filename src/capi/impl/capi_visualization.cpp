@@ -66,7 +66,8 @@ EXPORT tc_plot* tc_plot_create_sframe_summary(const tc_sframe* sf,
   CHECK_NOT_NULL(error, sf, "sframe", NULL);
 
   std::shared_ptr<turi::model_base> plot = sf->value.plot();
-  return new_tc_plot(std::dynamic_pointer_cast<turi::visualization::Plot>(plot));
+  return new_tc_plot(
+      std::dynamic_pointer_cast<turi::visualization::Plot>(plot));
     
   ERROR_HANDLE_END(error, NULL);
 }
@@ -105,7 +106,7 @@ EXPORT bool tc_plot_finished_streaming(const tc_plot* plot,
   ERROR_HANDLE_START();
   turi::ensure_server_initialized();
 
-  CHECK_NOT_NULL(error, plot, "plot", NULL);
+  CHECK_NOT_NULL(error, plot, "plot", true);
   return plot->value->finished_streaming();
 
   ERROR_HANDLE_END(error, true);
