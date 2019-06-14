@@ -1150,8 +1150,6 @@ include_directories(src)
 include_directories(SYSTEM src/external)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
-include_directories(SYSTEM src/external/cpp-netlib)
-include_directories(SYSTEM src/external/cpp-netlib/deps/asio/asio/include)
 include_directories(SYSTEM src/external/google)
 include_directories(src/platform)
 
