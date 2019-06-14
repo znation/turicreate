@@ -265,7 +265,14 @@ class Plot(object):
     def materialize(self):
         self.__proxy__.call_function('materialize')
 
-    def _get_url(self):
+    def get_url(self):
+        """
+        Returns a URL to the Plot hosted as a web page.
+
+        Notes
+        --------
+        The URL will be served by Turi Create on http://localhost.
+        """
         return self.__proxy__.call_function('get_url')
 
     def _repr_javascript_(self):
