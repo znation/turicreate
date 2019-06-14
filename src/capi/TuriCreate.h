@@ -918,8 +918,8 @@ void tc_plot_render_vega_spec_into_context(const char * vega_spec,
 #endif // TC_BUILD_IOS
 #endif // __APPLE__
 
-// Returns a URL to a localhost web server for this plot
-// Note: on first call, spins up said web server!
+// Returns a URL to this plot on a localhost web server.
+// Note: on the first call to this function, spins up the web server.
 tc_flexible_type* tc_plot_get_url(const tc_plot* plot, const tc_parameters* params, tc_error** error);
 
 #ifdef __cplusplus
