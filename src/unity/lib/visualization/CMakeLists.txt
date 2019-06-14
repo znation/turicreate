@@ -39,9 +39,7 @@ make_library(visualization OBJECT
   EXTERNAL_VISIBILITY		
 )
 
-set(GENERATED_HEADERS
-  html/vega.html
-  html/style.css
+set(GENERATED_VEGA_JSON_HEADERS
   vega_spec/boxes_and_whiskers.json
   vega_spec/categorical.json
   vega_spec/categorical_heatmap.json
@@ -52,16 +50,13 @@ set(GENERATED_HEADERS
   vega_spec/summary_view.json
 )
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/vega_spec)
 
-foreach(SOURCE_FILE ${GENERATED_HEADERS})
+foreach(SOURCE_FILE ${GENERATED_VEGA_JSON_HEADERS})
   
-  get_filename_component(EXTENSION ${SOURCE_FILE} EXT)
-  string(CONCAT EXT_MATCH ${EXTENSION} "$")
   string(
     REGEX REPLACE
-    ${EXT_MATCH}
+    ".json$"
     ".h"
     GENERATED_FILE
     ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_FILE}
