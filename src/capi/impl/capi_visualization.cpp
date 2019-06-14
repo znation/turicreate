@@ -68,7 +68,7 @@ EXPORT tc_plot* tc_plot_create_sframe_summary(const tc_sframe* sf,
   std::shared_ptr<turi::model_base> plot = sf->value.plot();
   return new_tc_plot(
       std::dynamic_pointer_cast<turi::visualization::Plot>(plot));
-    
+
   ERROR_HANDLE_END(error, NULL);
 }
 
