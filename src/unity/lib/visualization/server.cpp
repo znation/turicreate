@@ -7,6 +7,8 @@
 // Server impl code adapted from Beast example in
 // boost/beast/example/http/server/async/http_server_async.cpp
 
+#include <fileio/fs_utils.hpp>
+#include <fileio/general_fstream.hpp>
 #include <logger/logger.hpp>
 #include <unity/lib/visualization/server.hpp>
 
@@ -30,10 +32,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-
-// generated include files for front-end artifacts
-#include <unity/lib/visualization/html/vega.h>
-#include <unity/lib/visualization/html/style.h>
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
@@ -79,9 +77,6 @@ handle_request(
     Send&& send,
     WebServer::plot_map& m_plots)
 {
-    static const std::string vega_html = std::string(reinterpret_cast<char *>(html_vega_html), html_vega_html_len);
-    static const std::string style_css = std::string(reinterpret_cast<char *>(html_style_css), html_style_css_len);
-
     // Returns a bad request response
     auto const bad_request =
     [&req](boost::beast::string_view why)
@@ -153,44 +148,7 @@ handle_request(
 
     try {
         auto req_target = req.target();
-        if (req_target.find("/vega.html") == 0) {
-            // parse the id out of the query string and use it to find the plot
-            const size_t vega_html_length = sizeof("/vega.html?") - 1;
-            std::string qs = req_target.substr(vega_html_length).to_string();
-
-            std::string::iterator qs_begin = qs.begin();
-            std::string::iterator qs_end = qs.end();
-            url_query_string<std::string::iterator> p;
-            pairs_type queries;
-
-            if (!qi::parse(qs_begin, qs_end, p, queries))
-            {
-                std::stringstream ss;
-                ss << "Unable to parse query string from URL ";
-                ss << req_target;
-                return server_error(ss.str());
-            }
-            if (queries.find("plot") == queries.end()) {
-                std::stringstream ss;
-                ss << "Expected ?plot= in query string; did not find it in URL ";
-                ss << req_target;
-                return server_error(ss.str());
-            }
-            std::string plot_id = queries.at("plot");
-            if (m_plots->find(plot_id) == m_plots->end()) {
-                return server_error("Expected plot " + plot_id + " was not found");
-            }
-
-            const Plot& plot = m_plots->at(plot_id);
-
-            // load the spec and data, and format them into the HTML page
-            std::string vega_spec = plot.get_spec();
-            std::string plot_url = "\"/data/" + plot_id + "\"";
-            std::string rendered_page = boost::str(boost::format(vega_html) % vega_spec % plot_url);
-            return respond(rendered_page, "text/html");
-        } else if (req_target == "/style.css" || req_target.find("/style.css?") == 0) {
-            return respond(style_css, "text/css");
-        } else if (req_target.find("/data/") == 0) {
+        if (req_target.find("/data/") == 0) {
             const size_t data_url_length = sizeof("/data/") - 1;
             std::string plot_id = req_target.substr(data_url_length).to_string();
             if (m_plots->find(plot_id) == m_plots->end()) {
@@ -199,6 +157,13 @@ handle_request(
             const Plot& plot = m_plots->at(plot_id);
             std::string plot_data = plot.get_next_data();
             return respond(plot_data, "application/json");
+        }
+
+        // try to match a static file
+        std::string possible_file_path = m_static_url_directory + req_target;
+        turi::fileio::file_status possible_file_status = get_file_status(possible_file_path);
+        if (possible_file_status == REGULAR_FILE) {
+            // we can serve a file from this path
         }
 
         // did not match any expected URL
@@ -528,9 +493,20 @@ WebServer::~WebServer() {
     logstream(LOG_DEBUG) << "WebServer: destroying WebServer\n";
 }
 
+WebServer& WebServer::get_instance() {
+    static std::unique_ptr<WebServer> server = nullptr;
+    if (server == nullptr) {
+        server = std::unique_ptr<WebServer>(new WebServer());
+    }
+    return *server;
+}
+
 std::string WebServer::get_url_for_plot(const Plot& plot) {
-    static WebServer server;
-    return server.add_plot(plot);
+    return get_instance().add_plot(plot);
+}
+
+void WebServer::set_static_url_directory(const std::string& directory) {
+    get_instance().m_static_url_directory = directory;
 }
 
 std::string WebServer::add_plot(const Plot& plot) {
