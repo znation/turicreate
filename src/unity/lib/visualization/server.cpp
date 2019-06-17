@@ -75,7 +75,8 @@ void
 handle_request(
     http::request<Body, http::basic_fields<Allocator>>&& req,
     Send&& send,
-    WebServer::plot_map& m_plots)
+    const std::string& static_url_directory,
+    const WebServer::plot_map& m_plots)
 {
     // Returns a bad request response
     auto const bad_request =
@@ -160,9 +161,9 @@ handle_request(
         }
 
         // try to match a static file
-        std::string possible_file_path = m_static_url_directory + req_target;
-        turi::fileio::file_status possible_file_status = get_file_status(possible_file_path);
-        if (possible_file_status == REGULAR_FILE) {
+        std::string possible_file_path = static_url_directory + req_target.to_string();
+        turi::fileio::file_status possible_file_status = turi::fileio::get_file_status(possible_file_path);
+        if (possible_file_status == turi::fileio::file_status::REGULAR_FILE) {
             // we can serve a file from this path
         }
 
@@ -230,17 +231,20 @@ private:
     http::request<http::string_body> req_;
     std::shared_ptr<void> res_;
     send_lambda lambda_;
-    WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
+    const std::string& m_static_url_directory; // reference to the static URL directory path
+    const WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
 
 public:
     // Take ownership of the socket
     explicit
     session(
         tcp::socket socket,
-        WebServer::plot_map& plots)
+        const std::string& static_url_directory,
+        const WebServer::plot_map& plots)
         : socket_(std::move(socket))
         , strand_(socket_.get_executor())
         , lambda_(*this)
+        , m_static_url_directory(static_url_directory)
         , m_plots(plots)
     {
     }
@@ -285,7 +289,7 @@ public:
             return fail(ec, "read");
 
         // Send the response
-        handle_request(std::move(req_), lambda_, m_plots);
+        handle_request(std::move(req_), lambda_, m_static_url_directory, m_plots);
     }
 
     void
@@ -332,15 +336,18 @@ class listener : public std::enable_shared_from_this<listener>
 private:
     tcp::acceptor acceptor_;
     tcp::socket socket_;
-    WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
+    const std::string& m_static_url_directory; // reference to the static URL directory path
+    const WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
 
 public:
     listener(
         boost::asio::io_context& ioc,
         tcp::endpoint endpoint,
-        WebServer::plot_map& plots)
+        const std::string& static_url_directory,
+        const WebServer::plot_map& plots)
         : acceptor_(ioc)
         , socket_(ioc)
+        , m_static_url_directory(static_url_directory)
         , m_plots(plots)
     {
         boost::system::error_code ec;
@@ -411,6 +418,7 @@ public:
             // Create the session and run it
             std::make_shared<session>(
                 std::move(socket_),
+                m_static_url_directory,
                 m_plots)->run();
         }
 
@@ -455,7 +463,7 @@ public:
     std::vector<std::thread> m_threads; // listener threads
     std::shared_ptr<listener> m_listener = nullptr;
 
-    Impl(plot_map& plots) {
+    Impl(const std::string& static_url_directory, const plot_map& plots) {
         logstream(LOG_DEBUG) << "WebServer: starting WebServer::Impl\n";
         m_port = find_port();
         const auto address = boost::asio::ip::make_address("127.0.0.1");
@@ -464,6 +472,7 @@ public:
         m_listener = std::make_shared<listener>(
             m_ioc,
             tcp::endpoint{address, m_port},
+            static_url_directory,
             plots);
         m_listener->run();
 
@@ -486,7 +495,7 @@ public:
     }
 };
 
-WebServer::WebServer() : m_impl(new Impl(m_plots)) {
+WebServer::WebServer() : m_impl(new Impl(m_static_url_directory, m_plots)) {
     logstream(LOG_DEBUG) << "WebServer: starting WebServer\n";
 }
 WebServer::~WebServer() {
