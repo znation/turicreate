@@ -4497,8 +4497,8 @@ class SFrame(object):
 
         Notes
         -----
-        - The plot will render either inline in a Jupyter Notebook, or in a
-          native GUI window, depending on the value provided in
+        - The plot will render either inline in a Jupyter Notebook, in a web
+          browser, or in a native GUI window, depending on the value provided in
           `turicreate.visualization.set_target` (defaults to 'auto').
 
         Returns

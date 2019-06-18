@@ -53,8 +53,9 @@ def set_target(target='auto'):
     -----
     - When in 'auto' target, `show` will display plot output inline when in
       Jupyter Notebook, and otherwise will open a native GUI window.
-    - Only `show` can render inline in Jupyter Notebook. `explore` and
-      `annotate` both open a GUI window.
+    - Only `show` can render inline in Jupyter Notebook or a browser.
+      `explore` and `annotate` ignore this setting and open a GUI window
+      unless target is set to `None`.
 
     Parameters
     ----------
@@ -110,8 +111,8 @@ class Plot(object):
 
         Notes
         -----
-        - The plot will render either inline in a Jupyter Notebook, or in a
-          native GUI window, depending on the value provided in
+        - The plot will render either inline in a Jupyter Notebook, in a web
+          browser, or in a native GUI window, depending on the value provided in
           `turicreate.visualization.set_target` (defaults to 'auto').
 
         Examples
