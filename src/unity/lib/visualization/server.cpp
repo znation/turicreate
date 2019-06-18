@@ -9,6 +9,7 @@
 
 #include <fileio/fs_utils.hpp>
 #include <fileio/general_fstream.hpp>
+#include <globals/globals.hpp>
 #include <logger/logger.hpp>
 #include <unity/lib/visualization/server.hpp>
 
@@ -67,6 +68,44 @@ struct url_query_string
     qi::rule<Iterator, std::string()> key, value;
 };
 
+// Mime type from file extension
+// Adapted from Beast example in
+// beast/example/http/server/fast/http_server_fast.cpp
+boost::beast::string_view
+mime_type(boost::beast::string_view path)
+{
+    using boost::beast::iequals;
+    auto const ext = [&path]
+    {
+        auto const pos = path.rfind(".");
+        if(pos == boost::beast::string_view::npos)
+            return boost::beast::string_view{};
+        return path.substr(pos);
+    }();
+    if(iequals(ext, ".htm"))  return "text/html";
+    if(iequals(ext, ".html")) return "text/html";
+    if(iequals(ext, ".php"))  return "text/html";
+    if(iequals(ext, ".css"))  return "text/css";
+    if(iequals(ext, ".txt"))  return "text/plain";
+    if(iequals(ext, ".js"))   return "application/javascript";
+    if(iequals(ext, ".json")) return "application/json";
+    if(iequals(ext, ".xml"))  return "application/xml";
+    if(iequals(ext, ".swf"))  return "application/x-shockwave-flash";
+    if(iequals(ext, ".flv"))  return "video/x-flv";
+    if(iequals(ext, ".png"))  return "image/png";
+    if(iequals(ext, ".jpe"))  return "image/jpeg";
+    if(iequals(ext, ".jpeg")) return "image/jpeg";
+    if(iequals(ext, ".jpg"))  return "image/jpeg";
+    if(iequals(ext, ".gif"))  return "image/gif";
+    if(iequals(ext, ".bmp"))  return "image/bmp";
+    if(iequals(ext, ".ico"))  return "image/vnd.microsoft.icon";
+    if(iequals(ext, ".tiff")) return "image/tiff";
+    if(iequals(ext, ".tif"))  return "image/tiff";
+    if(iequals(ext, ".svg"))  return "image/svg+xml";
+    if(iequals(ext, ".svgz")) return "image/svg+xml";
+    return "application/text";
+}
+
 // Request handler function
 template<
     class Body, class Allocator,
@@ -75,7 +114,6 @@ void
 handle_request(
     http::request<Body, http::basic_fields<Allocator>>&& req,
     Send&& send,
-    const std::string& static_url_directory,
     const WebServer::plot_map& m_plots)
 {
     // Returns a bad request response
@@ -161,10 +199,20 @@ handle_request(
         }
 
         // try to match a static file
-        std::string possible_file_path = static_url_directory + req_target.to_string();
+        // note: server-side API caller should set static URL directory prior to any HTTP requests!
+        DASSERT_NE(VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY, "");
+        std::string possible_file_path = VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY + req_target.to_string();
+        size_t query_pos = possible_file_path.rfind("?");
+        if (query_pos != std::string::npos) {
+            possible_file_path = possible_file_path.substr(0, query_pos);
+        }
         turi::fileio::file_status possible_file_status = turi::fileio::get_file_status(possible_file_path);
         if (possible_file_status == turi::fileio::file_status::REGULAR_FILE) {
             // we can serve a file from this path
+            turi::general_ifstream stream(possible_file_path);
+            std::string file_contents{ std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
+            std::string type = mime_type(possible_file_path).to_string();
+            return respond(file_contents, type);
         }
 
         // did not match any expected URL
@@ -173,6 +221,8 @@ handle_request(
 
     } catch (const std::exception& e) {
         return server_error(e.what());
+    } catch (const std::string& s) {
+        return server_error(s);
     } catch (...) {
         return server_error("Unknown exception");
     }
@@ -231,7 +281,6 @@ private:
     http::request<http::string_body> req_;
     std::shared_ptr<void> res_;
     send_lambda lambda_;
-    const std::string& m_static_url_directory; // reference to the static URL directory path
     const WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
 
 public:
@@ -239,12 +288,10 @@ public:
     explicit
     session(
         tcp::socket socket,
-        const std::string& static_url_directory,
         const WebServer::plot_map& plots)
         : socket_(std::move(socket))
         , strand_(socket_.get_executor())
         , lambda_(*this)
-        , m_static_url_directory(static_url_directory)
         , m_plots(plots)
     {
     }
@@ -289,7 +336,7 @@ public:
             return fail(ec, "read");
 
         // Send the response
-        handle_request(std::move(req_), lambda_, m_static_url_directory, m_plots);
+        handle_request(std::move(req_), lambda_, m_plots);
     }
 
     void
@@ -336,18 +383,15 @@ class listener : public std::enable_shared_from_this<listener>
 private:
     tcp::acceptor acceptor_;
     tcp::socket socket_;
-    const std::string& m_static_url_directory; // reference to the static URL directory path
     const WebServer::plot_map& m_plots; // reference to the uuid->plot dictionary
 
 public:
     listener(
         boost::asio::io_context& ioc,
         tcp::endpoint endpoint,
-        const std::string& static_url_directory,
         const WebServer::plot_map& plots)
         : acceptor_(ioc)
         , socket_(ioc)
-        , m_static_url_directory(static_url_directory)
         , m_plots(plots)
     {
         boost::system::error_code ec;
@@ -418,7 +462,6 @@ public:
             // Create the session and run it
             std::make_shared<session>(
                 std::move(socket_),
-                m_static_url_directory,
                 m_plots)->run();
         }
 
@@ -463,7 +506,7 @@ public:
     std::vector<std::thread> m_threads; // listener threads
     std::shared_ptr<listener> m_listener = nullptr;
 
-    Impl(const std::string& static_url_directory, const plot_map& plots) {
+    Impl(const plot_map& plots) {
         logstream(LOG_DEBUG) << "WebServer: starting WebServer::Impl\n";
         m_port = find_port();
         const auto address = boost::asio::ip::make_address("127.0.0.1");
@@ -472,7 +515,6 @@ public:
         m_listener = std::make_shared<listener>(
             m_ioc,
             tcp::endpoint{address, m_port},
-            static_url_directory,
             plots);
         m_listener->run();
 
@@ -495,7 +537,7 @@ public:
     }
 };
 
-WebServer::WebServer() : m_impl(new Impl(m_static_url_directory, m_plots)) {
+WebServer::WebServer() : m_impl(new Impl(m_plots)) {
     logstream(LOG_DEBUG) << "WebServer: starting WebServer\n";
 }
 WebServer::~WebServer() {
@@ -514,10 +556,6 @@ std::string WebServer::get_url_for_plot(const Plot& plot) {
     return get_instance().add_plot(plot);
 }
 
-void WebServer::set_static_url_directory(const std::string& directory) {
-    get_instance().m_static_url_directory = directory;
-}
-
 std::string WebServer::add_plot(const Plot& plot) {
     // make UUID for plot
     static auto uuid_generator = boost::uuids::random_generator();
@@ -529,5 +567,13 @@ std::string WebServer::add_plot(const Plot& plot) {
 
     // return formatted URL
     std::string port_str = std::to_string(m_impl->m_port);
-    return "http://localhost:" + port_str + "/vega.html?plot=" + uuid_str;
+    return "http://localhost:" + port_str + "/index.html?plot=" + uuid_str;
+}
+
+namespace turi {
+    namespace visualization {
+        // The root directory for static files for the visualization web server
+        EXPORT std::string VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY;
+        REGISTER_GLOBAL(std::string, VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY, true);
+    }
 }

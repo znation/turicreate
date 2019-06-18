@@ -137,7 +137,16 @@ class Plot(object):
         except NameError:
             pass
 
+        path_to_client = _get_client_app_path()
+
         if _target == 'browser':
+            # First, make sure TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY is set
+            import turicreate as tc
+            if (tc.config.get_runtime_config()['TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY'] == ''):
+                tc.config.set_runtime_config('TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY',
+                    _os.path.abspath(_os.path.join(_os.path.dirname(path_to_client), '..', 'Resources', 'build'))
+                )
+
             import webbrowser
             url = self.get_url()
             webbrowser.open_new_tab(url)
@@ -148,7 +157,6 @@ class Plot(object):
         # browser. At this point, we expect _target to be either "auto"
         # (not in Jupyter Notebook) or "gui". This is enforced in set_target.
         # Thus, proceed to launch the GUI.
-        path_to_client = _get_client_app_path()
 
         # TODO: allow autodetection of light/dark mode.
         # Disabled for now, since the GUI side needs some work (ie. background color).
