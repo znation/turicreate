@@ -5,8 +5,11 @@ if(location.search) {
   // TODO: refactor to share code with the non-browser case,
   // and move all of it to src/index instead of public/index
   // (remove the latter)
-}
-if(window.navigator.platform == 'MacIntel'){
+  window.tcvizBrowserMode = true;
+} else if(window.navigator.platform == 'MacIntel'){
+  // If no query string, and we're on macOS, it means we're in
+  // Turi Create Visualization.app (in a WKWebView).
+  window.tcvizBrowserMode = false;
   window.vegaResult = null;
   function log(level) {
     return function() {
