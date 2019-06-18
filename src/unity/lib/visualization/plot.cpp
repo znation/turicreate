@@ -1,6 +1,10 @@
 #include <iostream>
 #include <memory>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "plot.hpp"
 #include <unity/lib/visualization/dark_mode.hpp>
 #include <unity/lib/visualization/process_wrapper.hpp>
@@ -17,6 +21,17 @@
 
 namespace turi{
   namespace visualization{
+    Plot::Plot() {
+      // make UUID for plot
+      static auto uuid_generator = boost::uuids::random_generator();
+      auto uuid = uuid_generator();
+      m_id = boost::lexical_cast<std::string>(uuid);
+    }
+
+    const std::string& Plot::get_id() const {
+      return m_id;
+    }
+
     void Plot::show(const std::string& path_to_client, tc_plot_variation variation) {
 
       std::shared_ptr<Plot> self = std::make_shared<Plot>(*this);

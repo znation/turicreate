@@ -23,9 +23,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include <memory>
 #include <thread>
@@ -575,12 +572,9 @@ std::string WebServer::get_url_for_plot(const Plot& plot) {
 }
 
 std::string WebServer::add_plot(const Plot& plot) {
-    // make UUID for plot
-    static auto uuid_generator = boost::uuids::random_generator();
-    auto uuid = uuid_generator();
-    auto uuid_str = boost::lexical_cast<std::string>(uuid);
 
     // add to dictionary with UUID
+    const std::string& uuid_str = plot.get_id();
     (*m_plots)[uuid_str] = plot;
 
     // return formatted URL
