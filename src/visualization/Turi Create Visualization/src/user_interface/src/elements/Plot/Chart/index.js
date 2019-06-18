@@ -82,9 +82,7 @@ class TcPlot extends Component {
         this.vegaLoading = false;
         vegaTooltip.vega(this.vegaView, this.bubbleOpts);
        
-        // When on Safari and not in browser mode (which uses query string for plot ID),
-        // send a ready signal back to the client app.
-        if(window.navigator.platform === 'MacIntel' && !window.location.search){
+        if(window.navigator.platform === 'MacIntel' && !window.tcvizBrowserMode){
             window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'ready'});
         }
     }
