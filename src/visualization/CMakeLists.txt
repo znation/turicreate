@@ -162,7 +162,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       node
       ${JAVASCRIPT_SOURCES}
     WORKING_DIRECTORY "${TC_FRONTEND_SOURCE_DIR}"
-    COMMENT "Building ${SOURCE} using TypeScript 3.4.5"
+    COMMENT "Building JavaScript using TypeScript 3.4.5"
     VERBATIM
   )
 
@@ -187,6 +187,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
         "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css"
         "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js"
         "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js"
+        "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js"
         "${CMAKE_SOURCE_DIR}/src/external/javascript/long-4.0.0/long.js"
         "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js"
         "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js"
