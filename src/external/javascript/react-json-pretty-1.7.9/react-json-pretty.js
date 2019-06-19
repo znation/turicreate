@@ -16,7 +16,7 @@ define("react-json-pretty", ["require", "exports", "react", "create-react-class"
             continue;
         target[i] = obj[i];
     } return target; }
-    module.exports = create_react_class_1["default"]({
+    exports.default = create_react_class_1({
         displayName: 'exports',
         // 格式化函数
         _replace: function _replace(match, ind, key, val, tra) {
