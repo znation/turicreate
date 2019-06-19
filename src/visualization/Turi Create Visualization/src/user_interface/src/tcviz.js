@@ -12,6 +12,7 @@ import messageFormat from 'json!./format/message.json';
 import { load, Root } from 'protobuf';
 
 import TCAnnotate from './elements/Annotate/index.js';
+import { initBrowserClient } from './client.js';
 
 var command_down = 0;
 var body_zoom = 100;
@@ -242,3 +243,13 @@ window.handleInput = function(data){
 }
 
 window.addEventListener('contextmenu', event => event.preventDefault());
+
+// In browser mode, bootstrap the process by making requests over HTTP.
+// Otherwise, in an app context, spec & data will get pushed to the client.
+if (window.tcvizBrowserMode) {
+    initBrowserClient().then(result => {
+        console.log("Finished bootstrapping Turi Create Visualization web app with result:", result);
+    }).catch(err => {
+        console.error("Got error while bootstrapping Turi Create Visualization web app:", err);
+    });
+}
