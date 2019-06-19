@@ -58,6 +58,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
   )
   set(JAVASCRIPT_SOURCES
+    "Turi Create Visualization/src/user_interface/src/client.js"
     "Turi Create Visualization/src/user_interface/src/tcviz.js"
     "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
     "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
