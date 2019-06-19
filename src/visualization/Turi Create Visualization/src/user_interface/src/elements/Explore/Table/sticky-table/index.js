@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import { PropTypes } from 'prop-types';
 import Table from './Table/index';
 import Row from './Row/index';
 import Cell from './Cell/index';
