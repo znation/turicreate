@@ -3,10 +3,11 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
-#include "process_wrapper.hpp"
 
 #include <logger/assertions.hpp>
 #include <logger/logger.hpp>
+#include <unity/lib/visualization/process_wrapper.hpp>
+#include <unity/lib/visualization/server.hpp>
 
 #include <cassert>
 #include <chrono>
@@ -23,7 +24,7 @@ process_wrapper::process_wrapper(const std::string& path_to_client) : m_alive(tr
   // constructor
   // instantiate visualization client process
   m_client_process.popen(path_to_client.c_str(),
-                  std::vector<std::string>(),
+                  std::vector<std::string>({ "--server", WebServer::get_instance().get_base_url() }),
                   STDOUT_FILENO,
                   true /* open_write_pipe */);
   if (!m_client_process.exists()) {

@@ -5,6 +5,30 @@
 
 import Cocoa
 
-let delegate = AppDelegate()
+let args = CommandLine.arguments
+fputs(args.debugDescription, stderr)
+fputs("\n", stderr)
+
+if args.count != 3 || args[1] != "--server" {
+    let msg = """
+        Turi Create Visualization usage:
+
+        --server <HTTP_SERVER_URL> (required)
+
+        The HTTP server root should point to the static frontend assets for Turi Create Visualization.
+
+        """
+    fputs(msg, stderr)
+    fputs("\n", stderr)
+    exit(1)
+}
+
+
+guard let server = URL(string: args[2]) else {
+    fputs("Error: server \(args[2]) is not a valid URL.\n", stderr)
+    exit(1)
+}
+
+let delegate = AppDelegate(server: server)
 NSApplication.shared.delegate = delegate
 NSApplication.shared.run()

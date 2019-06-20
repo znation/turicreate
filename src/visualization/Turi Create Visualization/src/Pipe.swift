@@ -97,8 +97,10 @@ class Pipe {
     private func process_data(data: String) {
         do {
             // expect "data" to contain JSON of the form [String: Any]
-            let json = try JSON.parse(str: data) as! [String: Any]
-            
+            guard let json = try JSON.parse(str: data) as? [String: Any] else {
+                throw JSONSerializationError("\(data) is not valid JSON")
+            }
+
             if let table_spec = json["table_spec"] as? [String: Any] {
                 self.graph_data.set_table(table_spec: table_spec)
             }

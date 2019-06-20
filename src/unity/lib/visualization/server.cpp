@@ -571,6 +571,12 @@ std::string WebServer::get_url_for_plot(const Plot& plot) {
     return get_instance().add_plot(plot);
 }
 
+std::string WebServer::get_base_url() {
+    // return formatted URL
+    std::string port_str = std::to_string(m_impl->m_port);
+    return "http://localhost:" + port_str;
+}
+
 std::string WebServer::add_plot(const Plot& plot) {
 
     // add to dictionary with UUID
@@ -578,8 +584,7 @@ std::string WebServer::add_plot(const Plot& plot) {
     m_plots[uuid_str] = plot;
 
     // return formatted URL
-    std::string port_str = std::to_string(m_impl->m_port);
-    return "http://localhost:" + port_str + "/index.html?" + uuid_str;
+    return get_base_url() + "/index.html?" + uuid_str;
 }
 
 namespace turi {

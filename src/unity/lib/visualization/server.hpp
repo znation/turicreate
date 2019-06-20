@@ -23,6 +23,9 @@ namespace visualization {
         // Spins up the web server lazily, if needed.
         static std::string get_url_for_plot(const Plot& plot);
 
+        // Returns the base URL to the server.
+        std::string get_base_url();
+
     private:
         WebServer();
 

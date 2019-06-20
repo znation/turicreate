@@ -8,6 +8,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var newWindow: NSWindow?
     var controller: ViewController?
+    var server: URL
+    
+    init(server: URL) {
+        self.server = server
+        super.init()
+    }
     
     @objc func print_vega(_ sender: Any) {
         SharedData.shared.vegaContainer?.get_image {optionalImage in

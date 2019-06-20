@@ -11,7 +11,7 @@ public class JSON {
     private static func stringify(anything: Any) throws -> String {
         let objectData = try JSONSerialization.data(withJSONObject: anything, options: JSONSerialization.WritingOptions(rawValue: 0))
         guard let objectString = String(data: objectData, encoding: .utf8) else {
-            throw VisualizationError.JSONSerializationError
+            throw VisualizationError.JSONSerializationError("Serialized JSON data was not a valid UTF8 string")
         }
         return objectString
     }
@@ -26,7 +26,7 @@ public class JSON {
     
     public static func parse(str: String) throws -> Any {
         guard let data = str.data(using: String.Encoding.utf8, allowLossyConversion: false) else {
-            throw VisualizationError.JSONSerializationError
+            throw VisualizationError.JSONSerializationError("\(str) is not valid JSON")
         }
         let obj_returned = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.init(rawValue: 0));
         return obj_returned;

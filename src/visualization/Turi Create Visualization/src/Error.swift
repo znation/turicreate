@@ -5,6 +5,6 @@
 
 enum VisualizationError:Error {
     case JavascriptError(String)
-    case JSONSerializationError
+    case JSONSerializationError(String)
     case UnexpectedInputError
 }

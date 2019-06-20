@@ -33,7 +33,7 @@ class VegaContainer: NSObject, WKScriptMessageHandler {
     private var loaded: Bool = false
     private var ready: Bool = false
     
-    init(view: CustomWebKitView) {
+    init(view: CustomWebKitView, server: URL) {
         
         // initialize variables
         self.view = view;
@@ -45,11 +45,11 @@ class VegaContainer: NSObject, WKScriptMessageHandler {
         // start the pipe
         self.pipe = Pipe(graph_data: self)
         
-        // load app bundle
-        let appBundle = Bundle.main
-        let htmlPath = appBundle.url(forResource: "index", withExtension: "html", subdirectory: "build")
-        self.view.loadFileURL(htmlPath!, allowingReadAccessTo: appBundle.bundleURL)
+        // load the index.html page
+        let url = server.appendingPathComponent("index.html")
         self.view.configuration.userContentController.add(self, name: "scriptHandler")
+        let request = URLRequest(url: url)
+        self.view.load(request)
     }
     
     // callback from the javascript

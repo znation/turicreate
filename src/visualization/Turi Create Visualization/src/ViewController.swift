@@ -7,6 +7,7 @@ import WebKit
 
 class ViewController: NSViewController, NSWindowDelegate, WKUIDelegate {
     var customWebView: CustomWebKitView!
+    let server: URL? = nil
     
     // load view
     override func loadView() {
@@ -24,7 +25,7 @@ class ViewController: NSViewController, NSWindowDelegate, WKUIDelegate {
         super.viewDidLoad()
         
         // create graph object
-        SharedData.shared.vegaContainer = VegaContainer(view: customWebView)
+        SharedData.shared.vegaContainer = VegaContainer(view: customWebView, server: self.server!)
     }
     
     override func viewDidAppear() {
