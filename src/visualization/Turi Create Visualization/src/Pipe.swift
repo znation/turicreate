@@ -98,7 +98,7 @@ class Pipe {
         do {
             // expect "data" to contain JSON of the form [String: Any]
             guard let json = try JSON.parse(str: data) as? [String: Any] else {
-                throw JSONSerializationError("\(data) is not valid JSON")
+                throw VisualizationError.JSONSerializationError("\(data) is not valid JSON")
             }
 
             if let table_spec = json["table_spec"] as? [String: Any] {
