@@ -57,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         newWindow?.center()
         newWindow?.minSize = NSMakeSize(600, 400)
         
-        controller = ViewController()
+        controller = ViewController(server: self.server)
         let content = newWindow!.contentView! as NSView
         let view = controller!.view
         content.frame = contentFrame
