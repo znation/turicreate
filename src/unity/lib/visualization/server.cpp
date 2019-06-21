@@ -213,6 +213,10 @@ handle_request(
             return respond(plot_data, "application/json");
         }
 
+        if (req_target == "/") {
+            req_target = "/index.html";
+        }
+
         // try to match a static file
         // note: server-side API caller should set static URL directory prior to any HTTP requests!
         DASSERT_NE(VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY, "");
