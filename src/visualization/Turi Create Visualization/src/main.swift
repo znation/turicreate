@@ -6,8 +6,6 @@
 import Cocoa
 
 let args = CommandLine.arguments
-fputs(args.debugDescription, stderr)
-fputs("\n", stderr)
 
 if args.count != 3 || args[1] != "--server" {
     let msg = """

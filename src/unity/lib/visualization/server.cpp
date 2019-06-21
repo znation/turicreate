@@ -572,6 +572,9 @@ std::string WebServer::get_url_for_plot(const Plot& plot) {
 }
 
 std::string WebServer::get_base_url() {
+    // Before this URL can be used, the root dir must be set.
+    DASSERT_NE(VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY, "");
+
     // return formatted URL
     std::string port_str = std::to_string(m_impl->m_port);
     return "http://localhost:" + port_str;

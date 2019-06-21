@@ -17,17 +17,30 @@ _CANVAS_PREBUILT_NOT_FOUND_ERROR = 1
 _NODE_NOT_FOUND_ERROR_CODE = 127
 _PERMISSION_DENIED_ERROR_CODE = 243
 
-def _get_client_app_path():
-    (tcviz_dir, _) = _os.path.split(_os.path.dirname(__file__))
+def _ensure_web_server_root_directory(path_to_client):
+    import turicreate as tc
+    if (tc.config.get_runtime_config()['TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY'] == ''):
+        tc.config.set_runtime_config('TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY',
+            _os.path.abspath(_os.path.join(_os.path.dirname(path_to_client), '..', 'Resources', 'build'))
+        )
 
+def _get_client_app_path_impl():
+    (tcviz_dir, _) = _os.path.split(_os.path.dirname(__file__))
     if _sys.platform != 'darwin' and _sys.platform != 'linux2' and _sys.platform != 'linux' :
         raise NotImplementedError('Visualization is currently supported only on macOS and Linux.')
-    
     if _sys.platform == 'darwin':
         return _os.path.join(tcviz_dir, 'Turi Create Visualization.app', 'Contents', 'MacOS', 'Turi Create Visualization')
-
     if _sys.platform == 'linux2' or _sys.platform == 'linux':
         return _os.path.join(tcviz_dir, 'Turi Create Visualization', 'visualization_client')
+
+def _get_client_app_path():
+    path_to_client = _get_client_app_path_impl()
+
+    # Client app will use web server for static assets.
+    # Make sure TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY is set before we return.
+    _ensure_web_server_root_directory(path_to_client)
+
+    return path_to_client
 
 def _focus_client_app():
     scpt = '''
@@ -138,16 +151,7 @@ class Plot(object):
         except NameError:
             pass
 
-        path_to_client = _get_client_app_path()
-
         if _target == 'browser':
-            # First, make sure TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY is set
-            import turicreate as tc
-            if (tc.config.get_runtime_config()['TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY'] == ''):
-                tc.config.set_runtime_config('TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY',
-                    _os.path.abspath(_os.path.join(_os.path.dirname(path_to_client), '..', 'Resources', 'build'))
-                )
-
             import webbrowser
             url = self.get_url()
             webbrowser.open_new_tab(url)
@@ -161,6 +165,7 @@ class Plot(object):
 
         # TODO: allow autodetection of light/dark mode.
         # Disabled for now, since the GUI side needs some work (ie. background color).
+        path_to_client = _get_client_app_path()
         plot_variation = 0x10 # force light mode
         self.__proxy__.call_function('show', {'path_to_client': path_to_client, 'variation': plot_variation})
 
@@ -290,6 +295,8 @@ class Plot(object):
         --------
         The URL will be served by Turi Create on http://localhost.
         """
+        path_to_client = _get_client_app_path()
+        _ensure_web_server_root_directory(path_to_client)
         return self.__proxy__.call_function('get_url')
 
     def _repr_javascript_(self):
