@@ -134,12 +134,28 @@ RUN rm -rf /src/get-pip.py
 WORKDIR /src
 RUN curl -O https://releases.llvm.org/8.0.0/llvm-8.0.0.src.tar.xz
 RUN curl -O https://releases.llvm.org/8.0.0/cfe-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/libcxx-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/libcxxabi-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/lld-8.0.0.src.tar.xz
 RUN tar xf llvm-8.0.0.src.tar.xz && \
     tar xf cfe-8.0.0.src.tar.xz && \
-    mv cfe-8.0.0.src llvm-8.0.0.src/tools/clang && \
+    tar xf libcxx-8.0.0.src.tar.xz && \
+    tar xf libcxxabi-8.0.0.src.tar.xz && \
+    tar xf lld-8.0.0.src.tar.xz && \
+    mv cfe-8.0.0.src clang && \
+    mv libcxx-8.0.0.src libcxx && \
+    mv libcxxabi-8.0.0.src libcxxabi && \
+    mv lld-8.0.0.src lld && \
     mkdir llvm-8.0.0.build
 WORKDIR /src/llvm-8.0.0.build
-RUN cmake ../llvm-8.0.0.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_COMPILER=gcc-4.8 -DCMAKE_CXX_COMPILER=g++-4.8 -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON && \
+RUN cmake ../llvm-8.0.0.src/ \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr/local \
+          -DCMAKE_C_COMPILER=gcc-4.8 \
+          -DCMAKE_CXX_COMPILER=g++-4.8 \
+          -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
+          -DLLVM_ENABLE_PROJECTS=clang\;libcxx\;libcxxabi\;lld \
+          && \
     make -j24 || make -j4 && \
     make --quiet install && \
     ldconfig && \
@@ -150,6 +166,7 @@ RUN cmake ../llvm-8.0.0.src/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/
 # (By not using gcc 4.8)
 ENV CC="clang"
 ENV CXX="clang++"
+ENV LD="lld"
 
 # Start at repo root (mounted into Docker)
 WORKDIR /build
