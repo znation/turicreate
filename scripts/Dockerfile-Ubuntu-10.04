@@ -185,16 +185,16 @@ RUN cmake ../llvm-8.0.0.src/ \
     rm -rf /src/llvm-8.0.0*
 
 # Make lld the default linker
-ENV LD="lld"
+ENV LD="ld.lld"
+RUN mv /usr/bin/ld /usr/bin/ld.bak
+RUN ln -s /usr/local/bin/ld.lld /usr/bin/ld
 
 # Start at repo root (mounted into Docker)
 WORKDIR /build
 
 # Set ccache size to 4GB
-CMD mkdir -p $CCACHE_DIR
-CMD ccache -s
-CMD ccache -M 4G
+RUN mkdir -p $CCACHE_DIR
+RUN ccache -M 4G
 
 # Clean up now-unnecessary paths in image
-CMD apt-get clean
-CMD rm -rf /src
+RUN rm -rf /src
