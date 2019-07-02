@@ -134,25 +134,48 @@ RUN rm -rf /src/get-pip.py
 WORKDIR /src
 RUN curl -O https://releases.llvm.org/8.0.0/llvm-8.0.0.src.tar.xz
 RUN curl -O https://releases.llvm.org/8.0.0/cfe-8.0.0.src.tar.xz
-RUN curl -O https://releases.llvm.org/8.0.0/libcxx-8.0.0.src.tar.xz
-RUN curl -O https://releases.llvm.org/8.0.0/libcxxabi-8.0.0.src.tar.xz
-RUN curl -O https://releases.llvm.org/8.0.0/lld-8.0.0.src.tar.xz
 RUN tar xf llvm-8.0.0.src.tar.xz && \
     tar xf cfe-8.0.0.src.tar.xz && \
-    tar xf libcxx-8.0.0.src.tar.xz && \
-    tar xf libcxxabi-8.0.0.src.tar.xz && \
-    tar xf lld-8.0.0.src.tar.xz && \
     mv cfe-8.0.0.src clang && \
-    mv libcxx-8.0.0.src libcxx && \
-    mv libcxxabi-8.0.0.src libcxxabi && \
-    mv lld-8.0.0.src lld && \
-    mkdir llvm-8.0.0.build
+    mkdir -p llvm-8.0.0.build
 WORKDIR /src/llvm-8.0.0.build
 RUN cmake ../llvm-8.0.0.src/ \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX=/usr/local \
           -DCMAKE_C_COMPILER=gcc-4.8 \
           -DCMAKE_CXX_COMPILER=g++-4.8 \
+          -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
+          -DLLVM_ENABLE_PROJECTS=clang \
+          && \
+    make -j24 || make -j4 && \
+    make --quiet install && \
+    ldconfig
+
+# Make clang the default compiler
+# To work around https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60367
+# (By not using gcc 4.8)
+ENV CC="clang"
+ENV CXX="clang++"
+
+# Install llvm 8.0.0 from source with clang (with libc++ and lld)
+WORKDIR /src
+RUN curl -O https://releases.llvm.org/8.0.0/libcxx-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/libcxxabi-8.0.0.src.tar.xz
+RUN curl -O https://releases.llvm.org/8.0.0/lld-8.0.0.src.tar.xz
+RUN tar xf libcxx-8.0.0.src.tar.xz && \
+    tar xf libcxxabi-8.0.0.src.tar.xz && \
+    tar xf lld-8.0.0.src.tar.xz && \
+    mv libcxx-8.0.0.src libcxx && \
+    mv libcxxabi-8.0.0.src libcxxabi && \
+    mv lld-8.0.0.src lld && \
+    mkdir -p llvm-8.0.0.build
+WORKDIR /src/llvm-8.0.0.build
+RUN rm -rf CMakeCache.txt
+RUN cmake ../llvm-8.0.0.src/ \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr/local \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
           -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
           -DLLVM_ENABLE_PROJECTS=clang\;libcxx\;libcxxabi\;lld \
           && \
@@ -161,11 +184,7 @@ RUN cmake ../llvm-8.0.0.src/ \
     ldconfig && \
     rm -rf /src/llvm-8.0.0*
 
-# Make clang the default compiler
-# To work around https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60367
-# (By not using gcc 4.8)
-ENV CC="clang"
-ENV CXX="clang++"
+# Make lld the default linker
 ENV LD="lld"
 
 # Start at repo root (mounted into Docker)
