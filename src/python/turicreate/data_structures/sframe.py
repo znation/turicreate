@@ -4527,10 +4527,20 @@ class SFrame(object):
 
 
         # Suppress visualization output if 'none' target is set
-        from ..visualization._plot import _target
+        from ..visualization._plot import _target, display_table_in_notebook
         if _target == 'none':
             return
 
+        # Detect Jupyter Notebook and show inline if possible
+        try:
+            if _target == 'auto' and \
+               get_ipython().__class__.__name__ == "ZMQInteractiveShell":
+                display_table_in_notebook(self)
+                return
+        except NameError:
+            pass
+
+        # Launch interactive GUI window
         path_to_client = _get_client_app_path()
 
         if title is None:
