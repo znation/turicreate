@@ -1147,12 +1147,12 @@ foreach(package ${packages})
 endforeach()
 
 include_directories(src)
+include_directories(src/core/system/platform)
 include_directories(SYSTEM deps/src/libsass-3.5.5/include)
 include_directories(SYSTEM src/external)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
 include_directories(SYSTEM src/external/google)
-include_directories(src/platform)
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/extensions)
   include_directories(SYSTEM extensions)
@@ -1210,11 +1210,13 @@ set(_TC_COMMON_OBJECTS
   "$<TARGET_OBJECTS:sframe_query_engine>"
   "$<TARGET_OBJECTS:sgraph>"
   "$<TARGET_OBJECTS:shmipc>"
-  "$<TARGET_OBJECTS:stack_trace>"
   "$<TARGET_OBJECTS:startup_teardown>"
   "$<TARGET_OBJECTS:supervised_learning>"
   "$<TARGET_OBJECTS:table_printer>"
   "$<TARGET_OBJECTS:timer>"
+  "$<TARGET_OBJECTS:unity_sframe>"
+  "$<TARGET_OBJECTS:gl_sframe>"
+  "$<TARGET_OBJECTS:unity_sketches>"
   "$<TARGET_OBJECTS:unity>"
   "$<TARGET_OBJECTS:unity_activity_classification>"
   "$<TARGET_OBJECTS:unity_core>"
@@ -1249,7 +1251,6 @@ set(_TC_COMMON_OBJECTS
 set(_TC_COMMON_REQUIREMENTS
   # External dependencies (from deps)
   boost
-  bz2
   curl
   eigen
   libjpeg

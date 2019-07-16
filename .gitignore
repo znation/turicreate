@@ -12,8 +12,6 @@ debug/*
 release/*
 profile/*
 dist/turicreateapi*
-doc/doxygen/*
-doc/doxygen_internal/*
 configure.deps
 config.log
 new_news.txt
@@ -33,6 +31,7 @@ description.json
 
 ############# python stuff ################
 *.py[cod]
+**/.cache
 
 # Packages
 *.egg
@@ -63,12 +62,15 @@ pytest.xml
 # Documentation
 pydocs/*
 
+## docxgen under root dir
+doc/
+/doxygen.log
 
+# vim
 *.swp
 
 # Mr Old School Data Scientist
 .Rhistory
-
 
 __MACOSX
 .ipynb_checkpoints
