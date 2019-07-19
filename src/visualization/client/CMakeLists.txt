@@ -254,12 +254,11 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
     )
-    message(WARNING "VISUALIZATION_XCODE_INPUT is ${VISUALIZATION_XCODE_INPUT}")
     add_custom_command(
       OUTPUT "${VISUALIZATION_XCODE_OUTPUT}"
       COMMAND xcodebuild -project "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/" -configuration ${CMAKE_BUILD_TYPE} SYMROOT=${CMAKE_CURRENT_BINARY_DIR}
       COMMENT "Building visualization client via xcodebuild"
-      DEPENDS ${VISUALIZATION_XCODE_INPUT}
+      DEPENDS ${VISUALIZATION_XCODE_DEPENDENCIES}
       VERBATIM
     )
     add_custom_target(visualization_client DEPENDS "${VISUALIZATION_XCODE_OUTPUT}")
