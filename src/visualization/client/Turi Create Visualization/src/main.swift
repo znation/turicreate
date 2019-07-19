@@ -4,6 +4,7 @@
 //  be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
 
 import Cocoa
+import WebKit
 
 let args = CommandLine.arguments
 
@@ -25,6 +26,18 @@ if args.count != 3 || args[1] != "--server" {
 guard let server = URL(string: args[2]) else {
     fputs("Error: server \(args[2]) is not a valid URL.\n", stderr)
     exit(1)
+}
+
+guard let scheme = server.scheme else {
+    fputs("Error: server \(args[2]) does not specify a URL scheme.\n", stderr)
+    exit(1)
+}
+
+if #available(OSX 10.13, *) {
+    if !WKWebView.handlesURLScheme(scheme) {
+        fputs("Error: scheme \(scheme) does not specify a URL scheme.\n", stderr)
+        exit(1)
+    }
 }
 
 let delegate = AppDelegate(server: server)
