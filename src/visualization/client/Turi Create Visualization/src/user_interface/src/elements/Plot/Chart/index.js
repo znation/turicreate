@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import * as React from 'react';
+import { Component } from 'react';
 
 import * as css from 'json!./index.css.json';
 
-import vega from 'vega';
-import vegaTooltip from 'vega-tooltip';
+import * as vega from 'vega';
+import * as vegaTooltip from 'vega-tooltip';
 
 class TcPlot extends Component {
 

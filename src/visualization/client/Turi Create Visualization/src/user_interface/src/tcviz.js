@@ -1,15 +1,12 @@
 ///<amd-module name="tcviz"/>
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-
 import TcPlot from './elements/Plot/Chart/index.js';
 import TcTable from './elements/Explore/Table/index.js';
 import TCEvaluation from './elements/Explore/Evaluation/index.js';
 
 import messageFormat from 'json!./format/message.json';
 
-import { load, Root } from 'protobuf';
+import { Root } from 'protobuf';
 
 import TCAnnotate from './elements/Annotate/index.js';
 import { initBrowserClient } from './client.js';

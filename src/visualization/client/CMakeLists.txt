@@ -155,6 +155,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             --target ES5
             --allowJs
             --jsx react
+            --jsxFactory "React.createElement"
             --sourceMap
             --removeComments
             --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
