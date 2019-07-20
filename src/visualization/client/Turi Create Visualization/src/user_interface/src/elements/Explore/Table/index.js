@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import * as React from 'react';
+import { Component } from 'react';
 import { StickyTable, Row, Cell } from './sticky-table/index'
-import css from 'json!./index.css.json';
+import * as css from 'json!./index.css.json';
 
 import { FontAwesomeIcon } from '../../fontawesome'
 

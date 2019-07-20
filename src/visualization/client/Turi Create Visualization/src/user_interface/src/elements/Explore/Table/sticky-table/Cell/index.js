@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import * as React from 'react';
+import { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-import css from 'json!./index.css.json';
+import * as css from 'json!./index.css.json';
 
 export default class Cell extends Component {
   render() {

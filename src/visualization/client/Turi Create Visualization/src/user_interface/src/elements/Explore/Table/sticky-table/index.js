@@ -1,4 +1,5 @@
-import React, { PureComponent } from 'react';
+import * as React from 'react';
+import { PureComponent } from 'react';
 import { PropTypes } from 'prop-types';
 import Table from './Table/index';
 import Row from './Row/index';
@@ -29,7 +30,6 @@ class StickyTable extends PureComponent {
     this.xScrollSize = 0;
     this.yScrollSize = 0;
     this.stickyHeaderCount = props.stickyHeaderCount === 0 ? 0 : (this.stickyHeaderCount || 1);
-    this.container_ref = React.createRef();
 
     this.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
   }

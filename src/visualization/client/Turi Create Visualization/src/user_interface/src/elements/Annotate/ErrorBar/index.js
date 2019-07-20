@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import * as React from 'react';
+import { Component } from 'react';
 import style from 'json!./index.module.scss.json';
 
 import error from 'image!./assets/error.svg';

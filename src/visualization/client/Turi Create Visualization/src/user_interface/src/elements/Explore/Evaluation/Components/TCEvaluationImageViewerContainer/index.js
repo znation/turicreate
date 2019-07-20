@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import * as React from 'react';
+import { Component } from 'react';
 import styles from 'json!./index.scss.json';
 
 import TCEvaluationImageComponent from '../TCEvaluationImageComponent/index.js';

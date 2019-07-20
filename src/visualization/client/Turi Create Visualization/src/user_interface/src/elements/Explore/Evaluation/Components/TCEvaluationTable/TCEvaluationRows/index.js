@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
-import css from 'json!./index.scss.json';
+import * as React from 'react';
+import { Component } from 'react';
+import * as css from 'json!./index.scss.json';
 import TCEvaluationCells from './TCEvaluationCells/index';
 
 class TCEvaluationRows extends Component {
