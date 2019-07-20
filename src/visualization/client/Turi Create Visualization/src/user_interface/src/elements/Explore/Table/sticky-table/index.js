@@ -6,7 +6,7 @@ import Row from './Row/index';
 import Cell from './Cell/index';
 
 import JSONPretty from 'react-json-pretty';
-import elementResizeEvent from 'element-resize-event';
+//import elementResizeEvent from 'element-resize-event';
 
 class StickyTable extends PureComponent {
   static propTypes = {
@@ -48,7 +48,7 @@ class StickyTable extends PureComponent {
       this.stickyCorner = this.table.querySelector('#sticky-table-corner');
       this.setScrollData();
 
-      elementResizeEvent(this.realTable, this.onResize);
+      //elementResizeEvent(this.realTable, this.onResize);
 
       this.onResize();
       setTimeout(this.onResize);
@@ -77,7 +77,7 @@ class StickyTable extends PureComponent {
       this.yWrapper.removeEventListener('scroll', this.scrollYScrollbar);
       this.yScrollbar.removeEventListener('scroll', this.onScrollBarY);
 
-      elementResizeEvent.unbind(this.realTable);
+      //elementResizeEvent.unbind(this.realTable);
     }
   }
 

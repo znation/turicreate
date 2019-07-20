@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import TcPlot from "../Chart";
 
 class TcSummary extends TcPlot {

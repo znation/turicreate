@@ -3,7 +3,7 @@ import { Component } from 'react';
 import { StickyTable, Row, Cell } from './sticky-table/index'
 import * as css from 'json!./index.css.json';
 
-import { FontAwesomeIcon } from '../../fontawesome'
+import FontAwesomeIcon from '../../fontawesome'
 
 import * as d3 from "d3";
 
