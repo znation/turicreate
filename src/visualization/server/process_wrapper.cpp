@@ -24,7 +24,7 @@ process_wrapper::process_wrapper(const std::string& path_to_client) : m_alive(tr
   // constructor
   // instantiate visualization client process
   m_client_process.popen(path_to_client.c_str(),
-                  { std::string("--server"), std::string("TODO") /*WebServer::get_instance().get_base_url() */},
+                  { std::string("--server"), WebServer::get_base_url() },
                   STDOUT_FILENO,
                   true /* open_write_pipe */);
   if (!m_client_process.exists()) {

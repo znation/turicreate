@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import css from 'json!./index.css.json';
+import css from 'json!./index.scss.json';
 
 import warning from 'image!./assets/warning.svg';
 import TCEvaluationImageCells from '../../../TCEvaluationImageCells/index';

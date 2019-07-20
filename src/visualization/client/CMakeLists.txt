@@ -146,8 +146,9 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   # Build JavaScript (client app code) with typescript
   # Includes any external dependencies that are distributed in source form
   # (i.e. need to be converted to AMD module format, and/or compiled down to ES5)
+  add_custom_target(tcviz_js)
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
+    TARGET tcviz_js
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
             --module amd
@@ -166,6 +167,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Building JavaScript using TypeScript 3.4.5"
     VERBATIM
   )
+  add_dependencies(tcviz_js ${JAVASCRIPT_SOURCES})
 
   # Build CSS Modules with css_module_compiler.js
   set(CMAKE_CSS_COMPILE_OBJECT "${CMAKE_SOURCE_DIR}/deps/local/bin/node ${CMAKE_SOURCE_DIR}/src/visualization/tools/css_module_compiler.js ${CMAKE_CSS_COMPILER} <SOURCE> <OBJECT>")
@@ -206,7 +208,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
   add_custom_target(tcviz_frontend_all
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
+    DEPENDS tcviz_js
     DEPENDS tcviz_css
     DEPENDS tcviz_frontend_assets
     DEPENDS tcviz_frontend_copy
@@ -237,8 +239,9 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/package.json"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/index.css"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/client.js"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"

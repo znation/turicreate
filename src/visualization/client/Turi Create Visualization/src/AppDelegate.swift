@@ -127,6 +127,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApplication.shared.mainMenu = mainMenu
 
         newWindow!.makeKeyAndOrderFront(nil)
+
+        // Bring window to front (otherwise it sits behind other windows)
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

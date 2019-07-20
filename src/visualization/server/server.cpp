@@ -536,6 +536,16 @@ WebServer& WebServer::get_instance() {
     return *server;
 }
 
+std::string WebServer::get_base_url() {
+    return get_instance()._get_base_url();
+}
+
+std::string WebServer::_get_base_url() const {
+    std::string port_str = std::to_string(m_impl->m_port);
+    return "http://localhost:" + port_str;
+
+}
+
 std::string WebServer::get_url_for_plot(const Plot& plot) {
     return get_instance().add_plot(plot);
 }
@@ -547,8 +557,7 @@ std::string WebServer::add_plot(const Plot& plot) {
     m_plots[uuid_str] = plot;
 
     // return formatted URL
-    std::string port_str = std::to_string(m_impl->m_port);
-    return "http://localhost:" + port_str + "/index.html?" + uuid_str;
+    return this->_get_base_url() + "/index.html?" + uuid_str;
 }
 
 namespace turi {

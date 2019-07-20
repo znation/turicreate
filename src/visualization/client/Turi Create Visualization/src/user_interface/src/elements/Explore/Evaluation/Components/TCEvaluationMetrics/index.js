@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import * as css from 'json!./index.css.json';
+import * as css from 'json!./index.scss.json';
 
 import TCEvaluationTooltip from '../TCEvaluationTooltip/index';
 

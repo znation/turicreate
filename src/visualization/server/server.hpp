@@ -16,8 +16,11 @@ namespace visualization {
     public:
         typedef std::unordered_map< std::string, Plot > plot_map;
 
-        static WebServer& get_instance();
         ~WebServer();
+
+        // Generates and returns the base URL to the server.
+        // Spins up the web server lazily, if needed.
+        static std::string get_base_url();
 
         // Generates and returns the URL to a given Plot object.
         // Spins up the web server lazily, if needed.
@@ -25,13 +28,13 @@ namespace visualization {
 
     private:
         WebServer();
-
         class Impl;
         plot_map m_plots;
         std::unique_ptr<Impl> m_impl;
 
+        static WebServer& get_instance();
         std::string add_plot(const Plot& plot);
-
+        std::string _get_base_url() const;
     };
 
     extern std::string VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY;

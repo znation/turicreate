@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import * as css from 'json!./index.css.json';
 
 import vega from 'vega';
-import vl from 'vega-lite';
 import vegaTooltip from 'vega-tooltip';
 
 class TcPlot extends Component {
