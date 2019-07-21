@@ -33,7 +33,6 @@
 
     <script type="text/javascript">
       require(['tcviz'], function() {
-        console.log("tcviz is loaded");
         if(window.navigator.platform == 'MacIntel'){
           if (document.readyState == 'complete') {
             window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});

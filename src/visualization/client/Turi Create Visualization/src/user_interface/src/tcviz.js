@@ -91,7 +91,6 @@ window.setSpec = function setSpec(value) {
             break;
     }
 }
-console.log("setSpec is ", typeof(window.setSpec));
 
 window.setProtoMessage = function setProtoMessage(value){
     
