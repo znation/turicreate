@@ -176,6 +176,9 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   add_library(tcviz_css STATIC
     ${CSS_SOURCES}
   )
+  set_target_properties(tcviz_css PROPERTIES PREFIX "")
+  set_target_properties(tcviz_css PROPERTIES OUTPUT_NAME "tcviz")
+  set_target_properties(tcviz_css PROPERTIES SUFFIX ".css")
   set_target_properties(tcviz_css PROPERTIES LINKER_LANGUAGE CSS)
   set_source_files_properties(${CSS_SOURCES} PROPERTIES LANGUAGE CSS)
   add_dependencies(tcviz_css node)
@@ -224,6 +227,8 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     )
     set(VISUALIZATION_XCODE_DEPENDENCIES
       tcviz_frontend_all
+      ${CSS_SOURCES}
+      ${JAVASCRIPT_SOURCES}
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/project.pbxproj"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Info.plist"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/Debugging.swift"
