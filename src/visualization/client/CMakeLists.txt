@@ -188,26 +188,30 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Copying visualization frontend assets from public/"
   )
 
+  set(FRONTEND_DEPS
+    "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/long-4.0.0/long.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/image.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/json.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/lib/text.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-4.3.0/vega.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.css"
+  )
+
   # Includes CSS and JS deps that don't need to be compiled
   add_custom_target(tcviz_frontend_deps
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/d3-5.9.2/d3.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/element-resize-event-3.0.4/element-resize-event.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/long-4.0.0/long.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/prop-types-15.7.2/prop-types.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/protobufjs-6.8.6/protobuf.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/react-16.8.6/react-dom.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/react-json-pretty-1.7.9/react-json-pretty.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-2.3.6/require.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/image.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/json.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/lib/text.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-4.3.0/vega.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.js"
-        "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.css"
+        ${FRONTEND_DEPS}
         "${TC_FRONTEND_BUILD_DIR}"
     COMMENT "Copying visualization frontend dependencies from src/external/"
   )
@@ -229,6 +233,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       tcviz_frontend_all
       ${CSS_SOURCES}
       ${JAVASCRIPT_SOURCES}
+      ${FRONTEND_DEPS}
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization.xcodeproj/project.pbxproj"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/Info.plist"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/Debugging.swift"

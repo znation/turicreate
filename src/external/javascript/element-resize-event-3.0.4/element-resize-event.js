@@ -17,8 +17,6 @@ define("element-resize-event", ["require", "exports"], function (require, export
         });
     }
     function _exports(element, fn) {
-        var window = this;
-        var document = window.document;
         var isIE;
         var attachEvent = document.attachEvent;
         if (typeof navigator !== 'undefined') {
