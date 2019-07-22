@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Component } from 'react';
 
-import * as css from 'json!./index.css.json';
+import * as css from 'json!../index.css.json';
 
 export default class Table extends Component {
   render() {

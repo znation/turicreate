@@ -4,6 +4,7 @@ import { PropTypes } from 'prop-types';
 import Table from './Table/index';
 import Row from './Row/index';
 import Cell from './Cell/index';
+import * as css from 'json!./index.css.json';
 
 import JSONPretty from 'react-json-pretty';
 import elementResizeEvent from 'element-resize-event';
@@ -515,20 +516,20 @@ class StickyTable extends PureComponent {
     }
 
     return (
-      <div className={'sticky-table ' + (this.props.className || '')} id={'sticky-table-' + this.id}>
+      <div className={css['sticky-table'] + ' ' + (this.props.className || '')} id={'sticky-table-' + this.id}>
         <div id='x-scrollbar'><div></div></div>
         <div id='y-scrollbar'><div></div></div>
-        <div className='sticky-table-corner' id='sticky-table-corner'>
+        <div className={css['sticky-table-corner']} id='sticky-table-corner'>
           <Table>{stickyCorner}</Table>
         </div>
-        <div className='sticky-table-header' id='sticky-table-header'>
+        <div className={css['sticky-table-header']} id='sticky-table-header'>
           <Table>{stickyHeader}</Table>
         </div>
-        <div className='sticky-table-y-wrapper' id='sticky-table-y-wrapper'>
-          <div className='sticky-table-column' id='sticky-table-column'>
+        <div className={css['sticky-table-y-wrapper']} id='sticky-table-y-wrapper'>
+          <div className={css['sticky-table-column']} id='sticky-table-column'>
             <Table>{stickyColumn}</Table>
           </div>
-          <div className='sticky-table-x-wrapper' id='sticky-table-x-wrapper'>
+          <div className={css['sticky-table-x-wrapper']} id='sticky-table-x-wrapper'>
             <Table>{rows}</Table>
           </div>
         </div>

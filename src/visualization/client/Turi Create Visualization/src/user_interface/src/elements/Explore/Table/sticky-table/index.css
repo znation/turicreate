@@ -84,24 +84,3 @@ Scrolling is probably 10-20x smoother.
 .sticky-table #y-scrollbar div {
   width: 100%;
 }
-
-.json-pretty{
-  line-height: 1.3;
-  color: #BFBFBF;
-}
-
-.json-key{
-  color: #108EE9;
-}
-
-.json-value{
-  color: #F5A623;
-}
-
-.json-string{
-  color: #00A854;
-}
-
-.json-boolean{
-  color: #F5A623;
-}
