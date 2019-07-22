@@ -188,6 +188,12 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMENT "Copying visualization frontend assets from public/"
   )
 
+  
+  set(JS_FILE_EXT "js")
+  if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(JS_FILE_EXT "min.js")
+  endif()
+
   set(FRONTEND_DEPS
     "${CMAKE_SOURCE_DIR}/src/external/css/font-awesome-4.7.0/font-awesome.min.css"
     "${CMAKE_SOURCE_DIR}/src/external/javascript/create-react-class-15.6.3/create-react-class.js"
@@ -203,7 +209,8 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/image.js"
     "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/src/json.js"
     "${CMAKE_SOURCE_DIR}/src/external/javascript/requirejs-plugins-1.0.3/lib/text.js"
-    "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-4.3.0/vega.js"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-5.4.0/vega.${JS_FILE_EXT}"
+    "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-lite-3.3.0/vega-lite.${JS_FILE_EXT}"
     "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.js"
     "${CMAKE_SOURCE_DIR}/src/external/javascript/vega-tooltip-0.6.1/vega-tooltip.css"
   )

@@ -53,8 +53,8 @@ if (APPLE)
   make_copy_target(
     visualization_client_app
     FILES
-    ${CMAKE_SOURCE_DIR}/src/visualization/vega_renderer/vega-5.4.0.min.js
-    ${CMAKE_SOURCE_DIR}/src/visualization/vega_renderer/vega-lite-3.3.0.min.js
+    ${CMAKE_SOURCE_DIR}/src/external/javascript/vega-5.4.0/vega.min.js
+    ${CMAKE_SOURCE_DIR}/src/external/javascript/vega-lite-3.3.0/vega-lite.min.js
     ${CMAKE_SOURCE_DIR}/src/python/turicreate/visualization/vg2png
     ${CMAKE_SOURCE_DIR}/src/python/turicreate/visualization/vg2svg
     DIRECTORIES
