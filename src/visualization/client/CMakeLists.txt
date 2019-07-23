@@ -11,16 +11,6 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
   set(TC_FRONTEND_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src")
   file(MAKE_DIRECTORY ${TC_FRONTEND_BUILD_DIR})
   set(CSS_SOURCES
-    # CSS files
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
-    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
-
-    # SCSS files
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/ImageContainer/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/InfiniteScroll/index.module.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Annotate/StatusBar/ToggleButton/index.module.scss"
@@ -57,8 +47,16 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationConfusionTable/TCEvaluationConfusionRow/TCEvaluationConfusionCell/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationFooter/index.scss"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.scss"
+    "Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.scss"
   )
   set(JAVASCRIPT_SOURCES
+    # JavaScript sources (.js)
     "Turi Create Visualization/src/user_interface/src/client.js"
     "Turi Create Visualization/src/user_interface/src/tcviz.js"
     "Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
@@ -105,6 +103,9 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationMetrics/index.js"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationImageComponent/index.js"
     "Turi Create Visualization/src/user_interface/src/elements/Explore/Evaluation/Components/TCEvaluationTooltip/index.js"
+
+    # TypeScript sources (.ts)
+    "Turi Create Visualization/src/user_interface/src/util/ClassNameMap.ts"
   )
 
   add_custom_target(tcviz_frontend_assets
@@ -152,7 +153,7 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
     COMMAND "${CMAKE_SOURCE_DIR}/deps/local/bin/node"
             "${CMAKE_SOURCE_DIR}/src/external/javascript/typescript-3.4.5/tsc.js"
             --module amd
-            --target ES5
+            --target ES2015
             --allowJs
             --jsx react
             --jsxFactory "React.createElement"
@@ -256,24 +257,6 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.html"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.js"
       "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/public/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/package.json"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/client.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/tcviz.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Chart/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Plot/Summary/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Cell/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Table/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/sticky-table/Row/index.css"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.js"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Turi Create Visualization/src/user_interface/src/elements/Explore/Table/index.css"
     )
     add_custom_command(
       OUTPUT "${VISUALIZATION_XCODE_OUTPUT}"

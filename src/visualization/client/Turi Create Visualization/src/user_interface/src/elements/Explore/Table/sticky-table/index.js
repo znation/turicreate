@@ -4,7 +4,9 @@ import { PropTypes } from 'prop-types';
 import Table from './Table/index';
 import Row from './Row/index';
 import Cell from './Cell/index';
-import * as css from 'json!./index.css.json';
+import * as _style_dict from 'json!./index.scss.json';
+import ClassNameMap from '../../../../util/ClassNameMap';
+const css = ClassNameMap(_style_dict);
 
 import JSONPretty from 'react-json-pretty';
 import elementResizeEvent from 'element-resize-event';

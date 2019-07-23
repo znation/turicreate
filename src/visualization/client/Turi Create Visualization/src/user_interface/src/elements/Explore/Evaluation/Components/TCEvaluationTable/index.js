@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Component } from 'react';
-import * as css from 'json!./index.scss.json';
+import * as _style_dict from 'json!./index.scss.json';
+import ClassNameMap from '../../../../../util/ClassNameMap';
+const css = ClassNameMap(_style_dict);
 
 import TCEvaluationRows from './TCEvaluationRows/index';
 import TCEvaluationHeader from './TCEvaluationHeader/index';

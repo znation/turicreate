@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { Component } from 'react';
 import { StickyTable, Row, Cell } from './sticky-table/index'
-import * as css from 'json!./index.css.json';
+import * as _style_dict from 'json!./index.scss.json';
+import ClassNameMap from '../../../util/ClassNameMap';
+const css = ClassNameMap(_style_dict);
 
 import FontAwesomeIcon from '../../fontawesome'
 
@@ -32,19 +34,19 @@ class TcTable extends Component {
         );
       case "float":
         return (
-          <div className={css.float_val}>
+          <div>
             { value }
           </div>
         );
       case "integer":
         return (
-          <div className={css.int_val}>
+          <div>
             { value }
           </div>
         );
       case "image":
         return (
-          <div className={css.image_val}>
+          <div>
                 <img src={ "data:image/" + value.format + ";base64," + value.data }  height={32} data-image-row={value.idx} data-image-column={value.column} alt={value.width + "x" + value.height + " image"} />
           </div>
         );
@@ -598,7 +600,7 @@ class TcTable extends Component {
     }
 
     var tableBody = (
-                      <div className={css.resize_container} key="tableBody" style={{ "height": this.state.windowHeight-44, "width": this.state.windowWidth}}>
+                      <div key="tableBody" style={{ "height": this.state.windowHeight-44, "width": this.state.windowWidth}}>
                      <StickyTable parent_context={parent_context} scroll_state={this.table_scroll} scrollVal={this.scrollVal} size={this.size} step_size={this.step_size} set_lower={this.set_lower} set_higher={this.set_higher}  y={this.y} data={this.data_sent} column_name={this.column_name} scroll_callback={this.callbackScroll} reset_scroll={this.reset_scroll} style={{ "height": this.state.windowHeight-44, "width": this.state.windowWidth}}>
                           {rows}
                         </StickyTable>

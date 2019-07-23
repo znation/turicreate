@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Component } from 'react';
-import style from 'json!./index.module.scss.json';
+import * as _style_dict from 'json!./index.module.scss.json';
+import ClassNameMap from '../../../../util/ClassNameMap';
+const style = ClassNameMap(_style_dict);
 
 class SimilarImage extends Component {
   constructor(props) {

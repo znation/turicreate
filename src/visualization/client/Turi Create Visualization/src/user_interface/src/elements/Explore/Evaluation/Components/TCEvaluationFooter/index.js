@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { Component } from 'react';
 import * as d3 from 'd3';
-import styles from 'json!./index.scss.json';
+import * as _style_dict from 'json!./index.scss.json';
+import ClassNameMap from '../../../../../util/ClassNameMap';
+const styles = ClassNameMap(_style_dict);
 
 import down_arrow from 'image!./assets/down.svg';
 import cancel from 'image!./assets/cancel.svg';

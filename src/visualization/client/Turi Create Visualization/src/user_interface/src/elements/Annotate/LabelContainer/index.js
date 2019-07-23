@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Component } from 'react';
-import styles from 'json!./index.module.scss.json';
+import * as _style_dict from 'json!./index.module.scss.json';
+import ClassNameMap from '../../../util/ClassNameMap';
+const styles = ClassNameMap(_style_dict);
 	
 import Labels from './Labels/index';
 	

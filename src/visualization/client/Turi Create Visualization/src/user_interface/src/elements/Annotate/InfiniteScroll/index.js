@@ -1,10 +1,13 @@
 import * as React from 'react';
 import { Component } from 'react';
-import styles from 'json!./index.module.scss.json';
-
 import ImageContainer from './ImageContainer/index';
+import * as _style_dict from 'json!./index.module.scss.json';
+import ClassNameMap from '../../../util/ClassNameMap';
+const styles = ClassNameMap(_style_dict);
+import * as _imgProperties_dict from 'json!./ImageContainer/index.module.scss.json';
+const imgProperties  = ClassNameMap(_style_dict);
 
-import imgProperties from 'json!./ImageContainer/index.module.scss.json';
+
 
 // has to be a multiple of 3 to work properly
 const CELL_PADDING = 3;
