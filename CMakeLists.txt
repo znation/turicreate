@@ -355,13 +355,7 @@ if (CLANG)
     add_compile_options(-Qunused-arguments)
   endif()
   
-  # same goes for unknown warning group (for #pragma clang warning suppression)
-  # seems different clang distributions have quite different warning arguments
-  check_cxx_compiler_flag("-Wno-unknown-warning-option" __no_unknown_warning_option)
-  if(${__no_unknown_warning_option})
-    add_compile_options(-Wno-unknown-warning-option)
-  endif()
-  
+ 
   # clang on Linux with libstdc++ from GCC 4.8.1 gives errors about class vs. struct hash.
   # apparently it's defined as both in separate places in libstdc++
   # and GCC 4.8.1 doesn't care, but clang does.
@@ -384,6 +378,13 @@ else()
   set(WERROR_FLAGS "-Werror")
 endif()
 
+# same goes for unknown warning group (for #pragma clang or #pragma GCC warning suppression)
+# seems different clang distributions have quite different warning arguments
+check_cxx_compiler_flag("-Wno-unknown-warning-option" __no_unknown_warning_option)
+if(${__no_unknown_warning_option})
+  add_compile_options(-Wno-unknown-warning-option)
+endif()
+ 
 if (${TC_STACK_DISPLAY})
   set(DEBUG_INFO_FLAGS "-g3 -fno-omit-frame-pointer")
 else()
@@ -1147,11 +1148,11 @@ foreach(package ${packages})
 endforeach()
 
 include_directories(src)
+include_directories(src/core/system/platform)
 include_directories(SYSTEM src/external)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-core/include)
 include_directories(SYSTEM src/external/aws-sdk-cpp/aws-cpp-sdk-s3/include)
 include_directories(SYSTEM src/external/google)
-include_directories(src/platform)
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/extensions)
   include_directories(SYSTEM extensions)
@@ -1209,11 +1210,13 @@ set(_TC_COMMON_OBJECTS
   "$<TARGET_OBJECTS:sframe_query_engine>"
   "$<TARGET_OBJECTS:sgraph>"
   "$<TARGET_OBJECTS:shmipc>"
-  "$<TARGET_OBJECTS:stack_trace>"
   "$<TARGET_OBJECTS:startup_teardown>"
   "$<TARGET_OBJECTS:supervised_learning>"
   "$<TARGET_OBJECTS:table_printer>"
   "$<TARGET_OBJECTS:timer>"
+  "$<TARGET_OBJECTS:unity_sframe>"
+  "$<TARGET_OBJECTS:gl_sframe>"
+  "$<TARGET_OBJECTS:unity_sketches>"
   "$<TARGET_OBJECTS:unity>"
   "$<TARGET_OBJECTS:unity_activity_classification>"
   "$<TARGET_OBJECTS:unity_core>"

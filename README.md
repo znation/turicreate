@@ -1,4 +1,4 @@
-Quick Links: [Installation](#supported-platforms) | [Documentation](#documentation) | [WWDC 2018 Talk](https://developer.apple.com/videos/play/wwdc2018/712/)
+Quick Links: [Installation](#supported-platforms) | [Documentation](#documentation) | [WWDC 2019](https://developer.apple.com/videos/play/wwdc2019/420/) |  [WWDC 2018](https://developer.apple.com/videos/play/wwdc2018/712/)
 
 [![Build Status](https://travis-ci.com/apple/turicreate.svg?branch=master)](#)
 [![PyPI Release](https://img.shields.io/pypi/v/turicreate.svg)](#)
@@ -8,7 +8,7 @@ Quick Links: [Installation](#supported-platforms) | [Documentation](#documentati
 
 # Turi Create 
 
-[Click here to check out our talk at WWDC 2018!](https://developer.apple.com/videos/play/wwdc2018/712/)
+Check out our talks at [WWDC 2019](https://developer.apple.com/videos/play/wwdc2019/420/) and at [WWDC 2018](https://developer.apple.com/videos/play/wwdc2018/712/)!
 
 Turi Create simplifies the development of custom machine learning models. You
 don't have to be a machine learning expert to add recommendations, object
@@ -30,6 +30,7 @@ With Turi Create, you can accomplish many common ML tasks:
 | [Drawing Classification](https://apple.github.io/turicreate/docs/userguide/drawing_classifier)  | Recognize Pencil/Touch Drawings and Gestures                     |
 | [Sound Classification](https://apple.github.io/turicreate/docs/userguide/sound_classifier)  | Classify sounds                     |
 | [Object Detection](https://apple.github.io/turicreate/docs/userguide/object_detection/)        | Recognize objects within images  |
+| [One Shot Object Detection](https://apple.github.io/turicreate/docs/userguide/one_shot_object_detection/)    | Recognize 2D objects within images using a single example  |
 | [Style Transfer](https://apple.github.io/turicreate/docs/userguide/style_transfer/)        | Stylize images |
 | [Activity Classification](https://apple.github.io/turicreate/docs/userguide/activity_classifier/) | Detect an activity using sensors |
 | [Image Similarity](https://apple.github.io/turicreate/docs/userguide/image_similarity/)        | Find similar images              |
