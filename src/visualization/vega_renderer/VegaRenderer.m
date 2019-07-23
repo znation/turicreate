@@ -18,28 +18,24 @@
 #ifdef NDEBUG
 
 // release mode, use minified JS
-#define VEGA_JS_H PATH(OBJROOT,/vega-5.4.0.min.js.h)
+#define VEGA_JS_H PATH(OBJROOT,/vega.min.js.h)
 #import VEGA_JS_H
-#define vega_js vega_5_4_0_min_js
-#define vega_js_size vega_5_4_0_min_js_len
+#define vega_js vega_min_js
+#define vega_js_len vega_min_js_len
 
-#define VEGALITE_JS_H PATH(OBJROOT,/vega-lite-3.3.0.min.js.h)
+#define VEGALITE_JS_H PATH(OBJROOT,/vega-lite.min.js.h)
 #import VEGALITE_JS_H
-#define vegalite_js vega_lite_3_3_0_min_js
-#define vegalite_js_size vega_lite_3_3_0_min_js_len
+#define vega_lite_js vega_lite_min_js
+#define vega_lite_js_len vega_lite_min_js_len
 
 #else
 
 // debug mode, use unminified JS
-#define VEGA_JS_H PATH(OBJROOT,/vega-5.4.0.js.h)
+#define VEGA_JS_H PATH(OBJROOT,/vega.js.h)
 #import VEGA_JS_H
-#define vega_js vega_5_4_0_js
-#define vega_js_size vega_5_4_0_js_len
 
-#define VEGALITE_JS_H PATH(OBJROOT,/vega-lite-3.3.0.js.h)
+#define VEGALITE_JS_H PATH(OBJROOT,/vega-lite.js.h)
 #import VEGALITE_JS_H
-#define vegalite_js vega_lite_3_3_0_js
-#define vegalite_js_size vega_lite_3_3_0_js_len
 
 #endif
 
@@ -198,14 +194,14 @@
 
 + (NSString*)vegaJS {
 
-    NSData *data = [NSData dataWithBytes:vega_js length:vega_js_size];
+    NSData *data = [NSData dataWithBytes:vega_js length:vega_js_len];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return str;
 }
 
 + (NSString*)vegaliteJS {
 
-    NSData *data = [NSData dataWithBytes:vegalite_js length:vegalite_js_size];
+    NSData *data = [NSData dataWithBytes:vega_lite_js length:vega_lite_js_len];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return str;
 }
