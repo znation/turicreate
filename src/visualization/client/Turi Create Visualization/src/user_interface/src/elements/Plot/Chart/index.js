@@ -142,7 +142,7 @@ class TcPlot extends Component {
     render() {
         return (
                 <div>
-                <div className={[css.vega_container].join(' ')} ref={(vega_container) => { this.vega_container = vega_container; }}>
+                <div ref={(vega_container) => { this.vega_container = vega_container; }}>
                 </div>
                 <div className={[css.hidden_cont].join(' ')} ref={(hidden_container) => { this.hidden_container = hidden_container; }}>
                 </div>
