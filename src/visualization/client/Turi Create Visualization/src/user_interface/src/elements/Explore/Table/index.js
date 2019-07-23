@@ -127,24 +127,24 @@ class TcTable extends Component {
     var string_elements = document.getElementsByClassName("string_val");
     for(var x = 0; x < string_elements.length; x++){
       if(string_elements[x].getBoundingClientRect().width < string_elements[x].children[0].getBoundingClientRect().width){
-        string_elements[x].parentElement.parentElement.classList.remove("hoverable_element");
-        string_elements[x].parentElement.parentElement.classList.add("hoverable_element");
+        string_elements[x].parentElement.parentElement.classList.remove(css["hoverable_element"]);
+        string_elements[x].parentElement.parentElement.classList.add(css["hoverable_element"]);
       }
     }
 
     var dictionary_value = document.getElementsByClassName("dictionary_value");
     for(var x = 0; x < dictionary_value.length; x++){
       if(dictionary_value[x].getBoundingClientRect().width < dictionary_value[x].children[0].getBoundingClientRect().width){
-        dictionary_value[x].parentElement.parentElement.classList.remove("hoverable_element");
-        dictionary_value[x].parentElement.parentElement.classList.add("hoverable_element");
+        dictionary_value[x].parentElement.parentElement.classList.remove(css["hoverable_element"]);
+        dictionary_value[x].parentElement.parentElement.classList.add(css["hoverable_element"]);
       }
     }
 
     var array_value = document.getElementsByClassName("array_value");
     for(var x = 0; x < array_value.length; x++){
       if(array_value[x].getBoundingClientRect().width < array_value[x].children[0].getBoundingClientRect().width){
-        array_value[x].parentElement.parentElement.classList.remove("hoverable_element");
-        array_value[x].parentElement.parentElement.classList.add("hoverable_element");
+        array_value[x].parentElement.parentElement.classList.remove(css["hoverable_element"]);
+        array_value[x].parentElement.parentElement.classList.add(css["hoverable_element"]);
       }
     }
   }
@@ -159,24 +159,24 @@ class TcTable extends Component {
     var string_elements = document.getElementsByClassName("string_val");
     for(var x = 0; x < string_elements.length; x++){
       if(string_elements[x].getBoundingClientRect().width < string_elements[x].children[0].getBoundingClientRect().width){
-        string_elements[x].parentElement.parentElement.classList.remove("hoverable_element");
-        string_elements[x].parentElement.parentElement.classList.add("hoverable_element");
+        string_elements[x].parentElement.parentElement.classList.remove(css["hoverable_element"]);
+        string_elements[x].parentElement.parentElement.classList.add(css["hoverable_element"]);
       }
     }
 
     var dictionary_value = document.getElementsByClassName("dictionary_value");
     for(var x = 0; x < dictionary_value.length; x++){
       if(dictionary_value[x].getBoundingClientRect().width < dictionary_value[x].children[0].getBoundingClientRect().width){
-        dictionary_value[x].parentElement.parentElement.classList.remove("hoverable_element");
-        dictionary_value[x].parentElement.parentElement.classList.add("hoverable_element");
+        dictionary_value[x].parentElement.parentElement.classList.remove(css["hoverable_element"]);
+        dictionary_value[x].parentElement.parentElement.classList.add(css["hoverable_element"]);
       }
     }
 
     var array_value = document.getElementsByClassName("array_value");
     for(var x = 0; x < array_value.length; x++){
       if(array_value[x].getBoundingClientRect().width < array_value[x].children[0].getBoundingClientRect().width){
-        array_value[x].parentElement.parentElement.classList.remove("hoverable_element");
-        array_value[x].parentElement.parentElement.classList.add("hoverable_element");
+        array_value[x].parentElement.parentElement.classList.remove(css["hoverable_element"]);
+        array_value[x].parentElement.parentElement.classList.add(css["hoverable_element"]);
       }
     }
   }
@@ -284,7 +284,7 @@ class TcTable extends Component {
       if(result == "image"){
         $this.image_source_container.style.display = "block";
         $this.arrow_left.style.display = "block";
-        if($this.image_source_container != null && e.target.getElementsByTagName("img")[0] && e.target.classList.contains('elements')){
+        if($this.image_source_container != null && e.target.getElementsByTagName("img")[0] && e.target.classList.contains(css['elements'])){
           var element_bounding = e.target.getBoundingClientRect();
           var arrow_bounding = $this.arrow_left.getBoundingClientRect();
           var bound_height = parseInt(((element_bounding.height/2 - arrow_bounding.height/2) + (element_bounding.y)), 10);
@@ -415,7 +415,7 @@ class TcTable extends Component {
     var $this = this;
     return function(e) {
       if(result == "image"){
-        if($this.image_source_container != null && e.target.getElementsByTagName("img")[0] && e.target.classList.contains('elements')){
+        if($this.image_source_container != null && e.target.getElementsByTagName("img")[0] && e.target.classList.contains(css['elements'])){
           $this.image_source_container.src = "";
         }
       }
@@ -464,8 +464,8 @@ class TcTable extends Component {
           if(active_element_loop[ele] != e.target){
             active_element_loop[ele].children[0].children[1].children[0].style.display = "block";
             active_element_loop[ele].children[0].children[1].children[1].style.display = "none";
-            active_element_loop[ele].children[0].children[1].classList.remove("active_arrow");
-            active_element_loop[ele].classList.remove("active_element");
+            active_element_loop[ele].children[0].children[1].classList.remove(css["active_arrow"]);
+            active_element_loop[ele].classList.remove(css["active_element"]);
           }
         }
 
@@ -475,8 +475,8 @@ class TcTable extends Component {
           if(e.target.children[0].children[1].children[0].style.display == "none"){
             e.target.children[0].children[1].children[0].style.display = "block";
             e.target.children[0].children[1].children[1].style.display = "none";
-            e.target.classList.remove("active_element");
-            e.target.children[0].children[1].classList.remove("active_arrow");
+            e.target.classList.remove(css["active_element"]);
+            e.target.children[0].children[1].classList.remove(css["active_arrow"]);
             this.data_sent = undefined;
             this.column_name = undefined;
             this.y = -1;
@@ -484,8 +484,8 @@ class TcTable extends Component {
           }else{
             e.target.children[0].children[1].children[0].style.display = "none";
             e.target.children[0].children[1].children[1].style.display = "block";
-            e.target.classList.add("active_element");
-            e.target.children[0].children[1].classList.add("active_arrow");
+            e.target.classList.add(css["active_element"]);
+            e.target.children[0].children[1].classList.add(css["active_arrow"]);
             this.data_sent = undefined;
             this.column_name = undefined;
             this.y = -1;
@@ -678,8 +678,8 @@ class TcTable extends Component {
     for(var ele = 0; ele < active_element_loop.length; ele++){
       active_element_loop[ele].children[0].children[1].children[0].style.display = "block";
       active_element_loop[ele].children[0].children[1].children[1].style.display = "none";
-      active_element_loop[ele].children[0].children[1].classList.remove("active_arrow");
-      active_element_loop[ele].classList.remove("active_element");
+      active_element_loop[ele].children[0].children[1].classList.remove(css["active_arrow"]);
+      active_element_loop[ele].classList.remove(css["active_element"]);
     }
 
     this.drawTable()
