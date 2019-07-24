@@ -11,45 +11,55 @@
 #include <core/util/test_macros.hpp>
 #include "log_proxy_tests.hpp"
 
-#include <iostream>
-
 @protocol TestExportInterface<JSExport>
-@property (readonly) NSString * expected;
+@property NSString * expected;
 @end
 
 @interface TestExport : NSObject<TestExportInterface>
+@property NSString * expected;
 @end
 
 @implementation TestExport
+@synthesize expected;
 
-- (NSString *)expected {
-    return @"this is expected.";
+- (instancetype)init {
+    self = [super init];
+    self.expected = @"this is expected.";
+    return self;
 }
 
 @end
 
 void LogProxyTests::test_no_logging_on_expected_property_access() {
-    std::cout << "Starting no logging test" << std::endl;
     JSContext *context = [[JSContext alloc] init];
     TestExport *original = [[TestExport alloc] init];
     JSValue *v = [JSValue valueWithObject:original inContext:context];
     JSValue *wrapped = [LogProxy wrap:v];
     TS_ASSERT_DIFFERS(wrapped, nil);
     NSString *str = @"this is not expected.";
-    BOOST_CHECK_NO_THROW(
-        str = v[@"expected"].toString;
-    );
+    str = wrapped[@"expected"].toString;
+
+    // Expect a defined property to give back the correct result through the wrapper
     TS_ASSERT_DIFFERS(str, nil);
     std::string expected = "this is expected.";
     std::string actual = str.UTF8String;
     TS_ASSERT_EQUALS(expected, actual);
-    std::cout << "Finished no logging test" << std::endl;
 }
 
 void LogProxyTests::test_logging_on_unexpected_property_access() {
+    JSContext *context = [[JSContext alloc] init];
+    TestExport *original = [[TestExport alloc] init];
+    JSValue *v = [JSValue valueWithObject:original inContext:context];
+    JSValue *wrapped = [LogProxy wrap:v];
+    TS_ASSERT_DIFFERS(wrapped, nil);
+    NSString *str = @"this is not expected.";
 
-}
+    // Expect accessing a missing property to throw an exception?
+    //str = wrapped[@"unexpected"].toString;
 
-void LogProxyTests::test_logging_on_unexpected_function_call() {
-
+    // Expect str to be unmodified
+    TS_ASSERT_DIFFERS(str, nil);
+    std::string expected = "this is not expected.";
+    std::string actual = str.UTF8String;
+    TS_ASSERT_EQUALS(expected, actual);
 }

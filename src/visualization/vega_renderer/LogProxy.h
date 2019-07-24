@@ -5,11 +5,26 @@
  */
 
 #import <JavaScriptCore/JavaScriptCore.h>
+#include <os/log.h>
 
-@protocol LogProxyInterface<JSExport>
-+ (JSValue *)wrap:(JSValue *)instance;
-@end
+typedef id (^LogProxyHandler_t)(NSObject *obj, NSString *property);
 
-@interface LogProxy : NSObject<LogProxyInterface>
+@interface LogProxy : NSObject
+
++ (os_log_t)logger;
+
+/*
+ * Provides a default handler (uses [obj valueForKey:property]),
+ * that will log all property accesses using os_log_debug, with subsystem
+ * "com.apple.turi" and component "vega_renderer".
+ */
 + (JSValue *)wrap:(JSValue *)instance;
+
+/*
+ * Takes a handler to wrap the instance with; all property accesses will go
+ * through this handler, and the handler should return the property value.
+ */
++ (JSValue *)wrap:(JSValue *)instance
+      withHandler:(LogProxyHandler_t)handler;
+
 @end

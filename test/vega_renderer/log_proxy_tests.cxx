@@ -19,8 +19,4 @@ BOOST_AUTO_TEST_CASE( test_logging_on_unexpected_property_access ) {
     LogProxyTests::test_logging_on_unexpected_property_access();
 }
 
-BOOST_AUTO_TEST_CASE( test_logging_on_unexpected_function_call ) {
-    LogProxyTests::test_logging_on_unexpected_function_call();
-}
-
 BOOST_AUTO_TEST_SUITE_END();
