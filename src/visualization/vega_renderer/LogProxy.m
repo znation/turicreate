@@ -24,7 +24,15 @@
   return [LogProxy wrap:instance withHandler:^(NSObject *target, NSString *key) {
     // First off, if the JS interface for this type has this property, return it
     if ([instance hasProperty:key]) {
-      return instance[key];
+      JSContext *context = instance.context;
+      JSValue *ret = instance[key];
+      context[@"__tmp_propertyAccess"] = ret;
+      if ([[context evaluateScript:@"typeof __tmp_propertyAccess"].toString isEqualToString:@"function"]) {
+        // it's a method, bind it to the original target or else we'll get
+        // "self type check failed for Objective-C instance method"
+        ret = [ret invokeMethod:@"bind" withArguments:@[instance]];
+      }
+      return ret;
     }
 
     // Encountered a missing key here!
@@ -39,6 +47,11 @@
   }];
 }
 
++ (JSValue *)wrapObject:(NSObject *)object {
+  // Assumes we have a current JSC context
+  return [LogProxy wrap:[JSValue valueWithObject:object inContext:[JSContext currentContext]]];
+}
+
 + (JSValue *)wrap:(JSValue *)instance
     withHandler:(LogProxyHandler_t)handler {
   instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
@@ -48,8 +61,6 @@
   instance.context[@"__tmp_wrapped_object"] = instance;
   [instance.context evaluateScript:@"__tmp_wrapped_object = new Proxy(__tmp_wrapped_object, { get: __tmp_valueForKey });"];
   JSValue *ret = instance.context[@"__tmp_wrapped_object"];
-  [instance.context evaluateScript:@"del __tmp_valueForKey"];
-  [instance.context evaluateScript:@"del __tmp_wrapped_object"];
   return ret;
 }
 

@@ -4,6 +4,7 @@
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
 #import "JSCanvas.h"
+#import "LogProxy.h"
 #import "colors.h"
 
 #import <AppKit/AppKit.h>
@@ -520,11 +521,11 @@
     _textAlign = textAlign;
 }
 
-- (VegaCGTextMetrics *)measureText:(NSString *)text {
+- (JSValue *)measureText:(NSString *)text {
     NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:text attributes:self.textAttributes];
     VegaCGTextMetrics *ret = [[VegaCGTextMetrics alloc] init];
     ret.width = attrStr.size.width;
-    return ret;
+    return [LogProxy wrapObject:ret];
 }
 
 - (void)rotateWithAngle:(double)angle {

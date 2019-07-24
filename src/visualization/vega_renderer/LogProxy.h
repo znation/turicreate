@@ -20,6 +20,14 @@ typedef id (^LogProxyHandler_t)(NSObject *obj, NSString *property);
 + (JSValue *)wrap:(JSValue *)instance;
 
 /*
+ * Provides a default handler (uses [obj valueForKey:property]),
+ * that will log all property accesses using os_log_info, and will log missing
+ * properties with os_log_error, using subsystem "com.apple.turi" and component
+ * "vega_renderer".
+ */
++ (JSValue *)wrapObject:(NSObject *)object;
+
+/*
  * Takes a handler to wrap the instance with; all property accesses will go
  * through this handler, and the handler should return the property value.
  */

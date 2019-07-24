@@ -79,7 +79,7 @@ JSExportAs(addColorStop,
 @property double lineDashOffset;
 
 // utilities
-- (VegaCGTextMetrics *)measureText:(NSString *)text;
+- (JSValue *)measureText:(NSString *)text;
 
 // save/restore context state
 - (void)save;
