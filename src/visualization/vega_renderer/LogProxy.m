@@ -5,6 +5,10 @@
  */
 #import "LogProxy.h"
 
+@interface LogProxy (Logging)
++ (os_log_t)logger;
+@end
+
 @implementation LogProxy
 
 + (os_log_t)logger {
@@ -18,14 +22,27 @@
 
 + (JSValue *)wrap:(JSValue *)instance {
   return [LogProxy wrap:instance withHandler:^(NSObject *target, NSString *key) {
-    os_log_debug(LogProxy.logger, "Accessing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
-    return [target valueForKey:key];
+    // First off, if the JS interface for this type has this property, return it
+    if ([instance hasProperty:key]) {
+      return instance[key];
+    }
+
+    // Encountered a missing key here!
+#ifndef NDEBUG
+    NSLog(@"Missing property \"%@\" on LogProxy wrapped object %@", key, target.debugDescription);
+#endif
+    os_log_error(LogProxy.logger, "Missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
+
+    // This will preserve the semantics of property access without LogProxy,
+    // which is to return undefined for a missing property.
+    return [JSValue valueWithUndefinedInContext:instance.context];
   }];
 }
 
 + (JSValue *)wrap:(JSValue *)instance
     withHandler:(LogProxyHandler_t)handler {
   instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
+    os_log_info(LogProxy.logger, "Accessing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
     return handler(target, key);
   };
   instance.context[@"__tmp_wrapped_object"] = instance;

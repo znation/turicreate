@@ -11,12 +11,11 @@ typedef id (^LogProxyHandler_t)(NSObject *obj, NSString *property);
 
 @interface LogProxy : NSObject
 
-+ (os_log_t)logger;
-
 /*
  * Provides a default handler (uses [obj valueForKey:property]),
- * that will log all property accesses using os_log_debug, with subsystem
- * "com.apple.turi" and component "vega_renderer".
+ * that will log all property accesses using os_log_info, and will log missing
+ * properties with os_log_error, using subsystem "com.apple.turi" and component
+ * "vega_renderer".
  */
 + (JSValue *)wrap:(JSValue *)instance;
 
