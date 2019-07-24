@@ -32,6 +32,12 @@
         // "self type check failed for Objective-C instance method"
         ret = [ret invokeMethod:@"bind" withArguments:@[instance]];
       }
+
+      // Make sure the wrapping is applied recursively on objects
+      if (ret.isObject) {
+        ret = [LogProxy wrap:ret];
+      }
+
       return ret;
     }
 
