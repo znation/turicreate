@@ -112,7 +112,7 @@ JSExportAs(clearRect,
 - (void)clip;
 - (void)closePath;
 JSExportAs(createLinearGradient,
-           - (VegaCGLinearGradient *)createLinearGradientWithX0:(double)x0
+           - (JSValue *)createLinearGradientWithX0:(double)x0
            y0:(double)y0
            x1:(double)x1
            y1:(double)y1

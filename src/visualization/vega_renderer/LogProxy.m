@@ -60,14 +60,31 @@
 
 + (JSValue *)wrap:(JSValue *)instance
     withHandler:(LogProxyHandler_t)handler {
-  instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
+  __weak JSValue * weak_instance = instance;
+  instance.context[@"__tmp_valueForKey"] = ^id(NSObject *target, NSString *key) {
+    if ([key isEqualToString:@"__instance"]) {
+      return weak_instance;
+    }
     os_log_info(LogProxy.logger, "Accessing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
     return handler(target, key);
   };
   instance.context[@"__tmp_wrapped_object"] = instance;
   [instance.context evaluateScript:@"__tmp_wrapped_object = new Proxy(__tmp_wrapped_object, { get: __tmp_valueForKey });"];
+  instance.context[@"__tmp_wrapped_object"][@"__instance"] = instance;
   JSValue *ret = instance.context[@"__tmp_wrapped_object"];
   return ret;
+}
+
++ (id)unwrap:(id)object {
+  if ([object isKindOfClass:NSDictionary.class]) {
+    NSDictionary *dict = (NSDictionary *)object;
+    id instance = [dict objectForKey:@"__instance"];
+    if (instance != nil) {
+      return instance;
+    }
+  }
+
+  return object;
 }
 
 @end

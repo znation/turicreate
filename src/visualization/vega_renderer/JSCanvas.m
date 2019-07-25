@@ -223,7 +223,7 @@
     return _fillStyle;
 }
 - (void)setFillStyle:(id)fillStyle {
-    _fillStyle = fillStyle;
+    _fillStyle = [LogProxy unwrap:fillStyle];
     if (![_fillStyle isKindOfClass:NSString.class]) {
         assert([_fillStyle isKindOfClass:VegaCGLinearGradient.class]);
     }
@@ -686,8 +686,9 @@
     CGPathRelease(currentPath);
 }
 
-- (VegaCGLinearGradient *)createLinearGradientWithX0:(double)x0 y0:(double)y0 x1:(double)x1 y1:(double)y1 {
-    return [[VegaCGLinearGradient alloc] initWithX0:x0 y0:y0 x1:x1 y1:y1];
+- (JSValue *)createLinearGradientWithX0:(double)x0 y0:(double)y0 x1:(double)x1 y1:(double)y1 {
+    VegaCGLinearGradient *ret = [[VegaCGLinearGradient alloc] initWithX0:x0 y0:y0 x1:x1 y1:y1];
+    return [LogProxy wrapObject:ret];
 }
 
 @end

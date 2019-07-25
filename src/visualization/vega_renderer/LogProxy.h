@@ -34,4 +34,12 @@ typedef id (^LogProxyHandler_t)(NSObject *obj, NSString *property);
 + (JSValue *)wrap:(JSValue *)instance
       withHandler:(LogProxyHandler_t)handler;
 
+
+/*
+ * Takes a LogProxy, or any other object type.
+ * If object is a LogProxy wrapper, returns the wrapped object.
+ * Otherwise, returns the object passed in.
+ */
++ (id)unwrap:(id)object;
+
 @end
