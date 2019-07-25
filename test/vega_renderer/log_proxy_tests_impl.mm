@@ -51,10 +51,13 @@ void LogProxyTests::test_logging_on_unexpected_property_access() {
     JSValue *v = [JSValue valueWithObject:original inContext:context];
 
     // Set up the wrapper to expect exactly what we are about to test
-    JSValue *wrapped = [LogProxy wrap:v withHandler:^(NSObject *target, NSString *key) {
+    JSValue *wrapped = [LogProxy wrap:v withGetHandler:^(NSObject *target, NSString *key) {
         TS_ASSERT_EQUALS(key.UTF8String, "unexpected");
         TS_ASSERT(![v hasProperty:key]);
         return [JSValue valueWithUndefinedInContext:context];
+    } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
+        TS_ASSERT(FALSE);
+        return FALSE;
     }];
     TS_ASSERT_DIFFERS(wrapped, nil);
 

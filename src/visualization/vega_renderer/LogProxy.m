@@ -21,7 +21,8 @@
 }
 
 + (JSValue *)wrap:(JSValue *)instance {
-  return [LogProxy wrap:instance withHandler:^(NSObject *target, NSString *key) {
+  return [LogProxy wrap:instance withGetHandler:^(NSObject *target, NSString *key) {
+
     // First off, if the JS interface for this type has this property, return it
     if ([instance hasProperty:key]) {
       JSContext *context = instance.context;
@@ -43,13 +44,36 @@
 
     // Encountered a missing key here!
 #ifndef NDEBUG
-    NSLog(@"Missing property \"%@\" on LogProxy wrapped object %@", key, target.debugDescription);
+    NSLog(@"Get for missing property \"%@\" on LogProxy wrapped object %@", key, target.debugDescription);
+    assert(false);
 #endif
-    os_log_error(LogProxy.logger, "Missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
+    os_log_error(LogProxy.logger, "Get for missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
 
     // This will preserve the semantics of property access without LogProxy,
     // which is to return undefined for a missing property.
     return [JSValue valueWithUndefinedInContext:instance.context];
+
+  } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
+
+    // First off, if the JS interface for this type has this property, use it
+    if ([instance hasProperty:key]) {
+      instance[key] = value;
+      return TRUE;
+    }
+
+    if ([key isEqualToString:@"__instance"]) {
+      assert(false);
+    }
+
+    // Encountered a missing key here!
+#ifndef NDEBUG
+    NSLog(@"Set for missing property \"%@\" on LogProxy wrapped object %@ to value %@", key, target.debugDescription, value.debugDescription);
+    assert(false);
+#endif
+    os_log_error(LogProxy.logger, "Set for missing property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
+
+    return FALSE;
+
   }];
 }
 
@@ -59,18 +83,32 @@
 }
 
 + (JSValue *)wrap:(JSValue *)instance
-    withHandler:(LogProxyHandler_t)handler {
+   withGetHandler:(LogProxyGetHandler_t)getHandler
+       setHandler:(LogProxySetHandler_t)setHandler {
   __weak JSValue * weak_instance = instance;
-  instance.context[@"__tmp_valueForKey"] = ^id(NSObject *target, NSString *key) {
+  instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
     if ([key isEqualToString:@"__instance"]) {
-      return weak_instance;
+      return (NSObject *)weak_instance;
     }
-    os_log_info(LogProxy.logger, "Accessing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
-    return handler(target, key);
+    os_log_info(LogProxy.logger, "Getting property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
+    return getHandler(target, key);
+  };
+  instance.context[@"__tmp_setValueForKey"] = ^BOOL(NSObject *target, NSString *key, NSObject *value) {
+    os_log_info(LogProxy.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
+    return setHandler(target, key, value);
   };
   instance.context[@"__tmp_wrapped_object"] = instance;
-  [instance.context evaluateScript:@"__tmp_wrapped_object = new Proxy(__tmp_wrapped_object, { get: __tmp_valueForKey });"];
-  instance.context[@"__tmp_wrapped_object"][@"__instance"] = instance;
+  instance.context[@"__tmp_wrapped_object_original"] = instance;
+  [instance.context evaluateScript:@""
+    "__tmp_wrapped_object = new Proxy(__tmp_wrapped_object_original, {"
+    "    get: __tmp_valueForKey,"
+    "    set: __tmp_setValueForKey,"
+    "});"
+    "Object.defineProperty(__tmp_wrapped_object, '__instance', {"
+    "  enumerable: true,"
+    "  value: __tmp_wrapped_object_original,"
+    "});"
+  ];
   JSValue *ret = instance.context[@"__tmp_wrapped_object"];
   return ret;
 }

@@ -7,7 +7,8 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 #include <os/log.h>
 
-typedef id (^LogProxyHandler_t)(NSObject *obj, NSString *property);
+typedef NSObject * (^LogProxyGetHandler_t)(NSObject *obj, NSString *property);
+typedef BOOL (^LogProxySetHandler_t)(NSObject *obj, NSString *property, NSObject *value);
 
 @interface LogProxy : NSObject
 
@@ -32,7 +33,8 @@ typedef id (^LogProxyHandler_t)(NSObject *obj, NSString *property);
  * through this handler, and the handler should return the property value.
  */
 + (JSValue *)wrap:(JSValue *)instance
-      withHandler:(LogProxyHandler_t)handler;
+   withGetHandler:(LogProxyGetHandler_t)getHandler
+       setHandler:(LogProxySetHandler_t)setHandler;
 
 
 /*
