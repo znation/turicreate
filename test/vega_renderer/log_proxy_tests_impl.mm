@@ -43,6 +43,14 @@ void LogProxyTests::test_no_logging_on_expected_property_access() {
     std::string expected = "this is expected.";
     std::string actual = str.UTF8String;
     TS_ASSERT_EQUALS(expected, actual);
+
+    // Expect setting a defined property to retain it
+    wrapped[@"expected"] = @"this is the new value.";
+    str = wrapped[@"expected"].toString;
+    TS_ASSERT_DIFFERS(str, nil);
+    expected = "this is the new value.";
+    actual = str.UTF8String;
+    TS_ASSERT_EQUALS(expected, actual);
 }
 
 void LogProxyTests::test_logging_on_unexpected_property_access() {
@@ -52,11 +60,11 @@ void LogProxyTests::test_logging_on_unexpected_property_access() {
 
     // Set up the wrapper to expect exactly what we are about to test
     JSValue *wrapped = [LogProxy wrap:v withGetHandler:^(NSObject *target, NSString *key) {
-        TS_ASSERT_EQUALS(key.UTF8String, "unexpected");
         TS_ASSERT(![v hasProperty:key]);
         return [JSValue valueWithUndefinedInContext:context];
     } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
-        TS_ASSERT(FALSE);
+        TS_ASSERT_EQUALS(key.UTF8String, "undeclared");
+        TS_ASSERT(![v hasProperty:key]);
         return FALSE;
     }];
     TS_ASSERT_DIFFERS(wrapped, nil);
@@ -67,5 +75,14 @@ void LogProxyTests::test_logging_on_unexpected_property_access() {
     TS_ASSERT_DIFFERS(str, nil);
     std::string expected = "undefined";
     std::string actual = str.UTF8String;
+    TS_ASSERT_EQUALS(expected, actual);
+
+    // Expect setting a missing property to do nothing,
+    // and not retain the value
+    wrapped[@"undeclared"] = @"this is the new value.";
+    str = wrapped[@"undeclared"].toString;
+    TS_ASSERT_DIFFERS(str, nil);
+    expected = "undefined";
+    actual = str.UTF8String;
     TS_ASSERT_EQUALS(expected, actual);
 }

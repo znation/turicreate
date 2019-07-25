@@ -24,9 +24,9 @@
   return [LogProxy wrap:instance withGetHandler:^(NSObject *target, NSString *key) {
 
     // First off, if the JS interface for this type has this property, return it
-    if ([instance hasProperty:key]) {
+    JSValue *ret = instance[key];
+    if (ret != nil && !ret.isUndefined) {
       JSContext *context = instance.context;
-      JSValue *ret = instance[key];
       context[@"__tmp_propertyAccess"] = ret;
       if ([[context evaluateScript:@"typeof __tmp_propertyAccess"].toString isEqualToString:@"function"]) {
         // it's a method, bind it to the original target or else we'll get
@@ -55,14 +55,12 @@
 
   } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
 
+    assert(![key isEqualToString:@"__instance"]);
+
     // First off, if the JS interface for this type has this property, use it
     if ([instance hasProperty:key]) {
       instance[key] = value;
       return TRUE;
-    }
-
-    if ([key isEqualToString:@"__instance"]) {
-      assert(false);
     }
 
     // Encountered a missing key here!
@@ -87,6 +85,7 @@
        setHandler:(LogProxySetHandler_t)setHandler {
   __weak JSValue * weak_instance = instance;
   instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
+    NSLog(@"Zach was here 1");
     if ([key isEqualToString:@"__instance"]) {
       return (NSObject *)weak_instance;
     }
@@ -94,6 +93,8 @@
     return getHandler(target, key);
   };
   instance.context[@"__tmp_setValueForKey"] = ^BOOL(NSObject *target, NSString *key, NSObject *value) {
+    // TODO why does this not get called???
+    NSLog(@"Zach was here 2");
     os_log_info(LogProxy.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
     return setHandler(target, key, value);
   };
