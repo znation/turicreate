@@ -76,14 +76,29 @@
 }
 
 + (id)unwrap:(id)object {
+  // First unwrap JSValues into Objective C object values
+  if ([object isKindOfClass:JSValue.class]) {
+    JSValue *value = (JSValue *)object;
+    if (value.isObject) {
+      object = value.toObject;
+    }
+  }
+
+  // Then test for NSDictionary, which is what new Proxy() shows
+  // up as in Objective C.
   if ([object isKindOfClass:NSDictionary.class]) {
     NSDictionary *dict = (NSDictionary *)object;
+
+    // If it has __instance on it, assume we put it there and
+    // that's what we want to return.
     id instance = [dict objectForKey:@"__instance"];
     if (instance != nil) {
       return instance;
     }
   }
 
+  // It doesn't appear to be a Proxy object, or at least not
+  // one wrapped by LogProxy. Return it as is.
   return object;
 }
 
