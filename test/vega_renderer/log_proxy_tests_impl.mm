@@ -55,6 +55,24 @@ void LogProxyTests::test_no_logging_on_expected_property_access() {
     TS_ASSERT_EQUALS(expected, actual);
 }
 
+@interface UnexpectedPropertyAccessLogger : NSObject<LogProxyHandling>
+@end
+
+@implementation UnexpectedPropertyAccessLogger
+- (JSValue *)getPropertyOnObject:(JSValue *)v
+                            named:(NSString *)key {
+    TS_ASSERT(![v hasProperty:key]);
+    return [JSValue valueWithUndefinedInContext:v.context];
+}
+- (BOOL)setPropertyOnObject:(JSValue *)v
+                        named:(NSString *)key
+                    toValue:(JSValue *)value {
+    TS_ASSERT_EQUALS(key.UTF8String, "undeclared");
+    TS_ASSERT(![v hasProperty:key]);
+    return FALSE;
+}
+@end
+
 void LogProxyTests::test_logging_on_unexpected_property_access() {
     JSContext *context = [[JSContext alloc] init];
     [JSConsole attachToJavaScriptContext:context];
@@ -62,14 +80,7 @@ void LogProxyTests::test_logging_on_unexpected_property_access() {
     JSValue *v = [JSValue valueWithObject:original inContext:context];
 
     // Set up the wrapper to expect exactly what we are about to test
-    JSValue *wrapped = [LogProxy wrap:v withGetHandler:^(NSObject *target, NSString *key) {
-        TS_ASSERT(![v hasProperty:key]);
-        return [JSValue valueWithUndefinedInContext:context];
-    } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
-        TS_ASSERT_EQUALS(key.UTF8String, "undeclared");
-        TS_ASSERT(![v hasProperty:key]);
-        return FALSE;
-    }];
+    JSValue *wrapped = [LogProxy wrap:v withHandler:[[UnexpectedPropertyAccessLogger alloc] init]];
     TS_ASSERT_DIFFERS(wrapped, nil);
 
     // Expect accessing a missing property to return undefined, but it will also

@@ -7,22 +7,19 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 #include <os/log.h>
 
-typedef JSValue * (^LogProxyGetHandler_t)(JSValue *obj, NSString *property);
-typedef BOOL (^LogProxySetHandler_t)(JSValue *obj, NSString *property, JSValue *value);
+#import "LogProxyHandler.h"
 
 @interface LogProxy : NSObject
 
 /*
- * Provides a default handler (uses [obj valueForKey:property]),
- * that will log all property accesses using os_log_info, and will log missing
+ * Logs all property accesses using os_log_info, and will log missing
  * properties with os_log_error, using subsystem "com.apple.turi" and component
  * "vega_renderer".
  */
 + (JSValue *)wrap:(JSValue *)instance;
 
 /*
- * Provides a default handler (uses [obj valueForKey:property]),
- * that will log all property accesses using os_log_info, and will log missing
+ * Logs all property accesses using os_log_info, and will log missing
  * properties with os_log_error, using subsystem "com.apple.turi" and component
  * "vega_renderer".
  */
@@ -33,9 +30,7 @@ typedef BOOL (^LogProxySetHandler_t)(JSValue *obj, NSString *property, JSValue *
  * through this handler, and the handler should return the property value.
  */
 + (JSValue *)wrap:(JSValue *)instance
-   withGetHandler:(LogProxyGetHandler_t)getHandler
-       setHandler:(LogProxySetHandler_t)setHandler;
-
+      withHandler:(id<LogProxyHandling>)handler;
 
 /*
  * Takes a LogProxy, or any other object type.

@@ -9,21 +9,7 @@
 
 #include <os/log.h>
 
-@implementation LogProxyHandler {
-    LogProxyGetHandler_t _getHandler;
-    LogProxySetHandler_t _setHandler;
-}
-
-- (instancetype)initWithGetHandler:(LogProxyGetHandler_t)getHandler
-                        setHandler:(LogProxySetHandler_t)setHandler {
-    self = [super init];
-    if (!self) {
-        return nil;
-    }
-    _getHandler = getHandler;
-    _setHandler = setHandler;
-    return self;
-}
+@implementation LogProxyHandler
 
 - (JSValue *)getPropertyOnObject:(JSValue *)instance
                             named:(NSString *)key {
@@ -48,8 +34,15 @@
       return ret;
     }
 
-    // Encountered a missing key here! Notify the handler.
-    return _getHandler(instance, key);
+    // Encountered a missing key here!
+#ifndef NDEBUG
+    NSLog(@"Get for missing property \"%@\" on LogProxy wrapped object %@", key, instance.debugDescription);
+#endif
+    os_log_error(LogProxy.logger, "Get for missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, instance.debugDescription.UTF8String);
+
+    // This will preserve the semantics of property access without LogProxy,
+    // which is to return undefined for a missing property.
+    return [JSValue valueWithUndefinedInContext:instance.context];
 }
 
 - (BOOL)setPropertyOnObject:(JSValue *)instance
@@ -64,8 +57,13 @@
       return TRUE;
     }
 
-    // Encountered a missing key here! Notify the handler.
-    return _setHandler(instance, key, value);
+    // Encountered a missing key here!
+#ifndef NDEBUG
+    NSLog(@"Set for missing property \"%@\" on LogProxy wrapped object %@ to value %@", key, instance.debugDescription, value.debugDescription);
+#endif
+    os_log_error(LogProxy.logger, "Set for missing property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, instance.debugDescription.UTF8String, value.debugDescription.UTF8String);
+
+    return FALSE;
 }
 
 @end
