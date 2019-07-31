@@ -138,7 +138,7 @@
     // MUST only use these from property setter/getters
     CGLayerRef _layer;
 
-    id _fillStyle;
+    JSValue * _fillStyle;
     double _globalAlpha;
     NSString * _lineCap;
     NSString * _lineJoin;
@@ -219,13 +219,15 @@
 }
 
 // properties
-- (id)fillStyle {
+- (JSValue *)fillStyle {
+    assert([_fillStyle isKindOfClass:[JSValue class]]);
     return _fillStyle;
 }
-- (void)setFillStyle:(id)fillStyle {
-    _fillStyle = [LogProxy unwrap:fillStyle];
-    if (![_fillStyle isKindOfClass:NSString.class]) {
-        assert([_fillStyle isKindOfClass:VegaCGLinearGradient.class]);
+- (void)setFillStyle:(JSValue *)fillStyle {
+    _fillStyle = [LogProxy tryUnwrap:fillStyle];
+    if (!_fillStyle.isString) {
+        assert(_fillStyle.isObject);
+        assert([_fillStyle.toObject isKindOfClass:VegaCGLinearGradient.class]);
     }
 }
 
@@ -235,8 +237,8 @@
     if (_fillStyle == nil) {
         color = [self.class newColorFromR:0 G:0 B:0 A:255];
     } else {
-        assert([_fillStyle isKindOfClass:NSString.class]);
-        color = [self.class newColorFromString:_fillStyle];
+        assert(_fillStyle.isString);
+        color = [self.class newColorFromString:_fillStyle.toString];
     }
     assert(color != nil);
     NSColor *nsColor = [NSColor colorWithCGColor:color];
@@ -672,15 +674,16 @@
 
 - (void)fill {
     CGPathRef currentPath = CGContextCopyPath(self.context);
-    if ([_fillStyle isKindOfClass:VegaCGLinearGradient.class]) {
-        VegaCGLinearGradient *gradient = _fillStyle;
-        [gradient fillWithContext:self.context];
-    } else {
-        assert([_fillStyle isKindOfClass:NSString.class]);
-        CGColorRef color = [self.class newColorFromString:_fillStyle];
+    if (_fillStyle.isString) {
+        CGColorRef color = [self.class newColorFromString:_fillStyle.toString];
         CGContextSetFillColorWithColor(self.context, color);
         CGColorRelease(color);
         CGContextFillPath(self.context);
+    } else {
+        assert(_fillStyle.isObject);
+        assert([_fillStyle.toObject isKindOfClass:VegaCGLinearGradient.class]);
+        VegaCGLinearGradient *gradient = _fillStyle.toObject;
+        [gradient fillWithContext:self.context];
     }
     CGContextAddPath(self.context, currentPath);
     CGPathRelease(currentPath);

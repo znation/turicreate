@@ -26,8 +26,9 @@
         ret = [ret invokeMethod:@"bind" withArguments:@[instance]];
       }
 
-      // Make sure the wrapping is applied recursively on objects
-      if (ret.isObject) {
+      // Make sure the wrapping is applied recursively on objects, but only
+      // if the caller isn't requesting the unwrapped object explicitly
+      if (ret.isObject && ![key isEqualToString:@"__LogProxy_wrapped"]) {
         ret = [LogProxy wrap:ret];
       }
 

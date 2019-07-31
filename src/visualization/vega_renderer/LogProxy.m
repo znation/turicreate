@@ -28,36 +28,40 @@
 
 + (JSValue *)wrap:(JSValue *)instance
    withHandler:(id<LogProxyHandling>)handler {
-  instance.context[@"__tmp_wrapped_object"] = instance;
+  instance.context[@"__tmp_instance"] = instance;
   instance.context[@"__tmp_handler"] = handler;
-  return [instance.context evaluateScript:@"new Proxy(__tmp_wrapped_object, __tmp_handler);"];
+  instance.context[@"__tmp_proxy"] = [instance.context evaluateScript:@"new Proxy(__tmp_instance, __tmp_handler);"];
+  [instance.context evaluateScript:@""
+	    "Object.defineProperty(__tmp_proxy, '__LogProxy_wrapped', {"
+	    "  enumerable: true,"
+      "  value: __tmp_instance,"
+      "});"];
+  return instance.context[@"__tmp_proxy"];
 }
 
-+ (id)unwrap:(id)object {
-  // First unwrap JSValues into Objective C object values
-  if ([object isKindOfClass:JSValue.class]) {
-    JSValue *value = (JSValue *)object;
-    if (value.isObject) {
-      object = value.toObject;
-    }
-  }
-
-  // Then test for NSDictionary, which is what new Proxy() shows
-  // up as in Objective C.
-  if ([object isKindOfClass:NSDictionary.class]) {
-    NSDictionary *dict = (NSDictionary *)object;
-
-    // If it has __instance on it, assume we put it there and
-    // that's what we want to return.
-    id instance = [dict objectForKey:@"__instance"];
-    if (instance != nil) {
-      return instance;
++ (id)tryUnwrap:(id)object {
+  if ([object isKindOfClass:[JSValue class]]) {
+    if ([object hasProperty:@"__LogProxy_wrapped"]) {
+      return object[@"__LogProxy_wrapped"];
     }
   }
 
   // It doesn't appear to be a Proxy object, or at least not
-  // one wrapped by LogProxy. Return it as is.
+  // one wrapped by LogProxy.
   return object;
+}
+
++ (JSValue *)unwrap:(JSValue *)instance {
+  assert([instance isKindOfClass:[JSValue class]]);
+
+  if ([instance hasProperty:@"__LogProxy_wrapped"]) {
+    return instance[@"__LogProxy_wrapped"];
+  }
+
+  // It doesn't appear to be a Proxy object, or at least not
+  // one wrapped by LogProxy.
+  assert(false);
+  return nil;
 }
 
 @end

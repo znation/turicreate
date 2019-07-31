@@ -11,6 +11,10 @@
 
 BOOST_AUTO_TEST_SUITE(log_proxy_tests );
 
+BOOST_AUTO_TEST_CASE( test_wrap_unwrap ) {
+    LogProxyTests::test_wrap_unwrap();
+}
+
 BOOST_AUTO_TEST_CASE( test_no_logging_on_expected_property_access ) {
     LogProxyTests::test_no_logging_on_expected_property_access();
 }

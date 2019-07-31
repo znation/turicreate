@@ -66,7 +66,7 @@ JSExportAs(addColorStop,
 @protocol VegaCGContextInterface <JSExport>
 
 // properties
-@property id fillStyle;
+@property JSValue * fillStyle;
 @property double globalAlpha;
 @property NSString * lineCap;
 @property NSString * lineJoin;

@@ -37,7 +37,14 @@
  * If object is a LogProxy wrapper, returns the wrapped object.
  * Otherwise, returns the object passed in.
  */
-+ (id)unwrap:(id)object;
++ (id)tryUnwrap:(id)object;
+
+/*
+ * Takes a LogProxy wrapped object.
+ * If object is a LogProxy wrapper, returns the wrapped object.
+ * Otherwise, returns nil.
+ */
++ (JSValue *)unwrap:(JSValue *)object;
 
 /*
  * A preconfigured log object for use with os_log methods.
