@@ -15,12 +15,12 @@ BOOST_AUTO_TEST_CASE( test_wrap_unwrap ) {
     LogProxyTests::test_wrap_unwrap();
 }
 
-BOOST_AUTO_TEST_CASE( test_no_logging_on_expected_property_access ) {
-    LogProxyTests::test_no_logging_on_expected_property_access();
+BOOST_AUTO_TEST_CASE( test_expected_property_access ) {
+    LogProxyTests::test_expected_property_access();
 }
 
-BOOST_AUTO_TEST_CASE( test_logging_on_unexpected_property_access ) {
-    LogProxyTests::test_logging_on_unexpected_property_access();
+BOOST_AUTO_TEST_CASE( test_unexpected_property_access ) {
+    LogProxyTests::test_unexpected_property_access();
 }
 
 BOOST_AUTO_TEST_SUITE_END();

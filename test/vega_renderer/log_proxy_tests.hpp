@@ -6,7 +6,6 @@
 
 struct LogProxyTests {
     static void test_wrap_unwrap();
-    static void test_no_logging_on_expected_property_access();
-    static void test_logging_on_unexpected_property_access();
-    static void test_logging_on_unexpected_function_call();
+    static void test_expected_property_access();
+    static void test_unexpected_property_access();
 };

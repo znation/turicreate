@@ -43,7 +43,7 @@ void LogProxyTests::test_wrap_unwrap() {
     TS_ASSERT([v isEqualToObject:unwrapped]);
 }
 
-void LogProxyTests::test_no_logging_on_expected_property_access() {
+void LogProxyTests::test_expected_property_access() {
     JSContext *context = [[JSContext alloc] init];
     [JSConsole attachToJavaScriptContext:context];
     TestExport *original = [[TestExport alloc] init];
@@ -85,7 +85,7 @@ void LogProxyTests::test_no_logging_on_expected_property_access() {
 }
 @end
 
-void LogProxyTests::test_logging_on_unexpected_property_access() {
+void LogProxyTests::test_unexpected_property_access() {
     JSContext *context = [[JSContext alloc] init];
     [JSConsole attachToJavaScriptContext:context];
     TestExport *original = [[TestExport alloc] init];
