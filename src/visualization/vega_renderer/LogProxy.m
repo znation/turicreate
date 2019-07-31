@@ -91,11 +91,10 @@
     os_log_info(LogProxy.logger, "Getting property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
     return getHandler(target, key);
   };
-  instance.context[@"__tmp_setMissingProperty"] = ^BOOL(NSObject *target, NSString *key, NSObject *value) {
-    // TODO why does this not get called???
+  instance.context[@"__tmp_setMissingProperty"] = [JSValue valueWithObject:^BOOL(JSValue *target, NSString *key, JSValue *value) {
     os_log_info(LogProxy.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
     return setHandler(target, key, value);
-  };
+  } inContext:instance.context];
   instance.context[@"__tmp_wrapped_object"] = instance;
   instance.context[@"__tmp_wrapped_object_original"] = instance;
   [instance.context evaluateScript:@""
