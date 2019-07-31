@@ -6,6 +6,7 @@
 
 #import <JavaScriptCore/JavaScriptCore.h>
 #import <visualization/vega_renderer/LogProxy.h>
+#import <visualization/vega_renderer/JSConsole.h>
 
 #include <boost/test/unit_test.hpp>
 #include <core/util/test_macros.hpp>
@@ -32,6 +33,7 @@
 
 void LogProxyTests::test_no_logging_on_expected_property_access() {
     JSContext *context = [[JSContext alloc] init];
+    [JSConsole attachToJavaScriptContext:context];
     TestExport *original = [[TestExport alloc] init];
     JSValue *v = [JSValue valueWithObject:original inContext:context];
     JSValue *wrapped = [LogProxy wrap:v];
@@ -55,6 +57,7 @@ void LogProxyTests::test_no_logging_on_expected_property_access() {
 
 void LogProxyTests::test_logging_on_unexpected_property_access() {
     JSContext *context = [[JSContext alloc] init];
+    [JSConsole attachToJavaScriptContext:context];
     TestExport *original = [[TestExport alloc] init];
     JSValue *v = [JSValue valueWithObject:original inContext:context];
 

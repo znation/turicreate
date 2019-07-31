@@ -85,16 +85,14 @@
        setHandler:(LogProxySetHandler_t)setHandler {
   __weak JSValue * weak_instance = instance;
   instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
-    NSLog(@"Zach was here 1");
     if ([key isEqualToString:@"__instance"]) {
       return (NSObject *)weak_instance;
     }
     os_log_info(LogProxy.logger, "Getting property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
     return getHandler(target, key);
   };
-  instance.context[@"__tmp_setValueForKey"] = ^BOOL(NSObject *target, NSString *key, NSObject *value) {
+  instance.context[@"__tmp_setMissingProperty"] = ^BOOL(NSObject *target, NSString *key, NSObject *value) {
     // TODO why does this not get called???
-    NSLog(@"Zach was here 2");
     os_log_info(LogProxy.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
     return setHandler(target, key, value);
   };
@@ -103,7 +101,14 @@
   [instance.context evaluateScript:@""
     "__tmp_wrapped_object = new Proxy(__tmp_wrapped_object_original, {"
     "    get: __tmp_valueForKey,"
-    "    set: __tmp_setValueForKey,"
+    "    set: function(target, property, value) {"
+    "      if (!(property in target)) {"
+    "        console.error('Property ' + property + ' not found on target ' + target);"
+    "        __tmp_setMissingProperty(target, property, value);"
+    "      } else {"
+    "        target[property] = value;"
+    "      }"
+    "    },"
     "});"
     "Object.defineProperty(__tmp_wrapped_object, '__instance', {"
     "  enumerable: true,"
