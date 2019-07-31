@@ -5,7 +5,6 @@
  */
 
 #import <JavaScriptCore/JavaScriptCore.h>
-#include <os/log.h>
 
 typedef NSObject * (^LogProxyGetHandler_t)(NSObject *obj, NSString *property);
 typedef BOOL (^LogProxySetHandler_t)(NSObject *obj, NSString *property, NSObject *value);

@@ -4,74 +4,15 @@
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
 #import "LogProxy.h"
-
-@interface LogProxy (Logging)
-+ (os_log_t)logger;
-@end
+#import "LogProxyHandler.h"
 
 @implementation LogProxy
 
-+ (os_log_t)logger {
-    static os_log_t log;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-      log = os_log_create("com.apple.turi", "vega_renderer");
-    });
-    return log;
-}
-
 + (JSValue *)wrap:(JSValue *)instance {
-  return [LogProxy wrap:instance withGetHandler:^(NSObject *target, NSString *key) {
-
-    // First off, if the JS interface for this type has this property, return it
-    JSValue *ret = instance[key];
-    if (ret != nil && !ret.isUndefined) {
-      JSContext *context = instance.context;
-      context[@"__tmp_propertyAccess"] = ret;
-      if ([[context evaluateScript:@"typeof __tmp_propertyAccess"].toString isEqualToString:@"function"]) {
-        // it's a method, bind it to the original target or else we'll get
-        // "self type check failed for Objective-C instance method"
-        ret = [ret invokeMethod:@"bind" withArguments:@[instance]];
-      }
-
-      // Make sure the wrapping is applied recursively on objects
-      if (ret.isObject) {
-        ret = [LogProxy wrap:ret];
-      }
-
-      return ret;
-    }
-
-    // Encountered a missing key here!
-#ifndef NDEBUG
-    NSLog(@"Get for missing property \"%@\" on LogProxy wrapped object %@", key, target.debugDescription);
-    assert(false);
-#endif
-    os_log_error(LogProxy.logger, "Get for missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
-
-    // This will preserve the semantics of property access without LogProxy,
-    // which is to return undefined for a missing property.
-    return [JSValue valueWithUndefinedInContext:instance.context];
-
+  return [LogProxy wrap:instance withGetHandler:^NSObject*(NSObject *target, NSString *key) {
+    return nil;
   } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
-
-    assert(![key isEqualToString:@"__instance"]);
-
-    // First off, if the JS interface for this type has this property, use it
-    if ([instance hasProperty:key]) {
-      instance[key] = value;
-      return TRUE;
-    }
-
-    // Encountered a missing key here!
-#ifndef NDEBUG
-    NSLog(@"Set for missing property \"%@\" on LogProxy wrapped object %@ to value %@", key, target.debugDescription, value.debugDescription);
-    assert(false);
-#endif
-    os_log_error(LogProxy.logger, "Set for missing property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
-
     return FALSE;
-
   }];
 }
 
@@ -83,37 +24,10 @@
 + (JSValue *)wrap:(JSValue *)instance
    withGetHandler:(LogProxyGetHandler_t)getHandler
        setHandler:(LogProxySetHandler_t)setHandler {
-  __weak JSValue * weak_instance = instance;
-  instance.context[@"__tmp_valueForKey"] = ^(NSObject *target, NSString *key) {
-    if ([key isEqualToString:@"__instance"]) {
-      return (NSObject *)weak_instance;
-    }
-    os_log_info(LogProxy.logger, "Getting property \"%s\" on LogProxy wrapped object %s", key.UTF8String, target.debugDescription.UTF8String);
-    return getHandler(target, key);
-  };
-  instance.context[@"__tmp_setMissingProperty"] = [JSValue valueWithObject:^BOOL(JSValue *target, NSString *key, JSValue *value) {
-    os_log_info(LogProxy.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, target.debugDescription.UTF8String, value.debugDescription.UTF8String);
-    return setHandler(target, key, value);
-  } inContext:instance.context];
   instance.context[@"__tmp_wrapped_object"] = instance;
   instance.context[@"__tmp_wrapped_object_original"] = instance;
-  [instance.context evaluateScript:@""
-    "__tmp_wrapped_object = new Proxy(__tmp_wrapped_object_original, {"
-    "    get: __tmp_valueForKey,"
-    "    set: function(target, property, value) {"
-    "      if (!(property in target)) {"
-    "        console.error('Property ' + property + ' not found on target ' + target);"
-    "        __tmp_setMissingProperty(target, property, value);"
-    "      } else {"
-    "        target[property] = value;"
-    "      }"
-    "    },"
-    "});"
-    "Object.defineProperty(__tmp_wrapped_object, '__instance', {"
-    "  enumerable: true,"
-    "  value: __tmp_wrapped_object_original,"
-    "});"
-  ];
+  instance.context[@"__tmp_handler"] = [[LogProxyHandler alloc] init];
+  [instance.context evaluateScript:@"__tmp_wrapped_object = new Proxy(__tmp_wrapped_object_original, __tmp_handler);"];
   JSValue *ret = instance.context[@"__tmp_wrapped_object"];
   return ret;
 }

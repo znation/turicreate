@@ -15,6 +15,7 @@ if(APPLE AND NOT TC_BUILD_IOS)
       JSConsole.m
       JSDocument.m
       LogProxy.m
+      LogProxyHandler.m
       VegaRenderer.m
       colors.m
    )
