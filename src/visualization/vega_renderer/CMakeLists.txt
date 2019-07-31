@@ -16,6 +16,7 @@ if(APPLE AND NOT TC_BUILD_IOS)
       JSDocument.m
       LogProxy.m
       LogProxyHandler.m
+      VegaHTMLElement.m
       VegaRenderer.m
       colors.m
    )
