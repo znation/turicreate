@@ -41,5 +41,9 @@ if #available(OSX 10.13, *) {
 }
 
 let delegate = AppDelegate(server: server)
+NSApplication.shared.setActivationPolicy(.regular)
 NSApplication.shared.delegate = delegate
+DispatchQueue.main.async {
+    NSApplication.shared.activate(ignoringOtherApps: true)
+}
 NSApplication.shared.run()

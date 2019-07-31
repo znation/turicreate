@@ -2385,11 +2385,17 @@ class SFrame(object):
         out : pandas.DataFrame
             The dataframe which contains all rows of SFrame
         """
+
+        from ..toolkits.image_classifier._evaluation import _image_resize
+
         assert HAS_PANDAS, 'pandas is not installed.'
         df = pandas.DataFrame()
         for i in range(self.num_columns()):
             column_name = self.column_names()[i]
-            df[column_name] = list(self[column_name])
+            if(self.column_types()[i] == _Image):
+                df[column_name] = [_image_resize(x[column_name])._to_pil_image() for x in self.select_columns([column_name])]
+            else:
+                df[column_name] = list(self[column_name])
             if len(df[column_name]) == 0:
                 df[column_name] = df[column_name].astype(self.column_types()[i])
         return df
@@ -4527,10 +4533,18 @@ class SFrame(object):
 
 
         # Suppress visualization output if 'none' target is set
-        from ..visualization._plot import _target
+        from ..visualization._plot import _target, display_table_in_notebook
         if _target == 'none':
             return
+        try:
+            if _target == 'auto' and \
+                get_ipython().__class__.__name__ == "ZMQInteractiveShell":
+                display_table_in_notebook(self)
+                return
+        except NameError:
+            pass
 
+        # Launch interactive GUI window
         path_to_client = _get_client_app_path()
 
         if title is None:
@@ -5556,7 +5570,7 @@ class SFrame(object):
         with cython_context():
             return SFrame(_proxy=self.__proxy__.sort(sort_column_names, sort_column_orders))
 
-    def dropna(self, columns=None, how='any'):
+    def dropna(self, columns=None, how='any', recursive=False):
         """
         Remove missing values from an SFrame. A missing value is either ``None``
         or ``NaN``.  If ``how`` is 'any', a row will be removed if any of the
@@ -5577,6 +5591,11 @@ class SFrame(object):
             Specifies whether a row should be dropped if at least one column
             has missing values, or if all columns have missing values.  'any' is
             default.
+
+        recursive: bool
+            By default is False. If this flag is set to True, then `nan` check will
+            be performed on each element of a sframe cell in a DFS manner if the cell
+            has a nested structure, such as dict, list.
 
         Returns
         -------
@@ -5631,9 +5650,9 @@ class SFrame(object):
         (columns, all_behavior) = self.__dropna_errchk(columns, how)
 
         with cython_context():
-            return SFrame(_proxy=self.__proxy__.drop_missing_values(columns, all_behavior, False))
+            return SFrame(_proxy=self.__proxy__.drop_missing_values(columns, all_behavior, False, recursive))
 
-    def dropna_split(self, columns=None, how='any'):
+    def dropna_split(self, columns=None, how='any', recursive=False):
         """
         Split rows with missing values from this SFrame. This function has the
         same functionality as :py:func:`~turicreate.SFrame.dropna`, but returns a
@@ -5651,6 +5670,12 @@ class SFrame(object):
             Specifies whether a row should be dropped if at least one column
             has missing values, or if all columns have missing values.  'any' is
             default.
+
+        recursive: bool
+            By default is False. If this flag is set to True, then `nan` check will
+            be performed on each element of a sframe cell in a recursive manner if the cell
+            has a nested structure, such as dict, list.
+
 
         Returns
         -------
@@ -5692,7 +5717,7 @@ class SFrame(object):
 
         (columns, all_behavior) = self.__dropna_errchk(columns, how)
 
-        sframe_tuple = self.__proxy__.drop_missing_values(columns, all_behavior, True)
+        sframe_tuple = self.__proxy__.drop_missing_values(columns, all_behavior, True, recursive)
 
         if len(sframe_tuple) != 2:
             raise RuntimeError("Did not return two SFrames!")

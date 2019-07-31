@@ -56,7 +56,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         newWindow = NSWindow(contentRect: contentFrame, styleMask: [.resizable, .titled, .closable, .miniaturizable], backing: .buffered, defer: false)
         newWindow?.center()
         newWindow?.minSize = NSMakeSize(600, 400)
-        
+        newWindow?.title = "Turi Create Visualization"
+
         controller = ViewController(server: self.server)
         let content = newWindow!.contentView! as NSView
         let view = controller!.view
