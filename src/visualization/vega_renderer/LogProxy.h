@@ -5,9 +5,10 @@
  */
 
 #import <JavaScriptCore/JavaScriptCore.h>
+#include <os/log.h>
 
-typedef NSObject * (^LogProxyGetHandler_t)(NSObject *obj, NSString *property);
-typedef BOOL (^LogProxySetHandler_t)(NSObject *obj, NSString *property, NSObject *value);
+typedef JSValue * (^LogProxyGetHandler_t)(JSValue *obj, NSString *property);
+typedef BOOL (^LogProxySetHandler_t)(JSValue *obj, NSString *property, JSValue *value);
 
 @interface LogProxy : NSObject
 
@@ -42,5 +43,10 @@ typedef BOOL (^LogProxySetHandler_t)(NSObject *obj, NSString *property, NSObject
  * Otherwise, returns the object passed in.
  */
 + (id)unwrap:(id)object;
+
+/*
+ * A preconfigured log object for use with os_log methods.
+ */
++ (os_log_t)logger;
 
 @end

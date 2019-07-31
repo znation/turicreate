@@ -9,24 +9,25 @@
 
 #include <os/log.h>
 
-@interface LogProxyHandler (Logging)
-+ (os_log_t)logger;
-@end
+@implementation LogProxyHandler {
+    LogProxyGetHandler_t _getHandler;
+    LogProxySetHandler_t _setHandler;
+}
 
-@implementation LogProxyHandler
-
-+ (os_log_t)logger {
-    static os_log_t log;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-      log = os_log_create("com.apple.turi", "vega_renderer");
-    });
-    return log;
+- (instancetype)initWithGetHandler:(LogProxyGetHandler_t)getHandler
+                        setHandler:(LogProxySetHandler_t)setHandler {
+    self = [super init];
+    if (!self) {
+        return nil;
+    }
+    _getHandler = getHandler;
+    _setHandler = setHandler;
+    return self;
 }
 
 - (JSValue *)getPropertyOnObject:(JSValue *)instance
                             named:(NSString *)key {
-    os_log_info(LogProxyHandler.logger, "Getting property \"%s\" on LogProxy wrapped object %s", key.UTF8String, instance.debugDescription.UTF8String);
+    os_log_info(LogProxy.logger, "Getting property \"%s\" on LogProxy wrapped object %s", key.UTF8String, instance.debugDescription.UTF8String);
 
     // First off, if the JS interface for this type has this property, return it
     JSValue *ret = instance[key];
@@ -47,22 +48,15 @@
       return ret;
     }
 
-    // Encountered a missing key here!
-#ifndef NDEBUG
-    NSLog(@"Get for missing property \"%@\" on LogProxy wrapped object %@", key, instance.debugDescription);
-#endif
-    os_log_error(LogProxyHandler.logger, "Get for missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, instance.debugDescription.UTF8String);
-
-    // This will preserve the semantics of property access without LogProxy,
-    // which is to return undefined for a missing property.
-    return [JSValue valueWithUndefinedInContext:instance.context];
+    // Encountered a missing key here! Notify the handler.
+    return _getHandler(instance, key);
 }
 
 - (BOOL)setPropertyOnObject:(JSValue *)instance
                         named:(NSString *)key
                     toValue:(JSValue *)value {
 
-    os_log_info(LogProxyHandler.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value \"%s\"", key.UTF8String, instance.debugDescription.UTF8String, value.debugDescription.UTF8String);
+    os_log_info(LogProxy.logger, "Setting property \"%s\" on LogProxy wrapped object %s to value \"%s\"", key.UTF8String, instance.debugDescription.UTF8String, value.debugDescription.UTF8String);
 
     // First off, if the JS interface for this type has this property, use it
     if ([instance hasProperty:key]) {
@@ -70,13 +64,8 @@
       return TRUE;
     }
 
-    // Encountered a missing key here!
-#ifndef NDEBUG
-    NSLog(@"Set for missing property \"%@\" on LogProxy wrapped object %@ to value %@", key, instance.debugDescription, value.debugDescription);
-#endif
-    os_log_error(LogProxyHandler.logger, "Set for missing property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, instance.debugDescription.UTF8String, value.debugDescription.UTF8String);
-
-    return FALSE;
+    // Encountered a missing key here! Notify the handler.
+    return _setHandler(instance, key, value);
 }
 
 @end

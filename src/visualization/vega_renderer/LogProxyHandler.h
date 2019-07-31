@@ -22,4 +22,8 @@ JSExportAs(set,
 @end
 
 @interface LogProxyHandler : NSObject<LogProxyHandling>
+
+- (instancetype)initWithGetHandler:(LogProxyGetHandler_t)getHandler
+                        setHandler:(LogProxySetHandler_t)setHandler;
+
 @end

@@ -8,11 +8,36 @@
 
 @implementation LogProxy
 
++ (os_log_t)logger {
+    static os_log_t log;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      log = os_log_create("com.apple.turi", "vega_renderer");
+    });
+    return log;
+}
+
 + (JSValue *)wrap:(JSValue *)instance {
-  return [LogProxy wrap:instance withGetHandler:^NSObject*(NSObject *target, NSString *key) {
-    return nil;
+  return [LogProxy wrap:instance withGetHandler:^JSValue*(JSValue *target, NSString *key) {
+
+#ifndef NDEBUG
+    NSLog(@"Get for missing property \"%@\" on LogProxy wrapped object %@", key, instance.debugDescription);
+#endif
+    os_log_error(LogProxy.logger, "Get for missing property \"%s\" on LogProxy wrapped object %s", key.UTF8String, instance.debugDescription.UTF8String);
+
+    // This will preserve the semantics of property access without LogProxy,
+    // which is to return undefined for a missing property.
+    return [JSValue valueWithUndefinedInContext:instance.context];
+
   } setHandler:^BOOL(NSObject *target, NSString *key, NSObject *value) {
+
+#ifndef NDEBUG
+    NSLog(@"Set for missing property \"%@\" on LogProxy wrapped object %@ to value %@", key, instance.debugDescription, value.debugDescription);
+#endif
+    os_log_error(LogProxy.logger, "Set for missing property \"%s\" on LogProxy wrapped object %s to value %s", key.UTF8String, instance.debugDescription.UTF8String, value.debugDescription.UTF8String);
+
     return FALSE;
+
   }];
 }
 
@@ -25,11 +50,8 @@
    withGetHandler:(LogProxyGetHandler_t)getHandler
        setHandler:(LogProxySetHandler_t)setHandler {
   instance.context[@"__tmp_wrapped_object"] = instance;
-  instance.context[@"__tmp_wrapped_object_original"] = instance;
-  instance.context[@"__tmp_handler"] = [[LogProxyHandler alloc] init];
-  [instance.context evaluateScript:@"__tmp_wrapped_object = new Proxy(__tmp_wrapped_object_original, __tmp_handler);"];
-  JSValue *ret = instance.context[@"__tmp_wrapped_object"];
-  return ret;
+  instance.context[@"__tmp_handler"] = [[LogProxyHandler alloc] initWithGetHandler:getHandler setHandler:setHandler];
+  return [instance.context evaluateScript:@"new Proxy(__tmp_wrapped_object, __tmp_handler);"];
 }
 
 + (id)unwrap:(id)object {
