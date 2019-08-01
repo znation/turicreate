@@ -162,13 +162,11 @@ if(${TC_BUILD_VISUALIZATION_CLIENT})
             --outFile "${TC_FRONTEND_BUILD_DIR}/tcviz.js"
             "tcviz.js"
     COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/javascript_build_sentinel
-    DEPENDS
-      node
-      ${JAVASCRIPT_SOURCES}
     WORKING_DIRECTORY "${TC_FRONTEND_SOURCE_DIR}"
     COMMENT "Building JavaScript using TypeScript 3.4.5"
     VERBATIM
   )
+  add_dependencies(tcviz_js node)
   add_dependencies(tcviz_js ${JAVASCRIPT_SOURCES})
 
   # Build CSS Modules with css_module_compiler.js
