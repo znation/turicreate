@@ -7,10 +7,17 @@ if [[ -z $VIRTUALENV ]]; then
   VIRTUALENV=virtualenv
 fi
 
-$VIRTUALENV `pwd`/deps/env
-source deps/env/bin/activate
+BIN_DIR="bin"
+EXE_EXTENSION=""
+if [[ $OSTYPE == "msys" ]]; then
+  BIN_DIR="Scripts"
+  EXE_EXTENSION=".exe"
+fi
 
-PYTHON="${PWD}/deps/env/bin/python"
+$VIRTUALENV `pwd`/deps/env
+source deps/env/$BIN_DIR/activate
+
+PYTHON="${PWD}/deps/env/$BIN_DIR/python$EXE_EXTENSION"
 PIP="${PYTHON} -m pip"
 
 PYTHON_MAJOR_VERSION=$(${PYTHON} -c 'import sys; print(sys.version_info.major)')
@@ -47,12 +54,14 @@ for f in `ls -d ../../env/include/$PYTHON_FULL_NAME/*`; do
 done
 popd
 
-mkdir -p deps/local/bin
-pushd deps/local/bin
-for f in `ls ../../env/bin`; do
-  ln -Ffs $f
-done
-popd
+if [[ $OSTYPE != "msys" ]]; then
+  mkdir -p deps/local/bin
+  pushd deps/local/bin
+  for f in `ls ../../env/$BIN_DIR`; do
+    ln -Ffs $f
+  done
+  popd
+fi
 
 linux_patch_sigfpe_handler
 

@@ -470,7 +470,7 @@ if [ ! -d $RELEASE_DIR ]; then
 fi
 cd $RELEASE_DIR
 rm -f CMakeCache.txt
-build_cmd="$CMAKE \
+build_cmd="\"$CMAKE\" \
     $GENERATOR \
     -D CMAKE_BUILD_TYPE=Release \
     -D CMAKE_C_COMPILER=$CCCMD \
@@ -489,7 +489,7 @@ if [ ! -d $DEBUG_DIR ]; then
 fi
 cd $DEBUG_DIR
 rm -f CMakeCache.txt
-build_cmd="$CMAKE \
+build_cmd="\"$CMAKE\" \
     $GENERATOR \
     -D CMAKE_BUILD_TYPE=Debug \
     -D CMAKE_C_COMPILER=$CCCMD \

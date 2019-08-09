@@ -113,7 +113,6 @@ if __name__ == '__main__':
         long_description = f.read().decode('utf-8')
 
     install_requires = [
-        "coremltools==3.0b3",
         "decorator >= 4.0.9",
         "numpy==1.16.4",
         "pandas >= 0.23.2",
@@ -124,6 +123,9 @@ if __name__ == '__main__':
         "scipy >= 1.1.0",
         "six >= 1.10.0",
     ]
+
+    if not cur_platform.startswith("win32"):
+        install_requires.append("coremltools==3.0b3")
 
     if sys.version_info.major == 3 and sys.version_info.minor == 7:
         if not cur_platform.startswith("macosx"):
