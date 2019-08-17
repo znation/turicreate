@@ -1,0 +1,145 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "autosize": {"type": "fit", "resize": false, "contains": "padding"},
+  "axes": [
+    {
+      "scale": "x",
+      "title": "{{xlabel}}",
+      "tickCount": {
+        "signal": "min(ceil(width/40), 60)"
+      },
+      "zindex": 1,
+      "labelOverlap": true,
+      "encode": {
+        "labels": {
+          "update": {
+            "align": {
+              "value": "right"
+            },
+            "angle": {
+              "value": 270
+            },
+            "baseline": {
+              "value": "middle"
+            }
+          }
+        }
+      },
+      "orient": "bottom"
+    },
+    {
+      "scale": "y",
+      "title": "{{ylabel}}",
+      "tickCount": {
+        "signal": "min(ceil(height/40), 40)"
+      },
+      "zindex": 1,
+      "labelOverlap": true,
+      "orient": "left"
+    }
+  ],
+  "legends": [
+    {
+      "titlePadding": 4,
+      "direction": "horizontal",
+      "title": "Count",
+      "titleFontSize": 12,
+      "gradientLength": {
+        "signal": "width"
+      },
+      "type": "gradient",
+      "orient": "top",
+      "fill": "color"
+    }
+  ],
+  "title": {{title}},
+  "scales": [
+    {
+      "range": [
+        0,
+        {
+          "signal": "width"
+        }
+      ],
+      "type": "band",
+      "domain": {
+        "data": "source_2",
+        "field": "x",
+        "sort": true
+      },
+      "zero": false,
+      "name": "x"
+    },
+    {
+      "range": [
+        {
+          "signal": "height"
+        },
+        0
+      ],
+      "type": "band",
+      "domain": {
+        "data": "source_2",
+        "field": "y",
+        "sort": true
+      },
+      "zero": false,
+      "name": "y"
+    },
+    {
+      "domain": {
+        "field": "count",
+        "data": "source_2"
+      },
+      "name": "color",
+      "zero": false,
+      "range": "heatmap",
+      "type": "sequential",
+      "nice": false
+    }
+  ],
+  "height": {{height}},
+  "padding": 8,
+  "width": {{width}},
+  "marks": [
+    {
+      "encode": {
+        "update": {
+          "fill": {
+            "field": "count",
+            "scale": "color"
+          }
+        },
+        "enter": {
+          "y": {
+            "field": "y",
+            "scale": "y"
+          },
+          "x": {
+            "field": "x",
+            "scale": "x"
+          },
+          "height": {
+            "band": true,
+            "scale": "y"
+          },
+          "width": {
+            "band": true,
+            "scale": "x"
+          }
+        }
+      },
+      "from": {
+        "data": "source_2"
+      },
+      "type": "rect"
+    }
+  ],
+  "data": [
+    {
+      "name": "source_2"
+      {{pre_filled_data_values}}
+    }
+  ],
+  {{config}}
+}

@@ -5,15 +5,12 @@ SET(EXTRA_CONFIGURE_COMMANDS "")
 
 if (CLANG)
   SET(ADD_BOOST_BOOTSTRAP --with-toolset=clang)
-  SET(cxxflags "-std=c++11 -stdlib=libc++ ${ARCH_FLAG} ${CPP_REAL_COMPILER_FLAGS}")
-  SET(tmp2 "-stdlib=libc++")
+  SET(cxxflags "-std=c++11 -Wno-everything ${ARCH_FLAG} ${CPP_REAL_COMPILER_FLAGS} -fvisibility=hidden")
   if(TC_BUILD_IOS)
-    SET(ADD_BOOST_COMPILE_TOOLCHAIN "toolset=clang abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi target-os=iphone cflags=\"-arch arm64\" cxxflags=\"${cxxflags}\" linkflags=${tmp2}")
+    SET(ADD_BOOST_COMPILE_TOOLCHAIN "toolset=clang abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi target-os=iphone cflags=\"-arch arm64\" cxxflags=\"${cxxflags}\"")
   else()
-    SET(ADD_BOOST_COMPILE_TOOLCHAIN "toolset=clang cxxflags=\"${cxxflags}\" linkflags=${tmp2}")
+    SET(ADD_BOOST_COMPILE_TOOLCHAIN "toolset=clang cflags=\"-Wno-everything\" cxxflags=\"${cxxflags}\"")
   endif()
-  UNSET(tmp)
-  UNSET(tmp2)
 elseif(APPLE)
   SET(ADD_BOOST_COMPILE_TOOLCHAIN toolset=darwin)
 elseif(WIN32 AND ${MINGW_MAKEFILES})
@@ -24,6 +21,10 @@ elseif(WIN32 AND ${MSYS_MAKEFILES})
   SET(ADD_BOOST_BOOTSTRAP --with-toolset=mingw)
   SET(ADD_BOOST_COMPILE_TOOLCHAIN toolset=gcc)
   SET(EXTRA_CONFIGURE_COMMANDS && perl -pi -e "s/mingw/gcc/g" ./project-config.jam)
+elseif(UNIX)
+  SET(cxxflags "-std=c++11 ${CPP_REAL_COMPILER_FLAGS} -fvisibility=hidden")
+  SET(ADD_BOOST_BOOTSTRAP --with-toolset=gcc)
+  SET(ADD_BOOST_COMPILE_TOOLCHAIN "toolset=gcc cxxflags=\"${cxxflags}\"")
 else()
   SET(ADD_BOOST_BOOTSTRAP "")
   SET(ADD_BOOST_COMPILE_TOOLCHAIN "")
@@ -44,8 +45,8 @@ else()
   endif()
   if(TC_BUILD_IOS)
     execute_process(
-      COMMAND bash -c "xcrun --sdk iphoneos --show-sdk-path" 
-      OUTPUT_VARIABLE _ios_sdk_path 
+      COMMAND bash -c "xcrun --sdk iphoneos --show-sdk-path"
+      OUTPUT_VARIABLE _ios_sdk_path
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     set(OPTIONAL_SDKROOT "SDKROOT=${_ios_sdk_path}")
@@ -119,15 +120,11 @@ set(Boost_LIBRARIES
   ${BOOST_LIBS_DIR}/libboost_regex.a)
 
 
-message(STATUS "Boost libs: " ${Boost_LIBRARIES})
-
 # add an imported library for each boost library
 #
 set(libnames "")
 foreach(blib ${Boost_LIBRARIES})
-  message(STATUS "Boost libs: " ${blib})
   string(REGEX REPLACE "\\.a$" ${CMAKE_SHARED_LIBRARY_SUFFIX} bout ${blib})
-  message(STATUS "Boost dyn libs: " ${bout})
   set(Boost_SHARED_LIBRARIES ${Boost_SHARED_LIBRARIES} ${bout})
   get_filename_component(FNAME ${blib} NAME)
   add_library(${FNAME} STATIC IMPORTED)
@@ -135,8 +132,6 @@ foreach(blib ${Boost_LIBRARIES})
   list(APPEND libnames ${FNAME})
 endforeach()
 
-
-message(STATUS "Boost Shared libs: " ${Boost_SHARED_LIBRARIES})
 
 add_dependencies(ex_boost ex_libbz2 ex_libz)
 # add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
@@ -168,7 +163,6 @@ set(Boost_Test_LIBRARIES
 
 set(libnames "")
 foreach(blib ${Boost_Test_LIBRARIES})
-  message(STATUS "Boost libs: " ${blib})
   string(REGEX REPLACE "\\.a$" ${CMAKE_SHARED_LIBRARY_SUFFIX} bout ${blib})
   get_filename_component(FNAME ${blib} NAME)
   add_library(${FNAME} STATIC IMPORTED)

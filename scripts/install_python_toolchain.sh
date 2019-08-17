@@ -7,7 +7,7 @@ if [[ -z $VIRTUALENV ]]; then
   VIRTUALENV=virtualenv
 fi
 
-$VIRTUALENV deps/env
+$VIRTUALENV `pwd`/deps/env
 source deps/env/bin/activate
 
 PYTHON="${PWD}/deps/env/bin/python"
@@ -26,11 +26,13 @@ fi
 
 
 function linux_patch_sigfpe_handler {
-if [[ $OSTYPE == linux* ]]; then
-        targfile=deps/local/include/pyfpe.h
-        echo "#undef WANT_SIGFPE_HANDLER" | cat - $targfile > tmp
-        mv -f tmp $targfile
-fi
+  if [[ $OSTYPE == linux* ]]; then
+    targfile=deps/local/include/pyfpe.h
+    if [[ -f $targfile ]]; then
+      echo "#undef WANT_SIGFPE_HANDLER" | cat - $targfile > tmp
+      mv -f tmp $targfile
+    fi
+  fi
 }
 
 $PIP install --upgrade "pip>=8.1"
@@ -40,7 +42,7 @@ mkdir -p deps/local/lib
 mkdir -p deps/local/include
 
 pushd deps/local/include
-for f in `ls ../../env/include/$PYTHON_FULL_NAME/*`; do  
+for f in `ls -d ../../env/include/$PYTHON_FULL_NAME/*`; do
   ln -Ffs $f
 done
 popd

@@ -12,8 +12,6 @@ debug/*
 release/*
 profile/*
 dist/turicreateapi*
-doc/doxygen/*
-doc/doxygen_internal/*
 configure.deps
 config.log
 new_news.txt
@@ -30,15 +28,14 @@ description.json
 
 *swp
 \.mchg\.mchg
-.ycm_extra_conf*
 
 ############# python stuff ################
 *.py[cod]
+**/.cache
 
 # Packages
 *.egg
 *.egg-info
-dist
 /build
 eggs
 parts
@@ -65,12 +62,15 @@ pytest.xml
 # Documentation
 pydocs/*
 
+## docxgen under root dir
+doc/
+/doxygen.log
 
+# vim
 *.swp
 
 # Mr Old School Data Scientist
 .Rhistory
-
 
 __MACOSX
 .ipynb_checkpoints
@@ -83,7 +83,6 @@ xcuserdata/
 deps/env
 deps/local
 deps/build
-node_modules/
 
 /dummy.cpp
 
@@ -94,3 +93,7 @@ node_modules/
 
 # Visual Studio Code files
 /.vscode/
+
+# CCache within Docker
+/.docker_ccache/
+/.docker_images/

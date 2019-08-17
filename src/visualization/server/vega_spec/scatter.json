@@ -1,0 +1,143 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "autosize": {"type": "fit", "resize": false, "contains": "padding"},
+  "padding": 8,
+  "width": {{width}},
+  "height": {{height}},
+  "style": "cell",
+  "title": {{title}},
+  "data": [
+    {
+      "name": "source_2"
+      {{pre_filled_data_values}}
+    }
+  ],
+  "marks": [
+    {
+      "name": "marks",
+      "type": "symbol",
+      "style": [
+        "circle"
+      ],
+      "from": {
+        "data": "source_2"
+      },
+      "encode": {
+        "hover": {
+          "fill": {
+            "value": "#7EC2F3"
+          }
+        },
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "x"
+          },
+          "y": {
+            "scale": "y",
+            "field": "y",
+            "title": "Miles per Gallon"
+          },
+          "fill": {
+            "value": "#108EE9"
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "opacity": {
+            "value": 0.7
+          }
+        }
+      }
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "linear",
+      "domain": {
+        "data": "source_2",
+        "field": "x"
+      },
+      "range": [
+        0,
+        {
+          "signal": "width"
+        }
+      ],
+      "nice": true,
+      "zero": false,
+      "padding": 5
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "domain": {
+        "data": "source_2",
+        "field": "y"
+      },
+      "range": [
+        {
+          "signal": "height"
+        },
+        0
+      ],
+      "nice": true,
+      "zero": false,
+      "padding": 5
+    }
+  ],
+  "axes": [
+    {
+      "scale": "x",
+      "labelOverlap": true,
+      "orient": "bottom",
+      "tickCount": {
+        "signal": "ceil(width/40)"
+      },
+      "title": "{{xlabel}}",
+      "zindex": 1
+    },
+    {
+      "scale": "x",
+      "domain": false,
+      "grid": true,
+      "labels": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "orient": "bottom",
+      "tickCount": {
+        "signal": "ceil(width/40)"
+      },
+      "ticks": false,
+      "zindex": 0,
+      "gridScale": "y"
+    },
+    {
+      "scale": "y",
+      "labelOverlap": true,
+      "orient": "left",
+      "tickCount": {
+        "signal": "ceil(height/40)"
+      },
+      "title": "{{ylabel}}",
+      "zindex": 1
+    },
+    {
+      "scale": "y",
+      "domain": false,
+      "grid": true,
+      "labels": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "orient": "left",
+      "tickCount": {
+        "signal": "ceil(height/40)"
+      },
+      "ticks": false,
+      "zindex": 0,
+      "gridScale": "x"
+    }
+  ],
+  {{config}}
+}

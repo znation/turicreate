@@ -1,32 +1,33 @@
 
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <string>
 #include <random>
 #include <set>
 #include <sstream>
 #include <vector>
 #include <algorithm>
-#include <util/cityhash_tc.hpp>
+#include <core/util/cityhash_tc.hpp>
 
-// Matrices
-#include <numerics/armadillo.hpp>
+// Eigen
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 // SFrame and Flex type
-#include <unity/lib/flex_dict_view.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
 
 // ML-Data Utils
-#include <unity/toolkits/ml_data_2/ml_data.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_entry.hpp>
-#include <unity/toolkits/ml_data_2/metadata.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_iterators.hpp>
-#include <unity/toolkits/ml_data_2/sframe_index_mapping.hpp>
+#include <toolkits/ml_data_2/ml_data.hpp>
+#include <toolkits/ml_data_2/ml_data_entry.hpp>
+#include <toolkits/ml_data_2/metadata.hpp>
+#include <toolkits/ml_data_2/ml_data_iterators.hpp>
+#include <toolkits/ml_data_2/sframe_index_mapping.hpp>
 
 // Testing utils common to all of ml_data_iterator
-#include <sframe/testing_utils.hpp>
-#include <util/testing_utils.hpp>
-#include <unity/toolkits/ml_data_2/testing_utils.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
+#include <toolkits/ml_data_2/testing_utils.hpp>
 
 
 using namespace turi;
@@ -297,7 +298,7 @@ struct ml_data_numeric_iteration_test  {
         for(auto it = data.get_iterator(thread_idx, num_threads); !it.done(); ++it){
 
           it.fill_observation(x);
-           vec(&dense_vector_x[idx][0], total_size);
+          Eigen::Map<DenseVector> vec(&dense_vector_x[idx][0], total_size);
 
           for(int i = 0; i < vec.size(); ++i)
             ASSERT_EQ(vec[i], x[i]);
@@ -320,7 +321,7 @@ struct ml_data_numeric_iteration_test  {
 
         for(auto it = data.get_iterator(thread_idx, num_threads); !it.done(); ++it){
           it.fill_observation(x);
-          arma::vec dense_vec(&dense_vector_x[idx][0],total_size, false);
+          Eigen::Map<DenseVector> dense_vec(&dense_vector_x[idx][0],total_size);
           vec = dense_vec.sparseView(0,0);
           TS_ASSERT(vec.isApprox(x));
           idx++;
@@ -341,7 +342,8 @@ struct ml_data_numeric_iteration_test  {
 
         for(auto it = data.get_iterator(thread_idx, num_threads, false, true); !it.done(); ++it){
           it.fill_observation(x);
-          arma::vec vec(&dense_vector_reference_x[idx][0],total_size_reference, false);
+          Eigen::Map<DenseVector>
+              vec(&dense_vector_reference_x[idx][0],total_size_reference);
           TS_ASSERT(vec.isApprox(x));
           idx++;
         }
@@ -361,9 +363,9 @@ struct ml_data_numeric_iteration_test  {
 
         for(auto it = data.get_iterator(thread_idx, num_threads, false, true); !it.done(); ++it){
           it.fill_observation(x);
-          arma::vec
-              dense_vec(&dense_vector_reference_x[idx][0],total_size_reference, false);
-          vec = to_sparse(dense_vec);
+          Eigen::Map<DenseVector>
+              dense_vec(&dense_vector_reference_x[idx][0],total_size_reference);
+          vec = dense_vec.sparseView(0,0);
           TS_ASSERT(vec.isApprox(x));
           idx++;
         }

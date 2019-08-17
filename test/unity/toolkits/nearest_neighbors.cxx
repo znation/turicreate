@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <string>
 #include <random>
 #include <set>
@@ -8,33 +8,33 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <util/cityhash_tc.hpp>
+#include <core/util/cityhash_tc.hpp>
 
 // Eigen
-#include <numerics/armadillo.hpp>
-#include <numerics/armadillo.hpp>
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 // SFrame and Flex type
-#include <unity/lib/flex_dict_view.hpp>
-#include <random/random.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
+#include <core/random/random.hpp>
 
 // ML-Data Utils
-#include <unity/toolkits/ml_data_2/ml_data.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_entry.hpp>
-#include <unity/toolkits/ml_data_2/metadata.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_iterators.hpp>
-#include <unity/toolkits/ml_data_2/sframe_index_mapping.hpp>
+#include <toolkits/ml_data_2/ml_data.hpp>
+#include <toolkits/ml_data_2/ml_data_entry.hpp>
+#include <toolkits/ml_data_2/metadata.hpp>
+#include <toolkits/ml_data_2/ml_data_iterators.hpp>
+#include <toolkits/ml_data_2/sframe_index_mapping.hpp>
 
 // Testing utils common to all of ml_data_iterator
-#include <sframe/testing_utils.hpp>
-#include <util/testing_utils.hpp>
-#include <unity/toolkits/ml_data_2/testing_utils.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
+#include <toolkits/ml_data_2/testing_utils.hpp>
 
 // Nearest neighbors
-#include <unity/toolkits/nearest_neighbors/nearest_neighbors.hpp>
-#include <unity/toolkits/nearest_neighbors/ball_tree_neighbors.hpp>
-#include <unity/toolkits/nearest_neighbors/brute_force_neighbors.hpp>
-#include <unity/toolkits/nearest_neighbors/lsh_neighbors.hpp>
+#include <toolkits/nearest_neighbors/nearest_neighbors.hpp>
+#include <toolkits/nearest_neighbors/ball_tree_neighbors.hpp>
+#include <toolkits/nearest_neighbors/brute_force_neighbors.hpp>
+#include <toolkits/nearest_neighbors/lsh_neighbors.hpp>
 
 
 using namespace turi;
@@ -114,25 +114,25 @@ struct test_nearest_neighbors_utils  {
     nearest_neighbors::DenseMatrix A(4, 2);
     nearest_neighbors::DenseMatrix B(3, 2);
     
-    A = {{1, 1},
-         {4, 4},
-         {5, 5},
-         {2, 2}};
+    A << 1, 1,
+         4, 4,
+         5, 5,
+         2, 2;
 
-    B = {{1, 2},
-         {4, 4},
-         {3, 5}};
+    B << 1, 2,
+         4, 4,
+         3, 5;
 
     nearest_neighbors::DenseMatrix dists(4, 3);
     nearest_neighbors::all_pairs_squared_euclidean(A, B, dists);
 
     nearest_neighbors::DenseMatrix ans(4, 3);
-    ans = {{1, 18, 20},
-           {13, 0, 2},
-           {25, 2, 4},
-           {1, 8, 10}};
+    ans << 1, 18, 20,
+           13, 0, 2,
+           25, 2, 4,
+           1, 8, 10;
 
-    ASSERT_TRUE(arma::all(arma::all(dists == ans)));
+    ASSERT_EQ(dists, ans);
   }
 };
 
@@ -398,20 +398,9 @@ struct test_nn_consistency  {
         std::vector<std::vector<flexible_type> > result_2
             = testing_extract_sframe_data(nn_sl_1->query(data[q_idx], y[q_idx], k, radius));
 
-        ASSERT_EQ(result_1.size(), result_2.size());
-        for (size_t i = 0; i < result_1.size(); ++i) {
-          ASSERT_EQ(result_1[i].size(), result_2[i].size());
-          for (size_t j = 0;j < result_1[i].size(); ++j) {
-            if (result_1[i][j].get_type() == flex_type_enum::FLOAT) {
-              TS_ASSERT_DELTA((flex_float)result_1[i][j], (flex_float)result_2[i][j], 1E-8);
-            } else {
-              ASSERT_EQ(result_1[i][j], result_2[i][j]);
-            }
-          }
-        }
+        ASSERT_TRUE(result_1 == result_2);
       });
 
-    
     save_and_load_object(*nn_sl_2, *nn);
 
     parallel_for(size_t(0), size_t(2 * 3 * 3), [&](size_t main_idx) {
@@ -426,17 +415,7 @@ struct test_nn_consistency  {
         std::vector<std::vector<flexible_type> > result_2
             = testing_extract_sframe_data(nn_sl_2->query(data[q_idx], y[q_idx], k, radius));
 
-        ASSERT_EQ(result_1.size(), result_2.size());
-        for (size_t i = 0; i < result_1.size(); ++i) {
-          ASSERT_EQ(result_1[i].size(), result_2[i].size());
-          for (size_t j = 0;j < result_1[i].size(); ++j) {
-            if (result_1[i][j].get_type() == flex_type_enum::FLOAT) {
-              TS_ASSERT_DELTA((flex_float)result_1[i][j], (flex_float)result_2[i][j], 1E-8);
-            } else {
-              ASSERT_EQ(result_1[i][j], result_2[i][j]);
-            }
-          }
-        }
+        ASSERT_TRUE(result_1 == result_2);
       });
   }
 

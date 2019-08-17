@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <fstream>
 #include <vector>
 #include <map>
@@ -13,10 +13,8 @@
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
-#include <util/any.hpp>
-#include <numerics/armadillo.hpp>
-#include <numerics/row_major_matrix.hpp>
-#include <serialization/serialization_includes.hpp>
+#include <core/util/any.hpp>
+#include <core/storage/serialization/serialization_includes.hpp>
 
 
 using namespace turi;
@@ -54,7 +52,7 @@ struct pod_class_1: public turi::IS_POD_TYPE {
 
 struct pod_class_2 {
   size_t x;
-}; 
+};
 SERIALIZABLE_POD(pod_class_2);
 
 
@@ -62,7 +60,7 @@ SERIALIZABLE_POD(pod_class_2);
 struct file_class {
   size_t x = 0;
   void save(oarchive& a) const {
-    std::string prefix = a.get_prefix(); 
+    std::string prefix = a.get_prefix();
     {
       general_ofstream fout(prefix + ".pika1");
       oarchive oarc(fout);
@@ -77,7 +75,7 @@ struct file_class {
     }
   }
   void load(iarchive& a) {
-    std::string prefix = a.get_prefix(); 
+    std::string prefix = a.get_prefix();
     {
       general_ifstream fin(prefix + ".pika1");
       iarchive iarc(fin);
@@ -319,9 +317,9 @@ public:
     std::cout << "reading maps =====================================" << std::endl;
     namespace bio = boost::iostreams;
     typedef bio::stream<bio::array_source> icharstream;
-  
 
-    
+
+
     for(size_t i = 0, offset=0; i < sizes.size(); ++i) {
       icharstream strm(&buffer[offset], sizes[i]);
       offset += sizes[i];
@@ -335,7 +333,7 @@ public:
     }
 
   }
-  
+
   void test_boost_unordered_map(void) {
     boost::unordered_map<std::string, size_t> m;
     m["hello"] = 1;
@@ -378,7 +376,7 @@ public:
     TS_ASSERT(m2.find("hello") != m2.end());
     TS_ASSERT(m2.find("world") != m2.end());
   }
-  
+
   void test_pod_method_1() {
     std::vector<pod_class_1> p1;
     for (size_t i = 0;i < 1000; ++i) {
@@ -386,7 +384,7 @@ public:
         p.x = i;
         p1.push_back(p);
     }
-    
+
     std::ofstream f;
     f.open("test.bin",std::fstream::binary);
     oarchive a(f);
@@ -394,7 +392,7 @@ public:
     f.close();
 
     std::vector<pod_class_1> p2;
-    
+
     std::ifstream g;
     iarchive b(g);
     g.open("test.bin",std::fstream::binary);
@@ -405,7 +403,7 @@ public:
         TS_ASSERT_EQUALS(p1[i].x, p2[i].x);
     }
   }
-  
+
     void test_pod_method_2() {
     std::vector<pod_class_2> p1;
     for (size_t i = 0;i < 1000; ++i) {
@@ -413,7 +411,7 @@ public:
         p.x = i;
         p1.push_back(p);
     }
-    
+
     std::ofstream f;
     f.open("test.bin",std::fstream::binary);
     oarchive a(f);
@@ -421,7 +419,7 @@ public:
     f.close();
 
     std::vector<pod_class_2> p2;
-    
+
     std::ifstream g;
     iarchive b(g);
     g.open("test.bin",std::fstream::binary);
@@ -431,100 +429,6 @@ public:
     for (size_t i = 0;i < 1000; ++i) {
         TS_ASSERT_EQUALS(p1[i].x, p2[i].x);
     }
-  }
-
-  template <typename T>
-  void save_and_load_arma_mat(T t) {
-    std::ofstream f; 
-    f.open("test.bin",std::fstream::binary);
-    oarchive a(f);
-    a << t;
-    f.close();
-
-    T t2;
-    std::ifstream g;
-    g.open("test.bin",std::fstream::binary);
-    iarchive b(g);
-    b >> t2;
-    g.close();
-    TS_ASSERT_EQUALS(t.n_rows, t2.n_rows);
-    TS_ASSERT_EQUALS(t.n_cols, t2.n_cols);
-    TS_ASSERT(arma::all(arma::vectorise(t)  == arma::vectorise(t2)));
-  }
-
-
-  template <typename T>
-  void save_and_load_row_major_mat(T t) {
-    std::ofstream f; 
-    f.open("test.bin",std::fstream::binary);
-    oarchive a(f);
-    a << t;
-    f.close();
-
-    T t2;
-    std::ifstream g;
-    g.open("test.bin",std::fstream::binary);
-    iarchive b(g);
-    b >> t2;
-    g.close();
-    TS_ASSERT_EQUALS(t.n_rows, t2.n_rows);
-    TS_ASSERT_EQUALS(t.n_cols, t2.n_cols);
-    TS_ASSERT(arma::all(arma::vectorise(t.X())  == arma::vectorise(t2.X())));
-  }
-
-  template <typename T>
-  void save_and_load_arma_vec(T t) {
-    std::ofstream f; 
-    f.open("test.bin",std::fstream::binary);
-    oarchive a(f);
-    a << t;
-    f.close();
-
-    T t2;
-    std::ifstream g;
-    g.open("test.bin",std::fstream::binary);
-    iarchive b(g);
-    b >> t2;
-    g.close();
-    TS_ASSERT_EQUALS(t.n_rows, t2.n_rows);
-    TS_ASSERT_EQUALS(t.n_cols, t2.n_cols);
-    TS_ASSERT(arma::all(t  == t2));
-  }
-
-  template <typename T>
-  turi::row_major_matrix<T> make_row_major() {
-    turi::row_major_matrix<T> ret(4,5);
-    for(size_t i = 0;i < 4; ++i) {
-      for(size_t j = 0;j < 5; ++j) {
-        ret(i,j) = i;
-      }
-    }
-    return ret;
-  }
-
-  void test_arma_serialization() {
-    save_and_load_arma_mat(arma::mat{{1,1,1,1},{2,2,2,2},{3,3,3,3},{4,4,4,4},{5,5,5,5}});
-    save_and_load_arma_mat(arma::fmat{{1,1,1,1},{2,2,2,2},{3,3,3,3},{4,4,4,4},{5,5,5,5}});
-    save_and_load_arma_mat(arma::umat{{1,1,1,1},{2,2,2,2},{3,3,3,3},{4,4,4,4},{5,5,5,5}});
-    save_and_load_arma_mat(arma::imat{{1,1,1,1},{2,2,2,2},{3,3,3,3},{4,4,4,4},{5,5,5,5}});
-    save_and_load_arma_mat(arma::imat{{1,1,1,1},{2,2,2,2},{3,3,3,3},{4,4,4,4},{5,5,5,5}});
-
-    save_and_load_arma_vec(arma::vec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::dvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::fvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::uvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::ivec{1,2,3,1,2,3});
-
-    save_and_load_arma_vec(arma::rowvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::drowvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::frowvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::urowvec{1,2,3,1,2,3});
-    save_and_load_arma_vec(arma::irowvec{1,2,3,1,2,3});
-
-    save_and_load_row_major_mat(make_row_major<int>());
-    save_and_load_row_major_mat(make_row_major<float>());
-    save_and_load_row_major_mat(make_row_major<double>());
-    save_and_load_row_major_mat(make_row_major<long>());
   }
 
   void test_directory_serialization() {
@@ -563,7 +467,7 @@ public:
         TS_ASSERT_EQUALS(f[i].x, f2[i].x);
       }
     }
-    // make sure that open_directory_for_write with existing stuff will fail    
+    // make sure that open_directory_for_write with existing stuff will fail
     {
       dir_archive dirarc;
       TS_ASSERT_THROWS_ANYTHING(dirarc.open_directory_for_write("test_dir", true));
@@ -596,9 +500,9 @@ public:
 
     // that I can delete
     dir_archive::delete_archive("test_dir");
-    
+
     // check that it no longer exists
-    TS_ASSERT_EQUALS((int)fileio::get_file_status("test_dir"), 
+    TS_ASSERT_EQUALS((int)fileio::get_file_status("test_dir").first,
                      (int)fileio::file_status::MISSING);
 
     // now make sure that trying to the file_class with a regular archive will
@@ -642,9 +546,6 @@ BOOST_AUTO_TEST_CASE(test_pod_method_1) {
 }
 BOOST_AUTO_TEST_CASE(test_pod_method_2) {
   SerializeTestSuite::test_pod_method_2();
-}
-BOOST_AUTO_TEST_CASE(test_arma_serialization) {
-  SerializeTestSuite::test_arma_serialization();
 }
 BOOST_AUTO_TEST_CASE(test_directory_serialization) {
   SerializeTestSuite::test_directory_serialization();

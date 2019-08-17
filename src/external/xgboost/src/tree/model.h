@@ -18,7 +18,7 @@
 #include <xgboost/src/utils/io.h>
 #include <xgboost/src/utils/fmap.h>
 #include <xgboost/src/utils/utils.h>
-#include <json/json_include.hpp>
+#include <core/data/json/json_include.hpp>
 
 namespace xgboost {
 namespace tree {
@@ -746,7 +746,7 @@ class RegTree: public TreeModel<bst_float, RTreeNodeStat>{
       legacy_nodes.resize(param.num_nodes);
       utils::Check(fi.Read(BeginPtr(legacy_nodes), sizeof(LegacyNode) * legacy_nodes.size()) > 0,
                    "TreeModel: wrong format");
-      for (size_t i = 0; i < param.num_nodes; ++i) {
+      for (size_t i = 0; i < size_t(param.num_nodes); ++i) {
         size_t other_field_size = sizeof(LegacyNode) - sizeof(double);
         utils::Check((other_field_size + sizeof(float)) == sizeof(Node), "TreeModel: wrong format");
         memcpy(&(nodes[i]), &(legacy_nodes[i]), other_field_size);
@@ -760,7 +760,7 @@ class RegTree: public TreeModel<bst_float, RTreeNodeStat>{
       legacy_stats.resize(param.num_nodes);
       utils::Check(fi.Read(BeginPtr(legacy_stats), sizeof(LegacyRTreeNodeStat) * legacy_stats.size()) > 0,
                    "TreeModel: wrong format");
-      for (size_t i = 0; i < param.num_nodes; ++i) {
+      for (size_t i = 0; i < size_t(param.num_nodes); ++i) {
         stats[i] = legacy_stats[i];
       }
     }

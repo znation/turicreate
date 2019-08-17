@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <string>
 #include <random>
 #include <set>
@@ -8,27 +8,29 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <util/cityhash_tc.hpp>
+#include <core/util/cityhash_tc.hpp>
 
-#include <numerics/armadillo.hpp>
+// Eigen
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 // SFrame and Flex type
-#include <unity/lib/flex_dict_view.hpp>
-#include <random/random.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
+#include <core/random/random.hpp>
 
 // ML-Data Utils
-#include <unity/toolkits/ml_data_2/ml_data.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_entry.hpp>
-#include <unity/toolkits/ml_data_2/metadata.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_iterators.hpp>
-#include <unity/toolkits/ml_data_2/sframe_index_mapping.hpp>
+#include <toolkits/ml_data_2/ml_data.hpp>
+#include <toolkits/ml_data_2/ml_data_entry.hpp>
+#include <toolkits/ml_data_2/metadata.hpp>
+#include <toolkits/ml_data_2/ml_data_iterators.hpp>
+#include <toolkits/ml_data_2/sframe_index_mapping.hpp>
 
 // Testing utils common to all of ml_data_iterator
-#include <sframe/testing_utils.hpp>
-#include <util/testing_utils.hpp>
-#include <unity/toolkits/ml_data_2/testing_utils.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
+#include <toolkits/ml_data_2/testing_utils.hpp>
 
-#include <globals/globals.hpp>
+#include <core/globals/globals.hpp>
 
 using namespace turi;
 
@@ -177,7 +179,7 @@ struct test_untranslated_coulmns  {
 
         std::vector<v2::ml_data_entry> x;
         v2::ml_data::DenseVector xd;
-        arma::mat xdr;
+        Eigen::MatrixXd xdr;
         v2::ml_data::SparseVector xs;
 
         std::vector<flexible_type> untranslated_row;
@@ -221,7 +223,7 @@ struct test_untranslated_coulmns  {
         xs.resize(sliced_data.metadata()->num_dimensions());
 
         xdr.resize(3, sliced_data.metadata()->num_dimensions());
-        xdr.zeros();
+        xdr.setZero();
 
         ASSERT_EQ(sliced_data.size(), row_end - row_start);
 
@@ -250,13 +252,13 @@ struct test_untranslated_coulmns  {
                   break;
                 }
                 case 1: {
-                  it.fill_row_expr(xd);
+                  it.fill_observation(xd);
                   row_x_buffer = data.translate_row_to_original(xd);
-                  // std::cerr << "xd = " << xd.t() << std::endl;
+                  // std::cerr << "xd = " << xd.transpose() << std::endl;
                   break;
                 }
                 case 2: {
-                  it.fill_row_expr(xs);
+                  it.fill_observation(xs);
                   row_x_buffer = data.translate_row_to_original(xs);
                   break;
                 }

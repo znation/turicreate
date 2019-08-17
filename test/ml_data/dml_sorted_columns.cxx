@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <string>
 #include <random>
 #include <set>
@@ -8,27 +8,32 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <util/cityhash_tc.hpp>
+#include <core/util/cityhash_tc.hpp>
+
+// Eigen
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 // SFrame and Flex type
-#include <unity/lib/flex_dict_view.hpp>
-#include <random/random.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
+#include <core/random/random.hpp>
 
 // ML-Data Utils
-#include <ml_data/ml_data.hpp>
-#include <ml_data/ml_data_entry.hpp>
-#include <ml_data/metadata.hpp>
+#include <ml/ml_data/ml_data.hpp>
+#include <ml/ml_data/ml_data_entry.hpp>
+#include <ml/ml_data/metadata.hpp>
 
 // Testing utils common to all of ml_data_iterator
-#include <sframe/testing_utils.hpp>
-#include <ml_data/testing_utils.hpp>
-#include <util/testing_utils.hpp>
-#include <numerics/armadillo.hpp>
-#include <numerics/sparse_vector.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <ml/ml_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
 
-#include <globals/globals.hpp>
+#include <core/globals/globals.hpp>
 
 using namespace turi;
+
+typedef Eigen::Matrix<double, Eigen::Dynamic,1>  DenseVector;
+typedef Eigen::SparseVector<double> SparseVector;
 
 struct test_sorted_columns  {
  public:
@@ -118,10 +123,10 @@ struct test_sorted_columns  {
 
         std::vector<ml_data_entry> x;
         std::vector<ml_data_entry_global_index> x_gi;
-        arma::vec xd;
-        arma::mat xdr;
+        DenseVector xd;
+        Eigen::MatrixXd xdr;
 
-        turi::sparse_vector<double> xs;
+        SparseVector xs;
 
         std::vector<flexible_type> row_x;
 
@@ -129,7 +134,7 @@ struct test_sorted_columns  {
         xs.resize(data.metadata()->num_dimensions());
 
         xdr.resize(3, data.metadata()->num_dimensions());
-        xdr.zeros();
+        xdr.setZero();
 
         ////////////////////////////////////////////////////////////////////////////////
         // Run the actual tests
@@ -167,9 +172,9 @@ struct test_sorted_columns  {
                 break;
               }
               case 4: {
-                it->fill_arma(xdr.row(1));
+                it->fill(xdr.row(1));
 
-                xd = xdr.row(1).t();
+                xd = xdr.row(1);
 
                 row_x = translate_row_to_original(data.metadata(), xd);
                 break;

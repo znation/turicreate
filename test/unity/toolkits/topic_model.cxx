@@ -1,16 +1,16 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <iostream>
 
 
 #include <unistd.h>
 #include <timer/timer.hpp>
-#include <unity/lib/unity_sarray.hpp>
-#include <unity/lib/flex_dict_view.hpp>
-#include <unity/toolkits/text/topic_model.hpp>
-#include <unity/toolkits/text/cgs.hpp>
-#include <unity/toolkits/text/alias.hpp>
+#include <core/storage/sframe_interface/unity_sarray.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
+#include <toolkits/text/topic_model.hpp>
+#include <toolkits/text/cgs.hpp>
+#include <toolkits/text/alias.hpp>
 
 using namespace turi;
 using namespace text;
@@ -94,6 +94,16 @@ struct topic_model_test {
     TS_ASSERT_EQUALS(sa->size(), ROW_COUNT);
   }
 
+  void test_eigen_basics() {
+    Eigen::MatrixXd a = Eigen::MatrixXd::Zero(5, 5);
+    a(1,1) = 5.0;
+    TS_ASSERT_EQUALS(a(1,1), 5.0);
+
+    Eigen::MatrixXd b = Eigen::MatrixXd::Zero(10, 5);
+    b.topRows(5) = a;
+    TS_ASSERT_EQUALS(b.rows(), 10);
+    TS_ASSERT_EQUALS(b(1,1), 5.0);
+  }
 
   void test_sparse_mat() {
     auto z = spmat(100);
@@ -114,16 +124,16 @@ struct topic_model_test {
     z.trim(99);
     TS_ASSERT_EQUALS(z.get_row(99).size(), 0);
 
-    arma::Mat<int> m;
+    Eigen::MatrixXi m;
     z.increment(2, 3, 1);
     m = z.as_matrix();
-    TS_ASSERT_EQUALS(m.n_rows, 100);
-    TS_ASSERT_EQUALS(m.n_cols, 4);
+    TS_ASSERT_EQUALS(m.rows(), 100);
+    TS_ASSERT_EQUALS(m.cols(), 4);
     TS_ASSERT_EQUALS(m(2, 3), 1);
     z.increment(80, 300, 1);
     m = z.as_matrix();
-    TS_ASSERT_EQUALS(m.n_rows, 100);
-    TS_ASSERT_EQUALS(m.n_cols, 301);
+    TS_ASSERT_EQUALS(m.rows(), 100);
+    TS_ASSERT_EQUALS(m.cols(), 301);
     TS_ASSERT_EQUALS(m(80, 300), 1);
   }
 
@@ -165,7 +175,7 @@ struct topic_model_test {
     auto pred = m->predict_gibbs(dataset, num_burnin);
     TS_ASSERT(m->is_trained());
     auto pred_counts = m->predict_counts(dataset, num_burnin);
-    /* TS_ASSERT(pred_counts.n_rows == dataset->size()); */
+    /* TS_ASSERT(pred_counts.rows() == dataset->size()); */
 
     // Test validation set
     m.reset(new cgs_topic_model);

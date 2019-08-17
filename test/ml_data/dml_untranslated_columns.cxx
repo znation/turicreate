@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <string>
 #include <random>
 #include <set>
@@ -8,25 +8,30 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <util/cityhash_tc.hpp>
+#include <core/util/cityhash_tc.hpp>
+
+// Eigen
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 // SFrame and Flex type
-#include <unity/lib/flex_dict_view.hpp>
-#include <random/random.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
+#include <core/random/random.hpp>
 
 // ML-Data Utils
-#include <ml_data/ml_data.hpp>
+#include <ml/ml_data/ml_data.hpp>
 
 // Testing utils common to all of ml_data_iterator
-#include <sframe/testing_utils.hpp>
-#include <ml_data/testing_utils.hpp>
-#include <util/testing_utils.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <ml/ml_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
 
-#include <numerics/armadillo.hpp>
-#include <numerics/sparse_vector.hpp>
-#include <globals/globals.hpp>
+#include <core/globals/globals.hpp>
 
 using namespace turi;
+
+typedef Eigen::Matrix<double, Eigen::Dynamic,1>  DenseVector;
+typedef Eigen::SparseVector<double> SparseVector;
 
 struct test_untranslated_columns_sanity  {
  public:
@@ -161,10 +166,9 @@ struct test_untranslated_coulmns  {
     parallel_for(0, data_v.size() * 4 * 4, [&](size_t main_idx) {
 
         std::vector<ml_data_entry> x;
-
-        arma::vec xd;
-        arma::mat xdr;
-        turi::sparse_vector<double> xs;
+        DenseVector xd;
+        Eigen::MatrixXd xdr;
+        SparseVector xs;
 
         std::vector<flexible_type> untranslated_row;
 
@@ -207,7 +211,7 @@ struct test_untranslated_coulmns  {
         xs.resize(sliced_data.metadata()->num_dimensions());
 
         xdr.resize(3, sliced_data.metadata()->num_dimensions());
-        xdr.zeros();
+        xdr.setZero();
 
         ASSERT_EQ(sliced_data.size(), row_end - row_start);
 

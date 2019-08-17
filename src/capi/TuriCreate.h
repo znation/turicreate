@@ -11,9 +11,15 @@
 extern "C" {
 #endif
 
+#ifdef __APPLE__
+#include <CoreGraphics/CoreGraphics.h>
+#endif // __APPLE__
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+
+#include "TuriCreateEnums.h"
 
 /******************************************************************************/
 /*                                                                            */
@@ -87,23 +93,12 @@ typedef struct tc_plot_struct tc_plot;
 /*                                                                            */
 /******************************************************************************/
 
-/** Initializing the framework. 
+/** Initializing the framework.
  *
  *  Call these before calling any non-setup function.
  *
  */
 void tc_init_set_log_location(const char* log_file, tc_error** error);
-
-typedef enum {
-  TURI_LOG_EVERYTHING = 0,
-  TURI_LOG_DEBUG = 1,
-  TURI_LOG_INFO = 2,
-  TURI_LOC_EMPH = 4,
-  TURI_LOG_PROGRESS = 4,
-  TURI_LOG_WARNING = 5,
-  TURI_LOG_ERROR = 6,
-  TURI_LOG_FATAL = 7,
-  TURI_LOG_NONE = 8} tc_log_level;
 
 void tc_init_set_log_callback_function(  //
     tc_log_level log_level,
@@ -182,20 +177,6 @@ tc_flexible_type* tc_ft_create_from_ndarray(const tc_ndarray*, tc_error** error)
 /*****************************************************/
 /* Testing types in flexible type                    */
 /*****************************************************/
-
-/** Type enum. */
-typedef enum {
-  FT_TYPE_INTEGER = 0,
-  FT_TYPE_FLOAT   = 1,
-  FT_TYPE_STRING  = 2,
-  FT_TYPE_ARRAY   = 3,
-  FT_TYPE_LIST    = 4,
-  FT_TYPE_DICT    = 5,
-  FT_TYPE_DATETIME = 6,
-  FT_TYPE_UNDEFINED = 7,
-  FT_TYPE_IMAGE   = 8,
-  FT_TYPE_NDARRAY = 9
-} tc_ft_type_enum;
 
 tc_ft_type_enum tc_ft_type(const tc_flexible_type*);
 
@@ -872,28 +853,8 @@ tc_variant* tc_function_call(
 /*                                                                            */
 /******************************************************************************/
 
-/*
- * Bit flags to configure plot variations.
- * The bit layout is as follows:
- * The first 4 bits (1 hex digit) represents size.
- * The next 4 bits (1 hex digit) represents color mode (light/dark).
- * Zeroes in any set of bits imply defaults should be used.
- * To apply multiple flags, simply OR them together.
- * (Note: only a single flag within each bit range should be used.)
- */
-typedef enum {
-    tc_plot_variation_default   = 0x00,
-
-    // Sizes (defaults to medium)
-    tc_plot_size_small          = 0x01,
-    tc_plot_size_medium         = 0x02,
-
-    // Color variations
-    // default could be light/dark depending on OS settings
-    tc_plot_color_light         = 0x10,
-    tc_plot_color_dark          = 0x20,
-
-} tc_plot_variation;
+// Default plot title / axis title sentinel value
+const char * const tc_plot_title_default_label = "__TURI_DEFAULT_LABEL";
 
 // Single SArray view (`.show` on an SArray)
 tc_plot* tc_plot_create_1d(const tc_sarray* sa,
@@ -917,6 +878,11 @@ tc_plot* tc_plot_create_2d(const tc_sarray* sa_x,
                            const tc_parameters* params,
                            tc_error** error);
 
+// Plot object from Vega or Vega-Lite JSON spec
+tc_plot* tc_plot_create_from_vega(const char* vega_spec,
+                                  const tc_parameters* params,
+                                  tc_error** error);
+
 // returns true if no further computation can be done on this stream
 // (should probably be used as a loop condition)
 bool tc_plot_finished_streaming(const tc_plot* plot, const tc_parameters *params, tc_error** error);
@@ -928,12 +894,41 @@ tc_flexible_type* tc_plot_get_vega_spec(const tc_plot* plot,
                                         tc_error** error);
 
 // computes the next batch of results, and returns a flex string of JSON data
-tc_flexible_type* tc_plot_get_next_data(const tc_plot* plot, const tc_parameters *params, tc_error** error); 
+tc_flexible_type* tc_plot_get_next_data(const tc_plot* plot, const tc_parameters *params, tc_error** error);
+
+#ifdef __APPLE__
+#ifndef TC_BUILD_IOS
+
+// pre-computes the final plot and renders it into a CoreGraphics context
+void tc_plot_render_final_into_context(const tc_plot* plot,
+                                       tc_plot_variation variation,
+                                       CGContextRef context,
+                                       const tc_parameters *params,
+                                       tc_error** error);
+
+// incrementally renders the plot into a CoreGraphics context
+// and returns true if streaming is finished (false if future renders may change)
+bool tc_plot_render_next_into_context(const tc_plot* plot,
+                                      tc_plot_variation variation,
+                                      CGContextRef context,
+                                      const tc_parameters *params,
+                                      tc_error** error);
+
+// renders a raw (JSON string) Vega spec into a CoreGraphics context
+void tc_plot_render_vega_spec_into_context(const char * vega_spec,
+                                           CGContextRef context,
+                                           const tc_parameters *params,
+                                           tc_error** error);
+
+#endif // TC_BUILD_IOS
+#endif // __APPLE__
+
+// Returns a URL to this plot on a localhost web server.
+// Note: on the first call to this function, spins up the web server.
+tc_flexible_type* tc_plot_get_url(const tc_plot* plot, const tc_parameters* params, tc_error** error);
 
 #ifdef __cplusplus
 }
 #endif
-
-
 
 #endif

@@ -5,16 +5,16 @@
  */
 #include <vector>
 #include <string>
-#include <random/random.hpp>
-#include <unity/toolkits/ml_data_2/ml_data.hpp>
-#include <unity/toolkits/ml_data_2/metadata.hpp>
-#include <unity/toolkits/ml_data_2/sframe_index_mapping.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_iterators.hpp>
-#include <unity/toolkits/ml_data_2/testing_utils.hpp>
-#include <sframe/testing_utils.hpp>
-#include <util/testing_utils.hpp>
+#include <core/random/random.hpp>
+#include <toolkits/ml_data_2/ml_data.hpp>
+#include <toolkits/ml_data_2/metadata.hpp>
+#include <toolkits/ml_data_2/sframe_index_mapping.hpp>
+#include <toolkits/ml_data_2/ml_data_iterators.hpp>
+#include <toolkits/ml_data_2/testing_utils.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
 #include <timer/timer.hpp>
-#include <sframe/sframe.hpp>
+#include <core/storage/sframe_data/sframe.hpp>
 
 using namespace turi;
 using namespace turi::v2;
@@ -96,7 +96,7 @@ void run_benchmark(size_t n_obs, std::string column_type_info) {
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  // Step 4:  Time parallel iterations with the sparse vector.
+  // Step 4:  Time parallel iterations with the Eigen sparse vector.
 
   for(size_t attempt : {1, 2})
   {
@@ -105,10 +105,12 @@ void run_benchmark(size_t n_obs, std::string column_type_info) {
 
     in_parallel([&](size_t thread_idx, size_t num_threads) {
 
-        turi::sparse_vector<double, size_t> x;
+        double cv = 0;
+        Eigen::SparseVector<double> x;
 
         for(auto it = mdata.get_iterator(thread_idx, num_threads); !it.done(); ++it) {
-          it.fill(x);
+          it.fill_observation(x);
+          cv += x.sum();
         }
 
       });

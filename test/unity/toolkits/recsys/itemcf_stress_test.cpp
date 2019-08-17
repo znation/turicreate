@@ -3,39 +3,16 @@
  * Use of this source code is governed by a BSD-3-clause license that can
  * be found in the LICENSE.txt file or at https://opensource.org/licenses/BSD-3-Clause
  */
-/*
- * Copyright (c) 2013 Turi
- *     All rights reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an "AS
- *  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- *  express or implied.  See the License for the specific language
- *  governing permissions and limitations under the License.
- *
- * For more about this software visit:
- *
- *      http://www.turicreate.com
- *
- */
 #include <vector>
 #include <string>
-#include <random/random.hpp>
-#include <unity/toolkits/recsys/models.hpp>
-#include <sframe/testing_utils.hpp>
-#include <util/testing_utils.hpp>
-#include <unity/toolkits/ml_data_2/ml_data.hpp>
-#include <unity/toolkits/ml_data_2/sframe_index_mapping.hpp>
-#include <unity/toolkits/ml_data_2/ml_data_iterators.hpp>
-#include <unity/toolkits/util/indexed_sframe_tools.hpp>
-
-#include <numerics/armadillo.hpp>
+#include <core/random/random.hpp>
+#include <toolkits/recsys/models.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
+#include <toolkits/ml_data_2/ml_data.hpp>
+#include <toolkits/ml_data_2/sframe_index_mapping.hpp>
+#include <toolkits/ml_data_2/ml_data_iterators.hpp>
+#include <toolkits/util/indexed_sframe_tools.hpp>
 
 using namespace turi;
 

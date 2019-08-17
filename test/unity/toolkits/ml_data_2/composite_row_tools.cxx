@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE
 #include <boost/test/unit_test.hpp>
-#include <util/test_macros.hpp>
+#include <core/util/test_macros.hpp>
 #include <string>
 #include <random>
 #include <set>
@@ -8,24 +8,26 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <util/cityhash_tc.hpp>
+#include <core/util/cityhash_tc.hpp>
 
-#include <numerics/armadillo.hpp>
+// Eigen
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 // SFrame and Flex type
-#include <unity/lib/flex_dict_view.hpp>
-#include <random/random.hpp>
+#include <model_server/lib/flex_dict_view.hpp>
+#include <core/random/random.hpp>
 
 // ML-Data Utils
-#include <unity/toolkits/ml_data_2/ml_data.hpp>
-#include <unity/toolkits/ml_data_2/row_slicing_utilities.hpp>
+#include <toolkits/ml_data_2/ml_data.hpp>
+#include <toolkits/ml_data_2/row_slicing_utilities.hpp>
 
 // Testing utils common to all of ml_data_iterator
-#include <sframe/testing_utils.hpp>
-#include <util/testing_utils.hpp>
-#include <unity/toolkits/ml_data_2/testing_utils.hpp>
+#include <core/storage/sframe_data/testing_utils.hpp>
+#include <core/util/testing_utils.hpp>
+#include <toolkits/ml_data_2/testing_utils.hpp>
 
-#include <globals/globals.hpp>
+#include <core/globals/globals.hpp>
 
 using namespace turi;
 
@@ -84,7 +86,7 @@ struct test_composite_rows  {
       const auto& vs = crc.sparse_subrows[sparse_row_index];
 
       ASSERT_EQ(vs.size(), 1);
-      ASSERT_EQ(size_t(vs(0)), 3);  // First row, 3nd column
+      ASSERT_EQ(size_t(vs.coeff(0)), 3);  // First row, 3nd column
 
       // The untranslated column.
       const auto& vf = crc.flex_subrows[flex_row_index];
@@ -115,7 +117,7 @@ struct test_composite_rows  {
 
       // One numerical column
       ASSERT_EQ(vs.size(), 1);
-      ASSERT_EQ(size_t(vs(0)), 6);  // First row, 3nd column
+      ASSERT_EQ(size_t(vs.coeff(0)), 6);  // First row, 3nd column
 
       // The untranslated column.
       const auto& vf = crc.flex_subrows[flex_row_index];
@@ -205,10 +207,10 @@ struct test_composite_rows  {
       for(size_t i = 0; i < row_slicers.size(); ++i) {
 
         row_slicers[i].slice(vd, x_t, x_u);
-        ASSERT_TRUE(arma::all(vd == crc.dense_subrows[dense_row_indices[i]]));
+        ASSERT_TRUE(vd == crc.dense_subrows[dense_row_indices[i]]);
 
         row_slicers[i].slice(vs, x_t, x_u);
-        ASSERT_TRUE(arma::all(vs.to_dense() == crc.sparse_subrows[sparse_row_indices[i]].to_dense()));
+        ASSERT_TRUE(vs.toDense() == crc.sparse_subrows[sparse_row_indices[i]].toDense());
       }
 
       // Now, do the same with the untranslated columns
