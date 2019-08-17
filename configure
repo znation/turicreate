@@ -433,7 +433,7 @@ function check_cmake {
 
     #test cmake version
     echo "Testing existing cmake version..."
-    currentversion=`$CMAKE --version | awk -F "patch" '{print $1;}' | tr -dc '[0-9].'`
+    currentversion=`"$CMAKE" --version | awk -F "patch" '{print $1;}' | tr -dc '[0-9].'`
     echo "Detected ${currentversion}. Required 3.12.0"
 
     check_version $currentversion "3.12.0"
@@ -462,6 +462,11 @@ check_cmake || {
 
 set -e
 set -o pipefail
+
+if [[ $with_python == 1 ]]; then
+  CMAKE_CONFIG_FLAGS='$CMAKE_CONFIG_FLAGS -DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")'
+  CMAKE_CONFIG_FLAGS='$CMAKE_CONFIG_FLAGS -DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))")'
+fi
 
 echo -e "\n\n\n======================= Release ========================" \
 

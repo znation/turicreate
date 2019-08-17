@@ -28,12 +28,12 @@ find_package( PythonInterp )
 if( PYTHONINTERP_FOUND )
   get_filename_component( _python_path ${PYTHON_EXECUTABLE} PATH )
   find_program( CYTHON_EXECUTABLE
-    NAMES cython cython.bat
+    NAMES cython cython.bat cython.exe
     HINTS ${_python_path} ${_python_path}/Scripts
     )
 else()
   find_program( CYTHON_EXECUTABLE
-    NAMES cython cython.bat
+    NAMES cython cython.bat cython.exe
     )
 endif()
 
