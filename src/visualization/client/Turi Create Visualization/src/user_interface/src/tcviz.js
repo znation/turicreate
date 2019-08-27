@@ -88,7 +88,7 @@ window.setSpec = function setSpec(value) {
             break;
             
         default:
-            break;
+            throw "Unexpected spec type: " + value.type;
     }
 }
 
@@ -174,15 +174,6 @@ window.getData = function getData(){
     }
 }
 
-window.setImageData = function setImageData(value){
-    switch(spec_type){
-        case SpecType.table:
-            return component_rendered.setImageData(value);
-        default:
-            return "";
-    }
-}
-
 window.setAccordionData = function setAccordionData(value){
     switch(spec_type){
         case SpecType.table:
@@ -213,7 +204,7 @@ window.handleInput = function(data){
     window.setSpec(input_data);
   }
 
-  if(json_obj["vega_spec"] != null) {
+  else if(json_obj["vega_spec"] != null) {
     var input_data = {};
     input_data["data"] = json_obj["vega_spec"];
     input_data["type"] = "vega";
@@ -221,20 +212,18 @@ window.handleInput = function(data){
     window.setSpec(input_data);
   }
 
-  if(json_obj["data_spec"] != null) {
+  else if(json_obj["data_spec"] != null) {
     window.updateData(json_obj["data_spec"]);
   }
 
-  if(json_obj["image_spec"] != null) {
-    var input_data = {};
-    input_data["data"] = json_obj["image_spec"];
-    window.setImageData(input_data);
-  }
-
-  if(json_obj["accordion_spec"] != null) {
+  else if(json_obj["accordion_spec"] != null) {
     var input_data = {};
     input_data["data"] = json_obj["accordion_spec"];
     window.setAccordionData(input_data);
+  }
+
+  else {
+      throw "Unexpected input to visualization client: " + JSON.stringify(data);
   }
 }
 
