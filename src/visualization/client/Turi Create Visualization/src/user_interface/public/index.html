@@ -33,7 +33,7 @@
 
     <script type="text/javascript">
       require(['tcviz'], function() {
-        if(window.navigator.platform == 'MacIntel'){
+        if(window.navigator.platform == 'MacIntel' && !window.tcvizBrowserMode){
           if (document.readyState == 'complete') {
             window.webkit.messageHandlers["scriptHandler"].postMessage({status: 'loaded'});
           } else {

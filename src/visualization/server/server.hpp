@@ -18,6 +18,8 @@ namespace visualization {
 
     class WebServer {
     public:
+        ~WebServer();
+
         struct table {
             table(const std::shared_ptr<unity_sframe>& sf, std::unique_ptr<sframe_reader> reader, const std::string& title);
             std::shared_ptr<unity_sframe> sf;
@@ -28,20 +30,22 @@ namespace visualization {
         typedef std::unordered_map< std::string, Plot > plot_map;
         typedef std::vector< table > table_vector;
 
-        ~WebServer();
+        // Spins up the web server lazily, if needed.
+        static WebServer& get_instance();
 
         // Generates and returns the base URL to the server.
         // Spins up the web server lazily, if needed.
         static std::string get_base_url();
 
-        // Returns the ID of the added element
-        std::string add_plot(const Plot& plot);
-        std::string add_table(const std::shared_ptr<unity_sframe>& table, const std::string& title);
-
         // Generates and returns the URL (optionally to a given visualization object).
         // Spins up the web server lazily, if needed.
         static std::string get_url_for_plot(const Plot& plot);
         static std::string get_url_for_table(const std::shared_ptr<unity_sframe>& table, const std::string& title);
+
+
+        // Returns the ID of the added element
+        std::string add_plot(const Plot& plot);
+        std::string add_table(const std::shared_ptr<unity_sframe>& table, const std::string& title);
 
     private:
         WebServer();
@@ -50,8 +54,6 @@ namespace visualization {
         table_vector m_tables;
         std::unique_ptr<Impl> m_impl;
 
-        static WebServer& get_instance();
-        std::string add_plot(const Plot& plot);
         std::string _get_base_url() const;
     };
 
