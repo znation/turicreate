@@ -21,7 +21,8 @@ def create(data,
            max_iterations=0,
            verbose=True):
     """
-    Create a :class:`OneShotObjectDetector` model.
+    Create a :class:`OneShotObjectDetector` model. Note: The One Shot Object Detector
+    is currently in beta.
 
     Parameters
     ----------
@@ -59,6 +60,8 @@ def create(data,
         # Make predictions on the training set and as column to the SFrame
         >>> test_data['predictions'] = model.predict(test_data)
     """
+    if not isinstance(data, _tc.SFrame) and not isinstance(data, _tc.Image):
+        raise TypeError("'data' must be of type SFrame or Image.")
     augmented_data = _preview_synthetic_training_data(data, target, backgrounds)
     model = _tc.object_detector.create( augmented_data,
                                         batch_size=batch_size,
@@ -77,7 +80,13 @@ def create(data,
         }
     return OneShotObjectDetector(state)
 
-class OneShotObjectDetector(_CustomModel):
+class OneShotObjectDetector(_CustomModel): 
+    """
+    An trained model that is ready to use for classification, exported to
+    Core ML, or for feature extraction.
+
+    This model should not be constructed directly.
+    """
     _PYTHON_ONE_SHOT_OBJECT_DETECTOR_VERSION = 1
 
     def __init__(self, state):

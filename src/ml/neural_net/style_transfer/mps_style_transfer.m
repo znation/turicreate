@@ -44,29 +44,27 @@
 @end
 
 @implementation TCMPSStyleTransfer
-- (instancetype) initWithParameters:(NSDictionary<NSString *, NSData *> *)weights
-                          numStyles:(NSUInteger)numStyles {
+
+- (instancetype) initWithDev:(id<MTLDevice>) dev
+                commandQueue:(id<MTLCommandQueue>) commandQueue
+                     weights:(NSDictionary<NSString *, NSData *> *) weights
+                   numStyles:(NSUInteger) numStyles {
   self = [super init];
   if (self) {
-    // Set Default parameters values
+    // Assign a _dev and _commandQueue
+    _dev = dev;
+    _commandQueue = commandQueue;
 
+    // Set Default parameters values
     _batchSize = 6;
     _contentLossMultiplier = 1.0;
     _styleLossMultiplier = 1e-4;
+
+    // Divide loss by large number to get into a more legible range, the same behavior exists in the MxNet Implementation
+    _totalLossMultiplier = 1e-4;
     _updateAllParams = YES;
     _imgWidth = 256;
     _imgHeight = 256;
-
-    // Create the loss descriptors for the style and content images
-    MPSCNNLossDescriptor *styleDesc = [MPSCNNLossDescriptor cnnLossDescriptorWithType:MPSCNNLossTypeMeanSquaredError
-                                                                         reductionType:MPSCNNReductionTypeMean];
-
-    styleDesc.weight = 0.5 * _styleLossMultiplier;
-
-    MPSCNNLossDescriptor *contentDesc = [MPSCNNLossDescriptor cnnLossDescriptorWithType:MPSCNNLossTypeMeanSquaredError
-                                                                           reductionType:MPSCNNReductionTypeMean];
-
-    contentDesc.weight = 0.5 * _contentLossMultiplier;
 
     // Create Proper Input Nodes
     _contentNode = [MPSNNImageNode nodeWithHandle: [[TCMPSGraphNodeHandle alloc] initWithLabel:@"contentImage"]];
@@ -82,16 +80,18 @@
                                                                                    tuneAllWeights:_updateAllParams];
     TCMPSVgg16Descriptor *vgg16Desc = [TCMPSStyleTransfer defineVGG16Descriptor:numStyles];
 
-    // Allocate a _dev and _commandQueue
-    _dev = [[TCMPSDeviceManager sharedInstance] preferredDevice];
-    _commandQueue = [_dev newCommandQueue];
-
     _model = [[TCMPSStyleTransferTransformerNetwork alloc] initWithParameters:@"Transformer"
                                                                     inputNode:_contentNode
                                                                        device:_dev
                                                                      cmdQueue:_commandQueue
                                                                    descriptor:transformerDesc
                                                                   initWeights:weights];
+
+    // Not Sure why this works. If this isn't defined the backward pass doesn't work properly
+    _model.forwardPass.handle = [[TCMPSGraphNodeHandle alloc] initWithLabel:@"TransformerForwardPass"];
+    _model.forwardPass.exportFromGraph = YES;
+    _model.forwardPass.synchronizeResource = YES;
+    _model.forwardPass.imageAllocator = [MPSImage defaultAllocator];
 
     _contentPreProcess = [[TCMPSStyleTransferPreProcessing alloc] initWithParameters:@"Content_Pre_Processing"
                                                                            inputNode:_model.forwardPass
@@ -135,6 +135,17 @@
     NSUInteger gramScaling2 = ((DEFAULT_IMAGE_SIZE/2) * (DEFAULT_IMAGE_SIZE/2));
     NSUInteger gramScaling3 = ((DEFAULT_IMAGE_SIZE/4) * (DEFAULT_IMAGE_SIZE/4));
     NSUInteger gramScaling4 = ((DEFAULT_IMAGE_SIZE/8) * (DEFAULT_IMAGE_SIZE/8));
+
+    // Create the loss descriptors for the style and content images
+    MPSCNNLossDescriptor *styleDesc = [MPSCNNLossDescriptor cnnLossDescriptorWithType:MPSCNNLossTypeMeanSquaredError
+                                                                         reductionType:MPSCNNReductionTypeMean];
+
+    styleDesc.weight = 0.5 * _styleLossMultiplier * _totalLossMultiplier;
+
+    MPSCNNLossDescriptor *contentDesc = [MPSCNNLossDescriptor cnnLossDescriptorWithType:MPSCNNLossTypeMeanSquaredError
+                                                                           reductionType:MPSCNNReductionTypeMean];
+
+    contentDesc.weight = 0.5 * _contentLossMultiplier * _totalLossMultiplier;
 
     MPSNNGramMatrixCalculationNode *gramMatrixStyleLossFirstReLU
       = [MPSNNGramMatrixCalculationNode nodeWithSource:_styleVggLoss.reluOut1
@@ -206,8 +217,8 @@
                                              addLossStyle3Style4.resultImage]];
 
     MPSNNAdditionNode* totalLoss
-      = [MPSNNAdditionNode nodeWithSources:@[addTotalStyleLoss.resultImage,
-                                             contentLossNode.resultImage]];
+      = [MPSNNAdditionNode nodeWithSources:@[contentLossNode.resultImage,
+                                             addTotalStyleLoss.resultImage]];
 
     totalLoss.resultImage.handle = [[TCMPSGraphNodeHandle alloc] initWithLabel:@"totalLossValue"];
     totalLoss.resultImage.exportFromGraph = YES;
@@ -224,7 +235,10 @@
                                              nodeHandler: nil];
 
     _trainingGraph = [MPSNNGraph graphWithDevice:_dev
-                                    resultImages:@[lastNodes[0].resultImage, lastNodes[1].resultImage]
+                                    resultImages:@[lastNodes[0].resultImage,
+                                                   lastNodes[1].resultImage,
+                                                   lastNodes[2].resultImage,
+                                                   lastNodes[3].resultImage]
                                 resultsAreNeeded:&resultsAreNeeded[0]];
 
     _inferenceGraph = [MPSNNGraph graphWithDevice:_dev
@@ -236,12 +250,16 @@
   }
   return self;
 }
- 
+
 - (NSDictionary<NSString *, NSData *> *) exportWeights {
+  [self checkpoint];
   return [_model exportWeights:@"transformer_"];
 }
 
 - (NSDictionary<NSString *, NSData *> *) predict:(NSDictionary<NSString *, NSData *> *)inputs {
+  // TODO: Change for testing
+  _batchSize = 1;
+
   MPSImageDescriptor *imgDesc = [MPSImageDescriptor
     imageDescriptorWithChannelFormat:MPSImageFeatureChannelFormatFloat32
                                width:_imgWidth
@@ -252,8 +270,12 @@
 
   NSMutableArray<MPSImage *> *contentImageArray = [[NSMutableArray alloc] init];
 
+  /**
+  * TODO: write what needs to be done for batching
+  **/
   for (NSUInteger index = 0; index < _batchSize; index++) {
-    NSString* key = [NSString stringWithFormat:@"%@%lu", @"contentImage", index];
+    // NSString* key = [NSString stringWithFormat:@"%@%lu", @"input", index];
+    NSString* key = @"input";
     MPSImage *contentImage = [[MPSImage alloc] initWithDevice:_dev imageDescriptor:imgDesc];
     [contentImage writeBytes:inputs[key].bytes dataLayout:(MPSDataLayoutHeightxWidthxFeatureChannels)imageIndex:0];
     [contentImageArray addObject:contentImage];
@@ -281,10 +303,14 @@
 
   NSMutableDictionary<NSString *, NSData *> *imagesOut = [[NSMutableDictionary alloc] init];;
 
+  /**
+  * TODO: write what needs to be done for batching
+  **/
   for (MPSImage *image in stylizedImages) {
+    // NSString* key = [NSString stringWithFormat:@"%@%lu", @"stylizedImage", [stylizedImages indexOfObject:image]];
+    NSString* key = @"output";
     NSMutableData* styleData = [NSMutableData dataWithLength:(NSUInteger)sizeof(float) * _imgWidth * _imgHeight * 3];
     [image readBytes:styleData.mutableBytes dataLayout:(MPSDataLayoutHeightxWidthxFeatureChannels)imageIndex:0];
-    NSString* key = [NSString stringWithFormat:@"%@%lu", @"stylizedImage", [stylizedImages indexOfObject:image]];
     imagesOut[key] = styleData;
   }
 
@@ -299,6 +325,15 @@
 }
 
 - (NSDictionary<NSString *, NSData *> *) train:(NSDictionary<NSString *, NSData *> *)inputs {
+  _batchSize = 1;
+
+  NSString* indexKey = @"index";
+
+  float styleIndex;
+  [inputs[indexKey] getBytes:&styleIndex length:sizeof(float)];
+
+  _model.styleIndex = styleIndex;
+
   NSUInteger imageSize = _imgWidth * _imgHeight * 3;
 
   NSMutableData* mean = [NSMutableData dataWithLength:(NSUInteger)sizeof(float) * imageSize];
@@ -324,9 +359,12 @@
   NSMutableArray<MPSImage *> *styleMultiplicationArray = [[NSMutableArray alloc] init];
 
   for (NSUInteger index = 0; index < _batchSize; index++) {
-    NSString* contentKey = [NSString stringWithFormat:@"%@%lu", @"contentImage", index];
-    NSString* styleKey = [NSString stringWithFormat:@"%@%lu", @"styleImage", index];
-    
+    // NSString* contentKey = [NSString stringWithFormat:@"%@%lu", @"contentImage", index];
+    // NSString* styleKey = [NSString stringWithFormat:@"%@%lu", @"styleImage", index];
+    NSString* contentKey = @"input";
+    NSString* styleKey = @"labels";
+
+    // TODO: add multiple batch sizes
     MPSImage *contentImage = [[MPSImage alloc] initWithDevice:_dev imageDescriptor:imgDesc];
     [contentImage writeBytes:inputs[contentKey].bytes dataLayout:(MPSDataLayoutHeightxWidthxFeatureChannels)imageIndex:0];
     [contentImageArray addObject:contentImage];
@@ -339,6 +377,7 @@
     [contentMultiplication writeBytes:multiplication.bytes dataLayout:(MPSDataLayoutHeightxWidthxFeatureChannels)imageIndex:0]; 
     [contentMultiplicationArray addObject:contentMultiplication];
 
+    // TODO: add multiple batch sizes
     MPSImage *syleImage = [[MPSImage alloc] initWithDevice:_dev imageDescriptor:imgDesc];
     [syleImage writeBytes:inputs[styleKey].bytes dataLayout:(MPSDataLayoutHeightxWidthxFeatureChannels)imageIndex:0];
     [styleImageArray addObject:syleImage];
@@ -397,6 +436,18 @@
   lossDict[@"loss"] = [NSData dataWithData:lossData];
 
   return [lossDict copy];
+}
+
+/**
+* HACK: this somehow checkpoints the model for weight exports and updating the
+*       data loaders. Following up internally for a proper fix to this issue.
+**/
+- (void) checkpoint {
+  _inferenceGraph = [MPSNNGraph graphWithDevice:_dev
+                                    resultImage:_model.forwardPass
+                            resultImageIsNeeded:YES];
+  
+  _inferenceGraph.format = MPSImageFeatureChannelFormatFloat32;
 }
 
 @end

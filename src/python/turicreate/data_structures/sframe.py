@@ -40,6 +40,7 @@ import sys
 import six
 import csv
 from collections import Iterable as _Iterable
+import warnings
 
 __all__ = ['SFrame']
 __LOGGER__ = _logging.getLogger(__name__)
@@ -1602,6 +1603,8 @@ class SFrame(object):
             g = SArray.read_json(url)
             if len(g) == 0:
                 return SFrame()
+            if g.dtype != dict:
+                raise RuntimeError("Invalid input JSON format. Expected list of dictionaries")
             g = SFrame({'X1':g})
             return g.unpack('X1','')
         elif orient == "lines":
@@ -1618,6 +1621,7 @@ class SFrame(object):
         else:
             raise ValueError("Invalid value for orient parameter (" + str(orient) + ")")
 
+        
 
     @classmethod
     def from_sql(cls, conn, sql_statement, params=None, type_inference_rows=100,
@@ -2464,6 +2468,9 @@ class SFrame(object):
             data type.
 
         seed : int, optional
+            ..WARNING:: This parameter is deprecated, It will be removed in the next
+            major release.
+
             Used as the seed if a random number generator is included in `fn`.
 
         Returns
@@ -2491,7 +2498,9 @@ class SFrame(object):
 
         if seed is None:
             seed = abs(hash("%0.20f" % time.time())) % (2 ** 31)
-
+        else:
+            warnings.warn("Passing a \"seed\" parameter to SFrame.apply is deprecated. This functionality"
+                          + " will be removed in the next major release.")
 
         nativefn = None
         try:
@@ -2649,7 +2658,6 @@ class SFrame(object):
         if (fraction > 1 or fraction < 0):
             raise ValueError('Invalid sampling rate: ' + str(fraction))
 
-
         if (self.num_rows() == 0 or self.num_columns() == 0):
             return self
         else:
@@ -2698,6 +2706,7 @@ class SFrame(object):
         """
         if (fraction > 1 or fraction < 0):
             raise ValueError('Invalid sampling rate: ' + str(fraction))
+        
         if (self.num_rows() == 0 or self.num_columns() == 0):
             return (SFrame(), SFrame())
 
@@ -3687,15 +3696,21 @@ class SFrame(object):
         For an SFrame that is lazily evaluated, force the persistence of the
         SFrame to disk, committing all lazy evaluated operations.
         """
-        return self.__materialize__()
+        with cython_context():
+            self.__proxy__.materialize()
 
     def __materialize__(self):
         """
         For an SFrame that is lazily evaluated, force the persistence of the
         SFrame to disk, committing all lazy evaluated operations.
+
+        ..WARNING:: This function is deprecated, It will be removed in the next
+        major release. Use SFrame.materialize instead.
         """
-        with cython_context():
-            self.__proxy__.materialize()
+        warnings.warn("SFrame.__materialize__ is deprecated. It will be removed in the next major release."
+                      + " Use SFrame.materialize instead.")
+
+        self.materialize()
 
     def is_materialized(self):
         """
@@ -3781,48 +3796,8 @@ class SFrame(object):
         if type(other) is not SFrame:
             raise RuntimeError("SFrame append can only work with SFrame")
 
-        left_empty = len(self.column_names()) == 0
-        right_empty = len(other.column_names()) == 0
-
-        if (left_empty and right_empty):
-            return SFrame()
-
-        if (left_empty or right_empty):
-            non_empty_sframe = self if right_empty else other
-            return non_empty_sframe.__copy__()
-
-        my_column_names = self.column_names()
-        my_column_types = self.column_types()
-        other_column_names = other.column_names()
-        if (len(my_column_names) != len(other_column_names)):
-            raise RuntimeError("Two SFrames have to have the same number of columns")
-
-        # check if the order of column name is the same
-        column_name_order_match = True
-        for i in range(len(my_column_names)):
-            if other_column_names[i] != my_column_names[i]:
-                column_name_order_match = False
-                break
-
-        processed_other_frame = other
-        if not column_name_order_match:
-            # we allow name order of two sframes to be different, so we create a new sframe from
-            # "other" sframe to make it has exactly the same shape
-            processed_other_frame = SFrame()
-            for i in range(len(my_column_names)):
-                col_name = my_column_names[i]
-                if(col_name not in other_column_names):
-                    raise RuntimeError("Column " + my_column_names[i] + " does not exist in second SFrame")
-
-                other_column = other.select_column(col_name)
-                processed_other_frame.add_column(other_column, col_name, inplace=True)
-
-                # check column type
-                if my_column_types[i] != other_column.dtype:
-                    raise RuntimeError("Column " + my_column_names[i] + " type is not the same in two SFrames, one is " + str(my_column_types[i]) + ", the other is " + str(other_column.dtype))
-
         with cython_context():
-            return SFrame(_proxy=self.__proxy__.append(processed_other_frame.__proxy__))
+            return SFrame(_proxy=self.__proxy__.append(other.__proxy__))
 
     def groupby(self, key_column_names, operations, *args):
         """
@@ -4560,15 +4535,31 @@ class SFrame(object):
         if sys.platform != 'darwin' and sys.platform != 'linux2' and sys.platform != 'linux':
             raise NotImplementedError('Visualization is currently supported only on macOS and Linux.')
 
-
         # Suppress visualization output if 'none' target is set
-        from ..visualization._plot import _target, display_table_in_notebook
+        from ..visualization._plot import _target, display_table_in_notebook, _ensure_web_server
         if _target == 'none':
             return
+
+        if title is None:
+            title = ""
+
+        # If browser target is set, launch in web browser
+        if _target == 'browser':
+            # First, make sure TURI_VISUALIZATION_WEB_SERVER_ROOT_DIRECTORY is set
+            _ensure_web_server()
+
+            # Launch localhost URL using Python built-in webbrowser module
+            import webbrowser
+            import turicreate as tc
+            url = tc.extensions.get_url_for_table(self, title)
+            webbrowser.open_new_tab(url)
+            return
+
+        # If auto target is set, try to show inline in Jupyter Notebook
         try:
             if _target == 'auto' and \
                 get_ipython().__class__.__name__ == "ZMQInteractiveShell":
-                display_table_in_notebook(self)
+                display_table_in_notebook(self, title)
                 return
         except NameError:
             pass
@@ -4576,8 +4567,6 @@ class SFrame(object):
         # Launch interactive GUI window
         path_to_client = _get_client_app_path()
 
-        if title is None:
-            title = ""
         self.__proxy__.explore(path_to_client, title)
 
     def show(self):

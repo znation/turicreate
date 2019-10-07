@@ -116,18 +116,32 @@ const std::vector<std::pair<float, float>>& anchor_boxes() {
 // into TCMPS.
 // TODO: These should be exposed in a way that facilitates experimentation.
 // TODO: A struct instead of a map would be nice, too.
-float_array_map get_training_config() {
+
+float_array_map get_base_config() {
   float_array_map config;
-  config["gradient_clipping"]        =
-      shared_float_array::wrap(0.025f * MPS_LOSS_MULTIPLIER);
   config["learning_rate"]            =
       shared_float_array::wrap(BASE_LEARNING_RATE);
+  config["gradient_clipping"]        =
+      shared_float_array::wrap(0.025f * MPS_LOSS_MULTIPLIER);
+  // TODO: Have MPS path use these parameters, instead
+  // of the values hardcoded in the MPS code.
+  config["od_rescore"]               = shared_float_array::wrap(1.0f);
+  config["lmb_noobj"]                = shared_float_array::wrap(5.0);
+  config["lmb_obj"]                  = shared_float_array::wrap(100.0);
+  config["lmb_coord_xy"]             = shared_float_array::wrap(10.0);
+  config["lmb_coord_wh"]             = shared_float_array::wrap(10.0);
+  config["lmb_class"]                = shared_float_array::wrap(2.0);
+  return config;
+}
+
+float_array_map get_training_config() {
+  float_array_map config = get_base_config();
   config["mode"]                     = shared_float_array::wrap(0.f);
   config["od_include_loss"]          = shared_float_array::wrap(1.0f);
   config["od_include_network"]       = shared_float_array::wrap(1.0f);
   config["od_max_iou_for_no_object"] = shared_float_array::wrap(0.3f);
   config["od_min_iou_for_object"]    = shared_float_array::wrap(0.7f);
-  config["od_rescore"]               = shared_float_array::wrap(1.0f);
+  config["rescore"]                  = shared_float_array::wrap(1.0f);
   config["od_scale_class"]           =
       shared_float_array::wrap(2.0f * MPS_LOSS_MULTIPLIER);
   config["od_scale_no_object"]       =
@@ -144,7 +158,7 @@ float_array_map get_training_config() {
 }
 
 float_array_map get_prediction_config() {
-  float_array_map config;
+  float_array_map config = get_base_config();
   config["mode"]                     = shared_float_array::wrap(2.0f);
   config["od_include_loss"]          = shared_float_array::wrap(0.0f);
   config["od_include_network"]       = shared_float_array::wrap(1.0f);
@@ -265,6 +279,10 @@ void object_detector::init_options(
       /* default_value     */ "center",
       /* allowed_values    */ {flexible_type("center"), flexible_type("top_left"), flexible_type("bottom_left")},
       /* allowed_overwrite */ false);
+  options.create_boolean_option(
+      /* name             */ "use_tensorflow",
+      /* description      */
+      "If set to True, model training will be done using TensorFlow.", false);
 
   // Validate user-provided options.
   options.set_options(opts);
@@ -379,35 +397,86 @@ void object_detector::train(gl_sframe data,
 }
 
 variant_map_type object_detector::evaluate(
-    gl_sframe data, std::string metric,
-    std::map<std::string, flexible_type> opts) {
-  return perform_evaluation(std::move(data), std::move(metric));
-}
+    gl_sframe data, std::string metric) {
 
-// TODO: Should accept model_backend as an optional argument to avoid
-// instantiating a new backend during training. Or just check to see if an
-// existing backend is available?
-variant_map_type object_detector::perform_evaluation(gl_sframe data,
-                                                     std::string metric) {
   std::vector<std::string> metrics;
   static constexpr char AP[] = "average_precision";
   static constexpr char MAP[] = "mean_average_precision";
   static constexpr char AP50[] = "average_precision_50";
   static constexpr char MAP50[] = "mean_average_precision_50";
-  std::vector<std::string> all_metrics = {AP,MAP,AP50,MAP50};
-  if (std::find(all_metrics.begin(), all_metrics.end(), metric) != all_metrics.end()) {
+  std::vector<std::string> all_metrics = {AP, MAP, AP50, MAP50};
+  if (std::find(all_metrics.begin(), all_metrics.end(), metric) !=
+      all_metrics.end()) {
     metrics = {metric};
-  }
-  else if (metric == "auto") {
-    metrics = {AP50,MAP50};
-  }
-  else if (metric == "all" || metric == "report") {
+  } else if (metric == "auto") {
+    metrics = {AP50, MAP50};
+  } else if (metric == "all" || metric == "report") {
     metrics = all_metrics;
-  }
-  else {
+  } else {
     log_and_throw("Metric " + metric + " not supported");
   }
 
+  flex_list class_labels = read_state<flex_list>("classes");
+
+  // Initialize the metric calculator
+  average_precision_calculator calculator(class_labels);
+
+  auto consumer = [&](const std::vector<image_annotation>& predicted_row,
+                      const std::vector<image_annotation>& groundtruth_row) {
+    calculator.add_row(predicted_row, groundtruth_row);
+  };
+
+  perform_predict(data, consumer);
+
+  // Compute the average precision (area under the precision-recall curve) for
+  // each combination of IOU threshold and class label.
+  variant_map_type result_map = calculator.evaluate();
+
+  // Trim undesired metrics from the final result. (For consistency with other
+  // toolkits. In this case, almost all of the work is shared across metrics.)
+  if (std::find(metrics.begin(), metrics.end(), AP) == metrics.end()) {
+    result_map.erase(AP);
+  }
+  if (std::find(metrics.begin(), metrics.end(), AP50) == metrics.end()) {
+    result_map.erase(AP50);
+  }
+  if (std::find(metrics.begin(), metrics.end(), MAP50) == metrics.end()) {
+    result_map.erase(MAP50);
+  }
+  if (std::find(metrics.begin(), metrics.end(), MAP) == metrics.end()) {
+    result_map.erase(MAP);
+  }
+
+  return result_map;
+}
+
+gl_sarray object_detector::predict(gl_sframe data) {
+  gl_sarray_writer result(flex_type_enum::LIST, 1);
+
+  auto consumer = [&](const std::vector<image_annotation>& predicted_row,
+                      const std::vector<image_annotation>& groundtruth_row) {
+    // Convert predicted_row to flex_type list to call gl_sarray_writer
+    flex_list predicted_row_ft;
+    for (const image_annotation& each_row : predicted_row) {
+      flex_dict bb_dict = {{"x", each_row.bounding_box.x}, {"y", each_row.bounding_box.y},
+                      {"width", each_row.bounding_box.width},
+                      {"height", each_row.bounding_box.height}};
+      flex_dict each_annotation = {{"confidence", each_row.confidence},
+                                   {"bounding_box", std::move(bb_dict)},
+                                   {"identifier", each_row.identifier}};
+      predicted_row_ft.push_back(std::move(each_annotation));
+    }
+    result.write(predicted_row_ft, 0);
+  };
+
+  perform_predict(data, consumer);
+
+  return result.close();
+}
+
+void object_detector::perform_predict(gl_sframe data,
+    std::function<void(const std::vector<image_annotation>&,
+    const std::vector<image_annotation>&)> consumer) {
 
   std::string image_column_name = read_state<flex_string>("feature");
   std::string annotations_column_name = read_state<flex_string>("annotations");
@@ -442,6 +511,13 @@ variant_map_type object_detector::perform_evaluation(gl_sframe data,
   // For each anchor box, we have 4 bbox coords + 1 conf + one-hot class labels
   int num_outputs_per_anchor = 5 + static_cast<int>(class_labels.size());
   int num_output_channels = num_outputs_per_anchor * anchor_boxes().size();
+
+  float_array_map pred_config = get_prediction_config();
+  pred_config["num_iterations"] =
+      shared_float_array::wrap(get_max_iterations());
+  pred_config["num_classes"] =
+      shared_float_array::wrap(get_num_classes());
+
   std::unique_ptr<model_backend> model = ctx->create_object_detector(
       /* n       */ read_state<int>("batch_size"),
       /* c_in    */ NUM_INPUT_CHANNELS,
@@ -450,26 +526,20 @@ variant_map_type object_detector::perform_evaluation(gl_sframe data,
       /* c_out   */ num_output_channels,
       /* h_out   */ grid_height,
       /* w_out   */ grid_width,
-      /* config  */ get_prediction_config(),
+      /* config  */ pred_config,
       /* weights */ get_model_params());
-
-  // Initialize the metric calculator
-  average_precision_calculator calculator(class_labels);
 
   // To support double buffering, use a queue of pending inference results.
   std::queue<image_augmenter::result> pending_batches;
 
   // Helper function to process results until the queue reaches a given size.
   auto pop_until_size = [&](size_t remaining) {
-
     while (pending_batches.size() > remaining) {
 
       // Pop one batch from the queue.
       image_augmenter::result batch = pending_batches.front();
       pending_batches.pop();
-
       for (size_t i = 0; i < batch.annotations_batch.size(); ++i) {
-
         // For this row (corresponding to one image), extract the prediction.
         shared_float_array raw_prediction = batch.image_batch[i];
 
@@ -482,8 +552,7 @@ variant_map_type object_detector::perform_evaluation(gl_sframe data,
         predicted_annotations = apply_non_maximum_suppression(
             std::move(predicted_annotations), iou_threshold);
 
-        // Tally the predictions and ground truth labels.
-        calculator.add_row(predicted_annotations, batch.annotations_batch[i]);
+        consumer(predicted_annotations, batch.annotations_batch[i]);
       }
     }
   };
@@ -491,7 +560,6 @@ variant_map_type object_detector::perform_evaluation(gl_sframe data,
   // Iterate through the data once.
   std::vector<labeled_image> input_batch = data_iter->next_batch(batch_size);
   while (!input_batch.empty()) {
-
     // Wait until we have just one asynchronous batch outstanding. The work
     // below should be concurrent with the neural net inference for that batch.
     pop_until_size(1);
@@ -511,8 +579,10 @@ variant_map_type object_detector::perform_evaluation(gl_sframe data,
     // submit them to the neural net.
     image_augmenter::result prepared_input_batch =
         augmenter->prepare_images(std::move(input_batch));
+
     std::map<std::string, shared_float_array> prediction_results =
         model->predict({{"input", prepared_input_batch.image_batch}});
+
     result_batch.image_batch = prediction_results.at("output");
 
     // Add the pending result to our queue and move on to the next input batch.
@@ -522,27 +592,23 @@ variant_map_type object_detector::perform_evaluation(gl_sframe data,
 
   // Process all remaining batches.
   pop_until_size(0);
+}
 
-  // Compute the average precision (area under the precision-recall curve) for
-  // each combination of IOU threshold and class label.
-  variant_map_type result_map = calculator.evaluate();
+// TODO: Should accept model_backend as an optional argument to avoid
+// instantiating a new backend during training. Or just check to see if an
+// existing backend is available?
+variant_map_type object_detector::perform_evaluation(gl_sframe data,
+                                                     std::string metric) {
+  return evaluate(data, metric);
+}
 
-  // Trim undesired metrics from the final result. (For consistency with other
-  // toolkits. In this case, almost all of the work is shared across metrics.)
-  if (std::find(metrics.begin(), metrics.end(), AP) == metrics.end()) {
-    result_map.erase(AP);
-  }
-  if (std::find(metrics.begin(), metrics.end(), AP50) == metrics.end()) {
-    result_map.erase(AP50);
-  }
-  if (std::find(metrics.begin(), metrics.end(), MAP50) == metrics.end()) {
-    result_map.erase(MAP50);
-  }
-  if (std::find(metrics.begin(), metrics.end(), MAP) == metrics.end()) {
-    result_map.erase(MAP);
-  }
-
-  return result_map;
+std::vector<neural_net::image_annotation>
+object_detector::convert_yolo_to_annotations(
+    const neural_net::float_array& yolo_map,
+    const std::vector<std::pair<float, float>>& anchor_boxes,
+    float min_confidence) {
+  return turi::object_detection::convert_yolo_to_annotations(
+      yolo_map, anchor_boxes, min_confidence);
 }
 
 std::unique_ptr<model_spec> object_detector::init_model(
@@ -764,7 +830,12 @@ std::unique_ptr<data_iterator> object_detector::create_iterator(
 
 std::unique_ptr<compute_context> object_detector::create_compute_context() const
 {
-  return compute_context::create();
+  bool use_tensorflow = read_state<bool>("use_tensorflow");
+  if (use_tensorflow) {
+    return compute_context::create_tf();
+  } else {
+    return compute_context::create();
+  }
 }
 
 void object_detector::init_train(
@@ -854,6 +925,13 @@ void object_detector::init_train(
   int num_outputs_per_anchor =  // 4 bbox coords + 1 conf + one-hot class labels
       5 + static_cast<int>(training_data_iterator_->class_labels().size());
   int num_output_channels = num_outputs_per_anchor * anchor_boxes().size();
+
+  float_array_map train_config = get_training_config();
+  train_config["num_iterations"] =
+      shared_float_array::wrap(get_max_iterations());
+  train_config["num_classes"] =
+      shared_float_array::wrap(get_num_classes());
+
   training_model_ = training_compute_context_->create_object_detector(
       /* n       */ read_state<int>("batch_size"),
       /* c_in    */ NUM_INPUT_CHANNELS,
@@ -862,7 +940,7 @@ void object_detector::init_train(
       /* c_out   */ num_output_channels,
       /* h_out   */ grid_height,
       /* w_out   */ grid_width,
-      /* config  */ get_training_config(),
+      /* config  */ train_config,
       /* weights */ get_model_params());
 
   // Print the header last, after any logging triggered by initialization above.
@@ -885,6 +963,7 @@ void object_detector::perform_training_iteration() {
   // TODO: Abstract out the learning rate schedule.
   flex_int iteration_idx = get_training_iterations();
   flex_int max_iterations = get_max_iterations();
+
   if (iteration_idx == max_iterations / 2) {
 
     training_model_->set_learning_rate(BASE_LEARNING_RATE / 10.f);
@@ -990,6 +1069,10 @@ flex_int object_detector::get_max_iterations() const {
 
 flex_int object_detector::get_training_iterations() const {
   return read_state<flex_int>("training_iterations");
+}
+
+flex_int object_detector::get_num_classes() const {
+  return read_state<flex_int>("num_classes");
 }
 
 void object_detector::wait_for_training_batches(size_t max_pending) {

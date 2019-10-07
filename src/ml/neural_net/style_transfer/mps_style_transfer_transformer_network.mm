@@ -50,7 +50,7 @@
                                                                    cmdQueue:cmdQ
                                                                  descriptor:descriptor.encode1
                                                                 initWeights:weights];
-
+    
     _encoding2 = [[TCMPSStyleTransferEncodingNode alloc] initWithParameters:@"transformer_encode_2_"
                                                                   inputNode:[_encoding1 output]
                                                                      device:dev
@@ -64,6 +64,7 @@
                                                                    cmdQueue:cmdQ
                                                                  descriptor:descriptor.encode3
                                                                 initWeights:weights];
+
 
     _residual1 = [[TCMPSStyleTransferResidualNode alloc] initWithParameters:@"transformer_residual_1_"
                                                                   inputNode:[_encoding3 output]
@@ -114,6 +115,7 @@
                                                                  descriptor:descriptor.decode2
                                                                 initWeights:weights];
 
+    NSMutableData* zeroedConvBiases = [NSMutableData dataWithLength:descriptor.conv.outputFeatureChannels*sizeof(float)];
     _conv = [MPSCNNConvolutionNode createConvolutional:[_decoding2 output]
                                            kernelWidth:descriptor.conv.kernelWidth
                                           kernelHeight:descriptor.conv.kernelHeight
@@ -124,7 +126,7 @@
                                           paddingWidth:descriptor.conv.paddingWidth
                                          paddingHeight:descriptor.conv.paddingHeight
                                                weights:weights[@"transformer_conv5_weight"]
-                                                biases:weights[@"transformer_conv5_bias"]
+                                                biases:zeroedConvBiases
                                                  label:descriptor.conv.label
                                          updateWeights:descriptor.conv.updateWeights
                                                 device:dev
@@ -140,7 +142,7 @@
                                                                     cmdQueue:cmdQ];
 
     _sigmoid = [MPSCNNNeuronSigmoidNode nodeWithSource:[_instNorm resultImage]];
-    
+
     _forwardPass = [_sigmoid resultImage];
   }
 
@@ -168,6 +170,21 @@
   return encoding1Grad;
 }
 
+- (void) setStyleIndex:(NSUInteger)styleIndex {
+  _encoding1.styleIndex = styleIndex;
+  _encoding2.styleIndex = styleIndex;
+  _encoding3.styleIndex = styleIndex;
+  _residual1.styleIndex = styleIndex;
+  _residual2.styleIndex = styleIndex;
+  _residual3.styleIndex = styleIndex;
+  _residual4.styleIndex = styleIndex;
+  _residual5.styleIndex = styleIndex;
+  _decoding1.styleIndex = styleIndex;
+  _decoding2.styleIndex = styleIndex;
+  _instNorm.tc_weightsData.styleIndex = styleIndex;
+  [_instNorm.tc_weightsData checkpoint];
+}
+
 - (void) setLearningRate:(float)lr {
   [_encoding1 setLearningRate:lr];
   [_encoding2 setLearningRate:lr];
@@ -179,22 +196,22 @@
   [_residual5 setLearningRate:lr];
   [_decoding1 setLearningRate:lr];
   [_decoding2 setLearningRate:lr];
-  [[_conv weights] setLearningRate:lr];
-  [[_instNorm weights] setLearningRate:lr];
+  [_conv.tc_weightsData setLearningRate:lr];
+  [_instNorm.tc_weightsData setLearningRate:lr];
 }
 
 - (NSDictionary<NSString *, NSData *> *) exportWeights:(NSString *)prefix {
   NSMutableDictionary<NSString *, NSData *> *weights = [[NSMutableDictionary alloc] init];
 
-  NSString* encoding1Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"encoding_1_"];
+  NSString* encoding1Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"encode_1_"];
   NSDictionary<NSString *, NSData *> * encode1Weights = [_encoding1 exportWeights:encoding1Prefix];
   [weights addEntriesFromDictionary: encode1Weights];
 
-  NSString* encoding2Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"encoding_2_"];
+  NSString* encoding2Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"encode_2_"];
   NSDictionary<NSString *, NSData *> * encode2Weights = [_encoding2 exportWeights:encoding2Prefix];
   [weights addEntriesFromDictionary: encode2Weights];
 
-  NSString* encoding3Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"encoding_3_"];
+  NSString* encoding3Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"encode_3_"];
   NSDictionary<NSString *, NSData *> * encode3Weights = [_encoding3 exportWeights:encoding3Prefix];
   [weights addEntriesFromDictionary: encode3Weights];
   
@@ -218,29 +235,30 @@
   NSDictionary<NSString *, NSData *> * residual5Weights = [_residual5 exportWeights:residual5Prefix];
   [weights addEntriesFromDictionary: residual5Weights];
 
-  NSString* decode1Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"decode_1_"];
+  NSString* decode1Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"decoding_1_"];
   NSDictionary<NSString *, NSData *> * decode1Weights = [_decoding1 exportWeights:decode1Prefix];
   [weights addEntriesFromDictionary: decode1Weights];
 
-  NSString* decode2Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"decode_2_"];
+  NSString* decode2Prefix = [NSString stringWithFormat:@"%@%@", prefix, @"decoding_2_"];
   NSDictionary<NSString *, NSData *> * decode2Weights = [_decoding2 exportWeights:decode2Prefix];
   [weights addEntriesFromDictionary: decode2Weights];
 
-  NSUInteger convWeightSize = (NSUInteger)([[_conv weights] weightSize] * sizeof(float));
+  NSUInteger convWeightSize = (NSUInteger)([_conv.tc_weightsData weightSize] * sizeof(float));
   NSMutableData* convDataWeight = [NSMutableData dataWithLength:convWeightSize];
-  memcpy(convDataWeight.mutableBytes, [[_conv weights] weights], convWeightSize);
+  
+  memcpy(convDataWeight.mutableBytes, [_conv.tc_weightsData weights], convWeightSize);
   NSString* conv5Weight = [NSString stringWithFormat:@"%@%@", prefix, @"conv5_weight"];
 
   weights[conv5Weight] = convDataWeight;
 
   NSString* instNorm5Gamma = [NSString stringWithFormat:@"%@%@", prefix, @"instancenorm5_gamma"];
   NSString* instNorm5Beta = [NSString stringWithFormat:@"%@%@", prefix, @"instancenorm5_beta"];
-  NSUInteger instNormSize = (NSUInteger)([[_instNorm weights] numberOfFeatureChannels] * sizeof(float));
+  NSUInteger instNormSize = (NSUInteger)([_instNorm.tc_weightsData styles] * [_instNorm.tc_weightsData numberOfFeatureChannels] * sizeof(float));
   NSMutableData* instNormDataGamma = [NSMutableData dataWithLength:instNormSize];
   NSMutableData* instNormDataBeta = [NSMutableData dataWithLength:instNormSize];
 
-  memcpy(instNormDataGamma.mutableBytes, [[_instNorm weights] gamma], instNormSize);
-  memcpy(instNormDataBeta.mutableBytes, [[_instNorm weights] beta], instNormSize);
+  memcpy(instNormDataGamma.mutableBytes, [_instNorm.tc_weightsData gamma], instNormSize);
+  memcpy(instNormDataBeta.mutableBytes, [_instNorm.tc_weightsData beta], instNormSize);
 
   weights[instNorm5Gamma] = instNormDataGamma;
   weights[instNorm5Beta] = instNormDataBeta;
