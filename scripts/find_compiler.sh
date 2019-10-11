@@ -72,7 +72,11 @@ if [[ $command == "cxx" ]] ; then
     fi
   fi
 
-  CXXCMD=`which $CXX || echo ""`
+  if [[ $OSTYPE == "msys" ]]; then
+    CXXCMD=$CXX
+  else
+    CXXCMD=`which $CXX || echo ""`
+  fi
 
   >&2 echo "Using CXX compiler $CXXCMD."
 
@@ -88,9 +92,9 @@ if [[ $command == "cxx" ]] ; then
     " > $CXXSCR && chmod a+x $CXXSCR
 
     CXXCMD="${CXXSCR}"
-  fi
 
-  >&2 echo "Wrote script to $CXXCMD to enable ccache with C++ compiler."
+    >&2 echo "Wrote script to $CXXCMD to enable ccache with C++ compiler."
+  fi
 
   echo $CXXCMD
   exit 0
@@ -115,7 +119,11 @@ elif [[ $command -eq cc ]] ; then
     fi
   fi
 
-  CCCMD=`which $CC || echo ""`
+  if [[ $OSTYPE == "msys" ]]; then
+    CCCMD=$CC
+  else
+    CCCMD=`which $CC || echo ""`
+  fi
 
   >&2 echo "Using C compiler $CCCMD."
 
