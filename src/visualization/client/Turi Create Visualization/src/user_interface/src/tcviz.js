@@ -22,16 +22,16 @@ var MINUS_KEY = 189;
 
 document.onkeydown = function(e) {
     var key_code = e.keyCode || e.charCode;
-    if (key_code == LEFT_COMMAND_KEY || key_code == RIGHT_COMMAND_KEY){
+    if (key_code === LEFT_COMMAND_KEY || key_code === RIGHT_COMMAND_KEY){
         command_down += 1;
     }
     
-    if(key_code == PLUS_KEY && command_down > 0){
+    if(key_code === PLUS_KEY && command_down > 0){
         body_zoom += 10;
         document.body.style.zoom = body_zoom+"%"
     }
     
-    if(key_code == MINUS_KEY && command_down > 0){
+    if(key_code === MINUS_KEY && command_down > 0){
         if(body_zoom > 10){
             body_zoom -= 10;
             document.body.style.zoom = body_zoom+"%"
@@ -42,7 +42,7 @@ document.onkeydown = function(e) {
 document.onkeyup = function(e) {
     var key_code = e.keyCode || e.charCode;
     
-    if (key_code == LEFT_COMMAND_KEY || key_code == RIGHT_COMMAND_KEY){
+    if (key_code === LEFT_COMMAND_KEY || key_code === RIGHT_COMMAND_KEY){
         command_down -= 1;
     }
 };
@@ -88,7 +88,7 @@ window.setSpec = function setSpec(value) {
             break;
             
         default:
-            throw "Unexpected spec type: " + value.type;
+            throw new Error("Unexpected spec type: " + value.type);
     }
 }
 
@@ -120,7 +120,7 @@ window.setProtoMessage = function setProtoMessage(value){
             component_rendered.setImageData(row_index, image, width, height);
         }
     } else if(decoded.hasOwnProperty('annotations')) {
-        for (var i = 0; i < decoded["annotations"]["annotation"].length; i++) {
+        for (i = 0; i < decoded["annotations"]["annotation"].length; i++) {
             const row_index = decoded["annotations"]["annotation"][i]["rowIndex"][0];
             const annotation = decoded["annotations"]["annotation"][i]["labels"][0];
             component_rendered.setAnnotationData(row_index, annotation);
@@ -205,7 +205,7 @@ window.handleInput = function(data){
   }
 
   else if(json_obj["vega_spec"] != null) {
-    var input_data = {};
+    input_data = {};
     input_data["data"] = json_obj["vega_spec"];
     input_data["type"] = "vega";
 
@@ -217,13 +217,13 @@ window.handleInput = function(data){
   }
 
   else if(json_obj["accordion_spec"] != null) {
-    var input_data = {};
+    input_data = {};
     input_data["data"] = json_obj["accordion_spec"];
     window.setAccordionData(input_data);
   }
 
   else {
-      throw "Unexpected input to visualization client: " + JSON.stringify(data);
+      throw new Error("Unexpected input to visualization client: " + JSON.stringify(data));
   }
 }
 

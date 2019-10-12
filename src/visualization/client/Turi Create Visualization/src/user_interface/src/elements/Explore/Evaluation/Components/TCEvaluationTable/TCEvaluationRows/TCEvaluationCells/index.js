@@ -63,14 +63,14 @@ class TCEvaluationCells extends Component {
     if(this.props.value <= 0.2){
       return (
         <div className={css.TCEvaluationCellsPercentShadedWarning}>
-          <img src={warning} height={16}/>
+          <img src={warning} height={16} alt="Warning" />
         </div>
       );
     }
   }
 
   render() {
-    if(this.props.type == "images"){
+    if(this.props.type === "images"){
       return (
         <div className={css.TCEvaluationCellsImages}>
           <div className={css.TCEvaluationCellsImagesContainer}>
@@ -82,7 +82,7 @@ class TCEvaluationCells extends Component {
           </div>
         </div>
        );
-    }else if(this.props.type == "percent"){
+    }else if(this.props.type === "percent"){
       return (
         <div className={css.TCEvaluationCellsPercent}>
           <div className={css.TCEvaluationCellsPercentShaded}
@@ -93,7 +93,7 @@ class TCEvaluationCells extends Component {
           {this.renderWarning()}
         </div>
       );
-    }else if(this.props.type == "amount"){
+    }else if(this.props.type === "amount"){
       return (
         <div className={css.TCEvaluationCellsAmount}>
           <div className={css.TCEvaluationCellsAmountShaded}

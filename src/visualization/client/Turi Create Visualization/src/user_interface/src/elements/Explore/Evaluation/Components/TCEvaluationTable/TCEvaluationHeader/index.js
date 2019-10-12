@@ -49,7 +49,7 @@ class TCEvaluationHeader extends Component {
         <TCEvaluationHeaderCell type="percent"
                                 name="ACCURACY"
                                 onclick={this.clickedAccuracy.bind(this)}
-                                enabled={(this.props.sort_by == "accuracy")}
+                                enabled={(this.props.sort_by === "accuracy")}
                                 direction={this.props.sort_direction}/>
       )
     }
@@ -61,7 +61,7 @@ class TCEvaluationHeader extends Component {
         <TCEvaluationHeaderCell type="percent"
                                 name="PRECISION"
                                 onclick={this.clickedPrecision.bind(this)}
-                                enabled={(this.props.sort_by == "precision")}
+                                enabled={(this.props.sort_by === "precision")}
                                 direction={this.props.sort_direction}/>
       )
     }
@@ -73,7 +73,7 @@ class TCEvaluationHeader extends Component {
         <TCEvaluationHeaderCell type="percent"
                                 name="RECALL"
                                 onclick={this.clickedRecall.bind(this)}
-                                enabled={(this.props.sort_by == "recall")}
+                                enabled={(this.props.sort_by === "recall")}
                                 direction={this.props.sort_direction}
                                 />
       );
@@ -86,7 +86,7 @@ class TCEvaluationHeader extends Component {
         <TCEvaluationHeaderCell type="percent"
                                 name="F1 SCORE"
                                 onclick={this.clickedF1Score.bind(this)}
-                                enabled={(this.props.sort_by == "f1_score")}
+                                enabled={(this.props.sort_by === "f1_score")}
                                 direction={this.props.sort_direction}
                                 />
       );
@@ -99,7 +99,7 @@ class TCEvaluationHeader extends Component {
         <div className={styles.TCEvaluationHeaderContainer}>
           <TCEvaluationHeaderCell name="CLASS NAME"
                                   onclick={this.clickedCell.bind(this)}
-                                  enabled={(this.props.sort_by == "class")}
+                                  enabled={(this.props.sort_by === "class")}
                                   direction={this.props.sort_direction}/>
           <TCEvaluationHeaderCell type="images"
                                   name="EXAMPLE IMAGES"/>
@@ -110,7 +110,7 @@ class TCEvaluationHeader extends Component {
           <TCEvaluationHeaderCell type="amount"
                                   name="NUM TEST"
                                   onclick={this.clickNumTest.bind(this)}
-                                  enabled={(this.props.sort_by == "train")}
+                                  enabled={(this.props.sort_by === "train")}
                                   direction={this.props.sort_direction}/>
         </div>
       </div>

@@ -25,12 +25,12 @@ class TCEvaluationFooter extends Component {
   }
 
   filterData = (element) => {
-    return element.actual == this.props.selected_actual && element.predicted == this.props.selected_prediction;
+    return element.actual === this.props.selected_actual && element.predicted === this.props.selected_prediction;
   }
 
   filterErrorData = (element) => {
     if(this.props.filter_confusion != null){
-      return element.actual == this.props.filter_confusion;
+      return element.actual === this.props.filter_confusion;
     }else{
       return true;
     }
@@ -68,7 +68,8 @@ class TCEvaluationFooter extends Component {
         &nbsp;
         &nbsp;
         <img src={cancel}
-         onClick={this.resetFilter.bind(this)}/>
+         onClick={this.resetFilter.bind(this)}
+         alt="Reset Filter"/>
         </div>
     )
   }
@@ -83,7 +84,8 @@ class TCEvaluationFooter extends Component {
         &nbsp;
         &nbsp;
         <img src={cancel}
-         onClick={this.props.selectRowConfusions.bind(this, null, null)}/>
+         onClick={this.props.selectRowConfusions.bind(this, null, null)}
+	 alt="Select Row"/>
         </div>
     )
   }
@@ -126,7 +128,8 @@ class TCEvaluationFooter extends Component {
                onClick={this.props.updateFooterOpen.bind(this)}>
             <img src={down_arrow}
                  className={styles.TCEvaluationFooterCarretImage}
-                 style={this.cssOpenStyleIcon()}/>
+                 style={this.cssOpenStyleIcon()}
+	         alt="Toggle Footer"/>
           </div>
         </div>
         {this.render_table()}

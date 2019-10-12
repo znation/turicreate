@@ -7,7 +7,7 @@ import ProgressBar from './ProgressBar/index';
   
 class Label extends Component {
   renderApply = () => {
-    if (!this.props.active || this.props.similarSelected.length != 0) {
+    if (!this.props.active || this.props.similarSelected.length !== 0) {
       return "Apply";
     } else {
       return "";

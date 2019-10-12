@@ -6,9 +6,6 @@ const style = ClassNameMap(_style_dict);
 import { LabelType } from '../../utils';
 
 class ImageContainer extends Component {
-    constructor(props) {
-    super(props);
-  }
 
   image_click = (e) =>{
     if (e.shiftKey) {
@@ -21,7 +18,7 @@ class ImageContainer extends Component {
   }
 
   renderAnnotation = () => {
-    if(this.props.type == LabelType.INTEGER && Number.isInteger(this.props.annotation)) {
+    if(this.props.type === LabelType.INTEGER && Number.isInteger(this.props.annotation)) {
       return (
         <div className={style.ImageLabel}>
           {this.props.annotation}
@@ -51,7 +48,8 @@ class ImageContainer extends Component {
              onClick={this.image_click.bind(this)}>
           <img src={this.props.src.src}
              className={`${style.ImageContainerSource} ${style.ImageContainerSourceSelected}`}
-             style={this.resizeImage(this.props.src.width, this.props.src.height)}/>
+             style={this.resizeImage(this.props.src.width, this.props.src.height)}
+	     alt=""/>
           {this.renderAnnotation()}
         </div>
       );
@@ -61,7 +59,8 @@ class ImageContainer extends Component {
              onClick={this.image_click.bind(this)}>
           <img src={this.props.src.src}
              className={style.ImageContainerSource}
-             style={this.resizeImage(this.props.src.width, this.props.src.height)}/>
+             style={this.resizeImage(this.props.src.width, this.props.src.height)}
+	     alt="Can't Find"/>
           {this.renderAnnotation()}
         </div>
       );

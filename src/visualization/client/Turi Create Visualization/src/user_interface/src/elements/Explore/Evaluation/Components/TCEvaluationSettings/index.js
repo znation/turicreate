@@ -43,7 +43,8 @@ class TCEvaluationSettings extends Component {
              onClick={this.changeOpenClose.bind(this)}>
           <img src={filter}
                height={20}
-               width={20}/>
+               width={20}
+	       alt="Toggle Filters"/>
         </div>
         {this.renderSettings()}
       </div>

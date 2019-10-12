@@ -15,14 +15,14 @@ class TCEvaluationConfusionTable extends Component {
 
   filterData = (element) => {
     if(this.props.filter_confusion != null){
-      return element.actual == this.props.filter_confusion;
+      return element.actual === this.props.filter_confusion;
     }else{
       return true;
     }
   }
 
   sortData = (a, b) => {
-    if(this.props.sort_by_confusions == "actual" && !this.props.sort_direction_confusions){
+    if(this.props.sort_by_confusions === "actual" && !this.props.sort_direction_confusions){
       if((a.actual) > (b.actual)){
         return -1;
       }else{
@@ -30,7 +30,7 @@ class TCEvaluationConfusionTable extends Component {
       }
     }
 
-    if(this.props.sort_by_confusions == "actual" && this.props.sort_direction_confusions){
+    if(this.props.sort_by_confusions === "actual" && this.props.sort_direction_confusions){
       if((a.actual) < (b.actual)){
         return -1;
       }else{
@@ -38,7 +38,7 @@ class TCEvaluationConfusionTable extends Component {
       }
     }
 
-    if(this.props.sort_by_confusions == "predicted" && !this.props.sort_direction_confusions){
+    if(this.props.sort_by_confusions === "predicted" && !this.props.sort_direction_confusions){
       if((a.predicted) > (b.predicted)){
         return -1;
       }else{
@@ -46,7 +46,7 @@ class TCEvaluationConfusionTable extends Component {
       }
     }
 
-    if(this.props.sort_by_confusions == "predicted" && this.props.sort_direction_confusions){
+    if(this.props.sort_by_confusions === "predicted" && this.props.sort_direction_confusions){
       if((a.predicted) < (b.predicted)){
         return -1;
       }else{
@@ -54,7 +54,7 @@ class TCEvaluationConfusionTable extends Component {
       }
     }
 
-    if(this.props.sort_by_confusions == "count" && !this.props.sort_direction_confusions){
+    if(this.props.sort_by_confusions === "count" && !this.props.sort_direction_confusions){
       if((a.count) > (b.count)){
         return -1;
       }else{
@@ -62,7 +62,7 @@ class TCEvaluationConfusionTable extends Component {
       }
     }
 
-    if(this.props.sort_by_confusions == "count" && this.props.sort_direction_confusions){
+    if(this.props.sort_by_confusions === "count" && this.props.sort_direction_confusions){
       if((a.count) < (b.count)){
         return -1;
       }else{

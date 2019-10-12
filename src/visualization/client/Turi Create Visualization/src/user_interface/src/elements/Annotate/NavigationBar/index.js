@@ -19,7 +19,7 @@ class NavigationBar extends Component{
   };
 
   enterPressJumpRow(e) {
-    if(e.keyCode == 13){
+    if(e.keyCode === 13){
       var image_number = parseInt(this.state.value,10);
       this.setState({value:''});
       if(this.state.value != null){

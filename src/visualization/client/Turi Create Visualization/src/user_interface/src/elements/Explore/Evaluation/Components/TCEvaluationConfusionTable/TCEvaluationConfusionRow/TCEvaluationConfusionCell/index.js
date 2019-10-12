@@ -37,7 +37,7 @@ class TCEvaluationConfusionCell extends Component {
   }
 
   render() {
-	if(this.props.type == "images"){
+	if(this.props.type === "images"){
       return (
         <div className={styles.TCEvaluationConfusionCellImage}>
           {this.props.value.slice(0, 100).map((data, index) => {
@@ -47,13 +47,13 @@ class TCEvaluationConfusionCell extends Component {
           })}
         </div>
       );
-    }else if(this.props.type == "percent"){
+    }else if(this.props.type === "percent"){
       return (
         <div className={styles.TCEvaluationConfusionCell}>
          
         </div>
       );
-    }else if(this.props.type == "amount"){
+    }else if(this.props.type === "amount"){
       return (
         <div className={styles.TCEvaluationCellsAmount}>
           <div className={styles.TCEvaluationCellsAmountShaded}

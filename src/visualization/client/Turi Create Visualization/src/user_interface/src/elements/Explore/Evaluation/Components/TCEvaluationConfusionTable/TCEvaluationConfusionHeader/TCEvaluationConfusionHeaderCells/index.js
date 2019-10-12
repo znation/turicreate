@@ -15,33 +15,34 @@ class TCEvaluationConfusionHeaderCell extends Component {
         return (
           <div className={styles.TCEvaluationConfusionHeaderCellDropDown}
                style={{"transform": "rotate(180deg)"}}>
-            <img src={caret_down}/>
+            <img src={caret_down}
+		 alt=""/>
           </div>
         )
       }else{
         return (
           <div className={styles.TCEvaluationConfusionHeaderCellDropDown}>
-            <img src={caret_down}/>
+            <img src={caret_down} alt="" />
           </div>
         )
       }
     }else{
       return (
         <div className={styles.TCEvaluationConfusionHeaderCellDropDown}>
-          <img src={down}/>
+          <img src={down} alt="" />
         </div>
       )
     }
   }
 
   render() {
-    if(this.props.type == "images"){
+    if(this.props.type === "images"){
       return (
         <div className={styles.TCEvaluationConfusionHeaderCellImages}>
           {this.props.name}
         </div>
       );
-    }else if(this.props.type == "percent"){
+    }else if(this.props.type === "percent"){
       return (
         <div className={styles.TCEvaluationConfusionHeaderCellPercent}
              onClick={this.props.onclick.bind(this)}>
@@ -49,7 +50,7 @@ class TCEvaluationConfusionHeaderCell extends Component {
           {this.renderCaret()}
         </div>
       );
-    }else if(this.props.type == "amount"){
+    }else if(this.props.type === "amount"){
       return (
         <div className={styles.TCEvaluationConfusionHeaderCellAmount}
              onClick={this.props.onclick.bind(this)}>

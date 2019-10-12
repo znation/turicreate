@@ -35,11 +35,13 @@ class TCEvaluationImageComponent extends Component {
              ref={this.imgEl}
              width={this.state.width}
              height={this.state.height}
-             onLoad={this.setHeight.bind(this)} />
+             onLoad={this.setHeight.bind(this)}
+             alt="" />
         <div className={styles.TCEvaluationImageComponentExport}>
           <img src={export_img}
                width={10}
-               height={10} />
+               height={10} 
+	       alt="Export" />
         </div>
       </div>
     );

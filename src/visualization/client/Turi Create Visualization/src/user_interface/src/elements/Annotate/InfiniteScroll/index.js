@@ -8,7 +8,6 @@ import * as _imgProperties_dict from 'json!./ImageContainer/index.module.scss.js
 const imgProperties  = ClassNameMap(_style_dict);
 
 
-
 // has to be a multiple of 3 to work properly
 const CELL_PADDING = 3;
 

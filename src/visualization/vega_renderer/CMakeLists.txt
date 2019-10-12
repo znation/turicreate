@@ -11,14 +11,15 @@ if(APPLE AND NOT TC_BUILD_IOS)
    )
 
    set( VEGA_RENDERER_SOURCES
-      JSCanvas.m
-      JSConsole.m
-      JSDocument.m
-      LogProxy.m
-      LogProxyHandler.m
-      VegaHTMLElement.m
-      VegaRenderer.m
-      colors.m
+      TCVegaJSCanvas.m
+      TCVegaJSConsole.m
+      TCVegaJSDocument.m
+      TCVegaLogger.m
+      TCVegaLogProxy.m
+      TCVegaLogProxyHandling.m
+      TCVegaHTMLElement.m
+      TCVegaRenderer.m
+      TCVegaCGColorMap.m
    )
 
    set( VEGA_RENDERER_STATIC_DEPENDENCIES
@@ -60,6 +61,7 @@ if(APPLE AND NOT TC_BUILD_IOS)
          ${CMAKE_CURRENT_BINARY_DIR}/vega.${JS_FILE_EXT}.h
          ${CMAKE_CURRENT_BINARY_DIR}/vega-lite.${JS_FILE_EXT}.h
    )
+   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
    ##
    ## VegaRenderer
