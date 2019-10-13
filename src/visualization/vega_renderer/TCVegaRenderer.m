@@ -12,29 +12,8 @@
 #import "TCVegaPortabilityTypes.h"
 #import <JavaScriptCore/JavaScriptCore.h>
 
-#ifdef NDEBUG
-
-// release mode, use minified JS
-#include "vega-5.4.0.min.js.h"
-#define vega_js vega_5_4_0_min_js
-#define vega_js_size vega_5_4_0_min_js_len
-
-#import "vega-lite-3.3.0.min.js.h"
-#define vegalite_js vega_lite_3_3_0_min_js
-#define vegalite_js_size vega_lite_3_3_0_min_js_len
-
-#else
-
-// debug mode, use unminified JS
-#import "vega-5.4.0.js.h"
-#define vega_js vega_5_4_0_js
-#define vega_js_size vega_5_4_0_js_len
-
-#import "vega-lite-3.3.0.js.h"
-#define vegalite_js vega_lite_3_3_0_js
-#define vegalite_js_size vega_lite_3_3_0_js_len
-
-#endif
+#import "vega.js.h"
+#import "vega-lite.js.h"
 
 @interface TCVegaRenderer ()
 
@@ -188,14 +167,14 @@
 
 + (NSString*)vegaJS {
 
-    NSData *data = [NSData dataWithBytes:vega_js length:vega_js_size];
+    NSData *data = [NSData dataWithBytes:vega_js length:vega_js_len];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return str;
 }
 
 + (NSString*)vegaliteJS {
 
-    NSData *data = [NSData dataWithBytes:vegalite_js length:vegalite_js_size];
+    NSData *data = [NSData dataWithBytes:vega_lite_js length:vega_lite_js_len];
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return str;
 }
